@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #131014;
+  --color-bg2: #1b161c;
+  --color-card: #24202a;
+  --color-card-hover: #2d2833;
+  --color-text: #ebdfdc;
+  --color-text-secondary: #b8a9a6;
+  --color-accent: #926868;
+  --color-border: #2a232b;
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-serif: "Playfair Display", serif;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text font-sans selection:bg-accent/30 selection:text-text;
+  }
+}
+
+.glass {
+  @apply bg-card/40 backdrop-blur-xl border border-border/50;
+}
+
+.gloss-overlay {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.02) 100%);
+}
+
+.glow-card {
+  @apply relative overflow-hidden transition-all duration-500 border border-border;
+}
+
+.glow-card::after {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-500 bg-linear-to-br from-accent/10 to-transparent pointer-events-none;
+}
+
+.glow-card:hover::after {
+  @apply opacity-100;
+}
+
+.noise-bg {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  @apply opacity-[0.03] pointer-events-none absolute inset-0 mix-blend-overlay;
+}
