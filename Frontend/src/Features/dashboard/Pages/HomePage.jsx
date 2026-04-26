@@ -5,9 +5,13 @@ import { Zap, ArrowRight } from "lucide-react";
 // Components
 import Nav from "../components/Nav";
 import FluidBackground from "../components/FluidBackground";
-import CourseCard from "../components/CourseCard";
 import { Media } from "../components/Media";
 import ZoomEffect from "../components/CinematicPortal"; // Import the new component
+import TestimonialSection from "../components/TestimonialSection";
+import InfiniteScroll from "../components/InfiniteScroll";
+
+
+
 
 /* ---------------- Home Page ---------------- */
 export default function HomePage() {
@@ -53,17 +57,27 @@ export default function HomePage() {
           <Media />
         </section>
 
+
+
+              <section className="relative z-10">
+          <InfiniteScroll />
+        </section>
+
+
+
         {/* ADDED ZOOM EFFECT HERE */}
         <ZoomEffect />
 
-        {/* NEXT SECTION (Revealed after zoom) */}
-        <section className="max-w-7xl mx-auto py-24 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             <CourseCard />
-             <CourseCard />
-             <CourseCard />
-          </div>
+
+
+
+
+        <section className="relative z-10">
+          <TestimonialSection />
         </section>
+
+
+
       </main>
     </div>
   );
