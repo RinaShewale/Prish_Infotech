@@ -8,17 +8,17 @@ import { Clock, BadgeCheck, PhoneCall, ArrowRight } from "lucide-react";
 gsap.registerPlugin(ScrollTrigger);
 
 const courses = [
-{
-  id: 1,
-  title: "Java Programming Mastery: Core Java + OOP + DSA",
-  image: "https://images.unsplash.com/photo-1768836180167-6d4a25c421b2?w=1200&auto=format&fit=crop&q=80",
-  description: "Master Java programming from basics to advanced, learn OOP concepts, solve DSA problems, and build real-world projects for strong fundamentals.",
-  duration: "4-5 Months",
-  certified: "Yes Certified",
-  support: "24/7 Mentor Support",
-  price: "6999",
-  oldPrice: "13998"
-},
+  {
+    id: 1,
+    title: "Java Programming Mastery: Core Java + OOP + DSA",
+    image: "https://images.unsplash.com/photo-1768836180167-6d4a25c421b2?w=1200&auto=format&fit=crop&q=80",
+    description: "Master Java programming from basics to advanced, learn OOP concepts, solve DSA problems, and build real-world projects for strong fundamentals.",
+    duration: "4-5 Months",
+    certified: "Yes Certified",
+    support: "24/7 Mentor Support",
+    price: "6999",
+    oldPrice: "13998"
+  },
   {
     id: 2,
     title: "Full Stack Mastery: Modern Web Systems & Architecture",
@@ -100,10 +100,10 @@ export default function CinematicPortal() {
         opacity: 1, scale: 1, yPercent: 0,
         duration: 2.5, ease: "power2.out"
       }, "-=1.5")
-      .to(texts[index], {
-        autoAlpha: 1, x: 0,
-        duration: 2, ease: "power2.out"
-      }, "-=2");
+        .to(texts[index], {
+          autoAlpha: 1, x: 0,
+          duration: 2, ease: "power2.out"
+        }, "-=2");
 
       tl.to({}, { duration: 3 });
 
@@ -112,10 +112,10 @@ export default function CinematicPortal() {
           xPercent: -130, scale: 0.5, opacity: 0,
           duration: 3, ease: "power2.inOut",
         })
-        .to(texts[index], {
-          autoAlpha: 0, x: -40,
-          duration: 2, ease: "power2.in"
-        }, "-=3");
+          .to(texts[index], {
+            autoAlpha: 0, x: -40,
+            duration: 2, ease: "power2.in"
+          }, "-=3");
       }
     });
   }, { scope: containerRef });
@@ -156,7 +156,7 @@ export default function CinematicPortal() {
           <div className="md:col-span-6 relative h-[520px] flex flex-col justify-center">
             {courses.map((course, index) => (
               <div key={index} ref={(el) => (textRefs.current[index] = el)} className="absolute inset-0 flex flex-col justify-center text-left items-start">
-                
+
                 {/* Title - FONT BOLD REMOVED */}
                 <h2 className="font-display text-2xl md:text-[2.75rem] font-medium text-text mb-4 leading-[1.15] tracking-tight">
                   {course.title}
@@ -190,8 +190,8 @@ export default function CinematicPortal() {
                   <span className="text-sm text-text-secondary/60">(+GST)</span>
                 </div>
 
-                <button className="group flex items-center gap-3 bg-text text-bg px-8 py-4 rounded-xl font-display font-bold text-sm transition-all hover:scale-[1.02] active:scale-95 pointer-events-auto">
-                  CHECK COURSE 
+                <button className="group flex items-center gap-3 bg-accent text-[#131014] px-8 py-4 rounded-xl font-display font-bold text-sm transition-all hover:brightness-110 hover:scale-[1.02] active:scale-95 pointer-events-auto shadow-lg shadow-accent/20">
+                  CHECK COURSE
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                 </button>
               </div>

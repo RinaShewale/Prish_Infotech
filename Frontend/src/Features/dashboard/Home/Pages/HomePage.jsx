@@ -3,17 +3,17 @@ import { motion, AnimatePresence } from "framer-motion"; // Note: change 'motion
 import { Zap, ArrowRight } from "lucide-react";
 
 // Components
-import Nav from "../components/Nav";
-import FluidBackground from "../components/FluidBackground";
-import { Media } from "../components/Media";
-import ZoomEffect from "../components/CinematicPortal";
-import TestimonialSection from "../components/TestimonialSection";
-import InfiniteScroll from "../components/InfiniteScroll";
-import InteractiveLoader from "../components/InteractiveLoader"; // Import the loader
-import { Footer } from "../components/Footer";
-import ComparisonSection from "../components/ComparisonSection";
-import { FAQSection } from "../components/FAQSection";
-import { CTASection } from "../components/CTASection";
+import Nav from "../../components/Nav";
+import FluidBackground from "../../components/FluidBackground";
+import { Media } from "../../components/Media";
+import ZoomEffect from "../../components/CinematicPortal";
+import TestimonialSection from "../../components/TestimonialSection";
+import InfiniteScroll from "../../components/InfiniteScroll";
+import InteractiveLoader from "../../components/InteractiveLoader"; // Import the loader
+import { Footer } from "../../components/Footer";
+import ComparisonSection from "../../components/ComparisonSection";
+import { FAQSection } from "../../components/FAQSection";
+import { CTASection } from "../../components/CTASection";
 
 
 
@@ -61,9 +61,9 @@ export default function HomePage() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <button className="px-10 py-5 bg-accent text-white rounded-lg text-[18px] font-medium flex items-center gap-2">
+                    <button className="px-10 py-5 bg-accent text-[#131014] text-[19px] font-bold flex items-center gap-2 rounded-full hover:bg-[#e6cec8] transition-colors duration-300">
                       Start Journey
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-5 h-5 stroke-[3]" />
                     </button>
                   </div>
                 </motion.div>

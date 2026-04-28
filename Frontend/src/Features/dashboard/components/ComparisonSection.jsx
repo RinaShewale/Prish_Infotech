@@ -34,8 +34,7 @@ export default function ComparisonSection() {
         </div>
 
         <h2 className="font-display text-4xl md:text-5xl font-normal tracking-tight text-text leading-[1.1]">
-          Why Work With{" "}
-          <span className="text-accent">Prish Infotech</span>
+          Why Work With{" "}Prish Infotech
           <br />
           Over Traditional Agencies
         </h2>

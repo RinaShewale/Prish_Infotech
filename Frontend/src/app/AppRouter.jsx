@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import HomePage from "../Features/dashboard/Pages/HomePage";
+import HomePage from "../Features/dashboard/Home/Pages/HomePage";
+
 
 
 
