@@ -30,8 +30,7 @@ const InfiniteScroll = () => {
   return (
     <section className="relative w-full py-16 overflow-hidden bg-transparent">
 
-      {/* Top Divider */}
-      <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-border to-transparent opacity-50" />
+     
 
       {/* Scroller */}
       <div className="relative w-full">
