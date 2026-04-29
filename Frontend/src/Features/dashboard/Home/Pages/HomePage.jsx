@@ -1,6 +1,6 @@
 import React, { useState } from "react"; // Add useState
 import { motion, AnimatePresence } from "framer-motion"; // Note: change 'motion/react' to 'framer-motion' if needed
-import { Zap, ArrowRight } from "lucide-react";
+import { Zap, ArrowUpRight } from "lucide-react";
 
 // Components
 import Nav from "../../components/Nav";
@@ -9,7 +9,7 @@ import { Media } from "../../components/Media";
 import ZoomEffect from "../../components/CinematicPortal";
 import TestimonialSection from "../../components/TestimonialSection";
 import InfiniteScroll from "../../components/InfiniteScroll";
-import InteractiveLoader from "../../components/InteractiveLoader"; // Import the loader
+import InteractiveLoader from "../../components/InteractiveLoader"; 
 import { Footer } from "../../components/Footer";
 import ComparisonSection from "../../components/ComparisonSection";
 import { FAQSection } from "../../components/FAQSection";
@@ -60,11 +60,25 @@ export default function HomePage() {
                     Premium cohort-based courses for software architects and high-growth engineers.
                   </p>
 
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <button className="px-10 py-5 bg-accent text-[#131014] text-[19px] font-bold flex items-center gap-2 rounded-full hover:bg-[#e6cec8] transition-colors duration-300">
-                      Start Journey
-                      <ArrowRight className="w-5 h-5 stroke-[3]" />
-                    </button>
+                  <div className="flex justify-center">
+                    <motion.button
+                      whileHover={{
+                        backgroundColor: "#e6cec8",
+                        color: "#131014",
+                        scale: 1.05
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="group relative flex items-center justify-center gap-4 px-8 py-4 md:px-10 md:py-5 rounded-full bg-accent text-bg font-display font-bold text-lg md:text-xl tracking-tight shadow-xl whitespace-nowrap"
+                    >
+                      <span className="relative z-10">
+                        Explore Courses
+                      </span>
+
+                      <div className="relative z-10 w-8 h-8 md:w-9 md:h-9 rounded-full bg-black/10 flex items-center justify-center group-hover:rotate-45 transition-transform duration-300">
+                        <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 text-bg" />
+                      </div>
+                    </motion.button>
                   </div>
                 </motion.div>
               </section>
@@ -92,7 +106,7 @@ export default function HomePage() {
               </section>
 
               <section className="relative z-10">
-            <CTASection />
+                <CTASection />
               </section>
 
 
