@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const Nav = () => {
+export const Nav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -19,13 +19,13 @@ const Nav = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = ["Home", "Courses", "Bootcamp", "Request call"];
+  const navLinks = ["Home", "Courses", "Bootcamp", "Request callback"];
 
   const pathMap = {
     Home: "/",
     Courses: "/courses",
     Bootcamp: "/bootcamp",
-    "Request call": "/request-call",
+    "Request callback": "/callback",
   };
 
   return (
@@ -121,4 +121,3 @@ const Nav = () => {
   );
 };
 
-export default Nav;

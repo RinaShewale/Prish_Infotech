@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Star } from "lucide-react";
 
-const StudentCard = ({ name, role, testimonial, rating, image }) => {
+export const StudentCard = ({ name, role, testimonial, rating, image }) => {
   return (
     // Changed: Responsive width (w-[280px] on mobile, w-[400px] on desktop)
     // Removed: px-4 (better to handle spacing via 'gap' in the parent)
@@ -62,5 +62,3 @@ const StudentCard = ({ name, role, testimonial, rating, image }) => {
     </div>
   );
 };
-
-export default StudentCard;

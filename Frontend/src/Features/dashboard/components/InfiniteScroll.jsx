@@ -24,7 +24,7 @@ const TECH_LOGOS = [
   }
 ];
 
-const InfiniteScroll = () => {
+export const InfiniteScroll = () => {
   const scrollingLogos = [...TECH_LOGOS, ...TECH_LOGOS, ...TECH_LOGOS];
 
   return (
@@ -94,4 +94,3 @@ const InfiniteScroll = () => {
   );
 };
 
-export default InfiniteScroll;

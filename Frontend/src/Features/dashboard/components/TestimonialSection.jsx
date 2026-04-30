@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
-import StudentCard from "./StudentCard";
+import { StudentCard } from "./StudentCard";
 
 const testimonials = [
   {
@@ -26,7 +26,7 @@ const testimonials = [
   }
 ];
 
-const TestimonialSection = () => {
+export const TestimonialSection = () => {
   // Triple the data to ensure the scroll is seamless
   const scrollData = [...testimonials, ...testimonials, ...testimonials];
 
@@ -71,4 +71,3 @@ const TestimonialSection = () => {
   );
 };
 
-export default TestimonialSection;

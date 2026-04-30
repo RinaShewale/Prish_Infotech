@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 
-const FluidBackground = () => {
+export const FluidBackground = () => {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-bg">
       
@@ -94,4 +94,3 @@ const FluidBackground = () => {
   );
 };
 
-export default FluidBackground;
