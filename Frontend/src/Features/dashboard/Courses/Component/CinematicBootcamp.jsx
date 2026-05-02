@@ -153,7 +153,7 @@ export default function CinematicBootcamp() {
       <div className="noise-bg opacity-[0.03] pointer-events-none fixed inset-0 z-0" />
       
       {/* PORTAL INTRO */}
-      <div ref={portalRef} className="absolute inset-0 z-[60] flex flex-col items-center justify-center p-4 pointer-events-none">
+      <div ref={portalRef} className="absolute inset-0 z-60 flex flex-col items-center justify-center p-4 pointer-events-none">
         <h1 className="font-display text-[12vw] font-black tracking-tighter leading-none uppercase mix-blend-difference">
           READY<span className="text-accent">?</span>
         </h1>
@@ -214,7 +214,7 @@ export default function CinematicBootcamp() {
                             <button 
                                 key={opt} 
                                 onClick={() => handleAnswer(opt)} 
-                                className="p-4 md:p-5 bg-white/[0.03] border border-white/10 hover:border-accent/60 hover:bg-accent/5 transition-all text-left font-display text-[10px] md:text-xs tracking-widest uppercase cursor-pointer"
+                                className="p-4 md:p-5 bg-white/3 border border-white/10 hover:border-accent/60 hover:bg-accent/5 transition-all text-left font-display text-[10px] md:text-xs tracking-widest uppercase cursor-pointer"
                             >
                                 {opt}
                             </button>
@@ -251,11 +251,11 @@ export default function CinematicBootcamp() {
 
                 {/* COUPON SECTION - Fixed badge overlap */}
                 <div className="mb-8 relative group" onClick={() => {navigator.clipboard.writeText(COUPON_CODE); setIsCopied(true)}}>
-                    <div className="relative p-6 md:p-8 bg-white/[0.02] border border-white/5 flex flex-col items-center cursor-pointer hover:bg-white/[0.04] transition-colors">
+                    <div className="relative p-6 md:p-8 bg-white/2 border border-white/5 flex flex-col items-center cursor-pointer hover:bg-white/4 transition-colors">
                         <span className="text-[8px] font-display tracking-[0.4em] text-accent/50 uppercase mb-4">Encrypted_Access_Key</span>
                         
                         <div className="relative w-full text-center py-2">
-                            <h3 className="text-4xl sm:text-6xl md:text-7xl font-display font-black tracking-[0.05em] text-white shadow-glow-heavy leading-none">
+                            <h3 className="text-4xl sm:text-6xl md:text-7xl font-display font-black tracking-wider text-white shadow-glow-heavy leading-none">
                                 {COUPON_CODE}
                             </h3>
                         </div>
@@ -278,7 +278,7 @@ export default function CinematicBootcamp() {
                         { icon: <Terminal size={14}/>, label: "ID", val: "BOOTCAMP_#07" },
                         { icon: <Lock size={14}/>, label: "CLEARANCE", val: "FULL_ACCESS" }
                     ].map(s => (
-                        <div key={s.label} className="bg-white/[0.03] p-4 flex items-center gap-4 border border-white/10 border-l-accent border-l-2">
+                        <div key={s.label} className="bg-white/3 p-4 flex items-center gap-4 border border-white/10 border-l-accent border-l-2">
                             <div className="text-accent">{s.icon}</div>
                             <div>
                                 <div className="text-[8px] font-display opacity-30 tracking-[0.2em] uppercase mb-0.5">{s.label}</div>
@@ -305,7 +305,7 @@ export default function CinematicBootcamp() {
 
         {/* FEEDBACK OVERLAY - Fixed scaling */}
         {!isWinner && feedback && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-bg/95 backdrop-blur-2xl animate-in fade-in duration-300 pointer-events-none">
+          <div className="fixed inset-0 z-100 flex items-center justify-center bg-bg/95 backdrop-blur-2xl animate-in fade-in duration-300 pointer-events-none">
              <div className="text-center px-6">
                 <div className={`text-5xl sm:text-7xl md:text-8xl font-display font-black uppercase italic leading-none tracking-tighter ${feedback === 'granted' ? 'text-accent' : 'text-red-600'}`}>
                   {feedback === 'granted' ? 'ACCESS_GRANTED' : 'ACCESS_DENIED'}

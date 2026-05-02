@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function CourseCard({ course }) {
+  const navigate = useNavigate(); 
   return (
     <motion.div
       variants={{
@@ -81,6 +83,7 @@ export default function CourseCard({ course }) {
             <motion.button
               whileHover="hover"
               whileTap="tap"
+              onClick={() => navigate(`/cohort/${course.slug}`)}
               className="relative w-full group/btn overflow-hidden rounded-2xl py-4 bg-accent flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_0_20px_rgba(146,104,104,0.3)]"
             >
               {/* Shine Effect Animation */}
@@ -88,6 +91,7 @@ export default function CourseCard({ course }) {
                 variants={{
                     hover: { x: ["-100%", "200%"] }
                 }}
+                onClick={() => navigate(`/cohort/${course.slug}`)}
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 -translate-x-full"
               />
