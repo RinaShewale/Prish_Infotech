@@ -15,6 +15,7 @@ This frontend powers the Prish Infotech site with:
 ## Key Features
 
 - Animated landing page sections and interactive hero experience
+- Authentication flow with register, login, and callback pages
 - Cohort and course detail pages for AI, Data Science, and Full Stack programs
 - Custom components for pricing, certification, syllabus, testimonials, CTA, and FAQ content
 - Responsive design for desktop and mobile
@@ -28,6 +29,8 @@ This frontend powers the Prish Infotech site with:
 - `src/Features/Home/Pages/HomePage.jsx` — homepage content
 - `src/Features/dashboard/components` — landing and dashboard UI components
 - `src/Features/Courses` — course pages, cohort details, and course components
+- `src/Features/auth/pages/Register.jsx` — registration page
+- `src/Features/auth/pages/Login.jsx` — login page
 - `src/Features/auth/pages/RequestCallback.jsx` — auth callback page
 
 ## Setup
