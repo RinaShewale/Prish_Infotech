@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,9 +13,16 @@ import { FluidBackground } from "../../components/FluidBackground";
 export const CourseDetailPage = () => {
   const { slug } = useParams();
 
-  // Scroll to top on load or slug change
-  useEffect(() => { 
-    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  // Scroll to top immediately on load or slug change
+  useLayoutEffect(() => {
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+    window.requestAnimationFrame(resetScroll);
   }, [slug]);
 
   const renderCohort = () => {
@@ -53,10 +60,6 @@ export const CourseDetailPage = () => {
 
       {/* 3. MAIN CONTENT STAGE */}
       <main className="relative z-10 pt-20">
-        
-        {/* Subtle top indicator/breadcrumb line */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-10" />
-
         <AnimatePresence mode="wait">
           <motion.div
             key={slug}

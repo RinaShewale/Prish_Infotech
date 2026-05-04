@@ -40,7 +40,7 @@ export const FullStackCohortDetails = () => {
         .from(".hero-desc", { y: 20, opacity: 0 }, "-=0.6")
         .from(".hero-stats", { y: 20, opacity: 0 }, "-=0.6")
         .from(".hero-btns", { y: 20, opacity: 0 }, "-=0.4")
-        .from(".hero-image", { x: 40, opacity: 0, duration: 1.2 }, "-=1");
+        .from(".hero-image", { x: 40, duration: 0.7 }, "-=1");
 
       // 2. Syllabus Scroll Animation
       gsap.from(".syllabus-card", {
@@ -164,11 +164,6 @@ export const FullStackCohortDetails = () => {
 
           {/* HERO IMAGE */}
           <div className="hero-image order-1 lg:order-2 relative rounded-[32px] md:rounded-[40px] overflow-hidden border border-white/10 shadow-2xl aspect-square max-w-lg mx-auto lg:max-w-none group">
-            <div className="absolute top-0 w-full bg-white/10 px-6 py-4 flex gap-2 border-b border-white/5 z-20 backdrop-blur-md">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-                <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-                <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-            </div>
             <img 
               src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200" 
               className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 

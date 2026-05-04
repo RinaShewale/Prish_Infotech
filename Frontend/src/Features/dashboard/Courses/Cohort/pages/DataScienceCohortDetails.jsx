@@ -39,7 +39,7 @@ export const DataScienceCohortDetails = () => {
         .from(".hero-desc", { y: 20, opacity: 0 }, "-=0.6")
         .from(".hero-stats", { y: 20, opacity: 0 }, "-=0.6")
         .from(".hero-btns", { y: 20, opacity: 0 }, "-=0.4")
-        .from(".hero-image", { x: 40, opacity: 0, duration: 1.2 }, "-=1");
+        .from(".hero-image", { x: 40, duration: 0.7 }, "-=1");
 
       // 2. Syllabus Scroll Animation
       gsap.from(".syllabus-card", {

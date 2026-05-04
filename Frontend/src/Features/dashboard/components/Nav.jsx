@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const Nav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -36,7 +37,7 @@ export const Nav = () => {
           : "py-8 bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between relative z-[70]">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between relative z-70">
         
         {/* ✅ Logo (Fixed) */}
         <Link to="/" className="flex items-center gap-3 group">
@@ -60,10 +61,15 @@ export const Nav = () => {
             </Link>
           ))}
 
-          <button className="px-8 py-3 border border-border rounded-full text-[13px] uppercase tracking-widest hover:border-accent transition-colors">
+          <button
+            onClick={() => navigate("/login")}
+            className="px-8 py-3 border border-border rounded-full text-[13px] uppercase tracking-widest hover:border-accent transition-colors"
+          >
             Sign In
           </button>
         </div>
+
+
 
         {/* ✅ Mobile Toggle */}
         <button
@@ -82,7 +88,7 @@ export const Nav = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 w-full h-screen bg-bg flex flex-col items-center justify-center z-[60]"
+            className="fixed inset-0 w-full h-screen bg-bg flex flex-col items-center justify-center z-60"
           >
             <div className="flex flex-col items-center gap-8 text-center">
               
@@ -108,6 +114,10 @@ export const Nav = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/login");
+                }}
                 className="mt-4 px-10 py-3 bg-accent text-bg font-bold rounded-full text-lg shadow-lg hover:scale-105 transition-transform"
               >
                 Sign In

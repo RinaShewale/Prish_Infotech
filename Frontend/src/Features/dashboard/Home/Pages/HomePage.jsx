@@ -5,21 +5,24 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 // Components
-import {Nav} from "../../components/Nav";
-import {FluidBackground} from "../../components/FluidBackground";
+import { Nav } from "../../components/Nav";
+import { FluidBackground } from "../../components/FluidBackground";
 import { Media } from "../../components/Media";
 import ZoomEffect from "../../components/CinematicPortal";
-import {InfiniteScroll} from "../../components/InfiniteScroll";
-import InteractiveLoader from "../../components/InteractiveLoader"; 
+import { InfiniteScroll } from "../../components/InfiniteScroll";
+import InteractiveLoader from "../../components/InteractiveLoader";
 import { Footer } from "../../components/Footer";
 import ComparisonSection from "../../components/ComparisonSection";
 import { FAQSection } from "../../components/FAQSection";
 import { CTASection } from "../../components/CTASection";
 import { TestimonialSection } from "../../components/TestimonialSection";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
+
+  const navigate = useNavigate();
 
   // GSAP 3D Mouse Follow Effect
   useGSAP(() => {
@@ -62,18 +65,18 @@ export default function HomePage() {
 
             {/* TECHNICAL GRID & DEPTH ORBS */}
             <div className="fixed inset-0 z-[1] bg-[linear-gradient(to_right,#2a232b_1px,transparent_1px),linear-gradient(to_bottom,#2a232b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
-            
+
             <div className="fixed inset-0 z-[1] pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-accent/5 rounded-full blur-[100px]" />
+              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse" />
+              <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-accent/5 rounded-full blur-[100px]" />
             </div>
 
             <div className="noise-bg z-[1]" />
-            
+
             <Nav />
 
             <main className="relative z-10 pt-32 pb-24 px-6">
-              
+
               {/* HERO SECTION - 3D Content */}
               <section className="max-w-7xl mx-auto py-20 text-center relative hero-3d-content">
                 <motion.div
@@ -102,6 +105,7 @@ export default function HomePage() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={() => navigate("/courses")}
                       className="group relative flex items-center justify-center gap-4 px-10 py-5 md:px-12 md:py-6 rounded-full bg-accent text-bg font-display font-bold text-lg md:text-xl tracking-tight shadow-[0_20px_50px_rgba(230,206,200,0.2)] overflow-hidden"
                     >
                       <span className="relative z-10">Explore Courses</span>
@@ -141,7 +145,7 @@ export default function HomePage() {
 
               <ScrollReveal rotateX={-10}>
                 <section className="relative z-10 py-24">
-                   <div className="glass rounded-[48px] p-1 border-white/5 bg-gradient-to-b from-white/5 to-transparent">
+                  <div className="glass rounded-[48px] p-1 border-white/5 bg-gradient-to-b from-white/5 to-transparent">
                     <ComparisonSection />
                   </div>
                 </section>
@@ -176,22 +180,22 @@ function ScrollReveal({ children, rotateX = 0, y = 50, scale = 1 }) {
   return (
     <motion.div
       ref={ref}
-      initial={{ 
-        opacity: 0, 
-        y: y, 
-        rotateX: rotateX, 
+      initial={{
+        opacity: 0,
+        y: y,
+        rotateX: rotateX,
         scale: scale,
-        transformPerspective: 1200 
+        transformPerspective: 1200
       }}
-      animate={isInView ? { 
-        opacity: 1, 
-        y: 0, 
-        rotateX: 0, 
-        scale: 1 
+      animate={isInView ? {
+        opacity: 1,
+        y: 0,
+        rotateX: 0,
+        scale: 1
       } : {}}
-      transition={{ 
-        duration: 1.2, 
-        ease: [0.16, 1, 0.3, 1] 
+      transition={{
+        duration: 1.2,
+        ease: [0.16, 1, 0.3, 1]
       }}
       style={{ transformStyle: "preserve-3d" }}
     >

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useLayoutEffect } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Zap, ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
 import gsap from "gsap";
@@ -66,6 +66,17 @@ export default function BootcampPage() {
       stagger: 0.5
     });
   });
+
+  useLayoutEffect(() => {
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+    window.requestAnimationFrame(resetScroll);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative min-h-screen bg-bg text-text selection:bg-accent/30 overflow-x-hidden perspective-1000">

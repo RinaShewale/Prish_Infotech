@@ -4,46 +4,17 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import Lenis from "@studio-freight/lenis";
 import { Clock, BadgeCheck, PhoneCall, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+
+import { COURSES_DATA } from "../Courses/page/CoursePage";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const courses = [
-  {
-    id: 1,
-    title: "Java Programming Mastery: Core Java + OOP + DSA",
-    image: "https://images.unsplash.com/photo-1768836180167-6d4a25c421b2?w=1200&auto=format&fit=crop&q=80",
-    description: "Master Java programming from basics to advanced, learn OOP concepts, solve DSA problems, and build real-world projects.",
-    duration: "4-5 Months",
-    certified: "Yes Certified",
-    support: "24/7 Mentor Support",
-    price: "6999",
-    oldPrice: "13998"
-  },
-  {
-    id: 2,
-    title: "Full Stack Mastery: Modern Web Systems & Architecture",
-    image: "https://images.unsplash.com/photo-1775896194071-f3311de4dabb?w=1200&auto=format&fit=crop&q=80",
-    description: "Build complete web applications using React, Node.js, and MongoDB with modern development practices.",
-    duration: "6 Months",
-    certified: "Yes Certified",
-    support: "24/7 Mentor Support",
-    price: "7499",
-    oldPrice: "14998"
-  },
-  {
-    id: 3,
-    title: "Data Science & Gen-AI: From Zero to Deployment",
-    image: "https://images.unsplash.com/photo-1761839259488-2bdeeae794f5?q=80&w=1200&auto=format&fit=crop",
-    description: "Explore data analysis, visualization, and machine learning using Python and real-world datasets.",
-    duration: "8 Months",
-    certified: "Yes Certified",
-    support: "24/7 Mentor Support",
-    price: "9999",
-    oldPrice: "19998"
-  },
-];
+
 
 export default function CinematicPortal() {
+  const navigate = useNavigate();
   const containerRef = useRef(null);
   const word1Ref = useRef(null);
   const plusRef = useRef(null);
@@ -102,7 +73,7 @@ export default function CinematicPortal() {
       duration: 3 // Slower, more cinematic zoom
     });
 
-    courses.forEach((_, index) => {
+   COURSES_DATA.forEach((_, index) => {
       // Reveal items
       tl.to(cards[index], {
         opacity: 1, scale: 1, yPercent: 0,
@@ -115,7 +86,7 @@ export default function CinematicPortal() {
 
       tl.to({}, { duration: 3 }); // Stay on current course
 
-      if (index < courses.length - 1) {
+    if (index < COURSES_DATA.length - 1){
         tl.to(cards[index], {
           xPercent: -130, scale: 0.5, opacity: 0,
           duration: 3, ease: "power2.inOut",
@@ -147,7 +118,7 @@ export default function CinematicPortal() {
 
           {/* Card Container */}
           <div className="md:col-span-6 relative aspect-[16/10] md:aspect-video flex items-center justify-center w-full">
-            {courses.map((course, index) => (
+            {COURSES_DATA.map((course, index) => (
               <div
                 key={course.id}
                 ref={(el) => (cardsRef.current[index] = el)}
@@ -162,7 +133,7 @@ export default function CinematicPortal() {
 
           {/* Text Container */}
           <div className="md:col-span-6 relative h-[45vh] md:h-[520px] flex flex-col justify-center">
-            {courses.map((course, index) => (
+         {COURSES_DATA.map((course, index) => (
               <div key={index} ref={(el) => (textRefs.current[index] = el)} className="absolute inset-0 flex flex-col justify-start md:justify-center text-left items-start">
                 <h2 className="font-display text-xl md:text-[2.75rem] font-medium text-text mb-2 md:mb-4 leading-[1.15] tracking-tight">
                   {course.title}
@@ -176,7 +147,7 @@ export default function CinematicPortal() {
                   <div className="flex items-center gap-2 md:gap-3">
                     <div className="p-1.5 md:p-2.5 rounded-xl bg-accent/10 text-accent"><Clock size={16} /></div>
                     <div className="flex flex-col">
-                      <span className="text-xs md:text-sm font-bold text-text leading-none">{course.duration.split(' ')[0]}</span>
+                      <span className="text-xs md:text-sm font-bold text-text leading-none">{course.duration?.split(' ')[0] || "5"}</span>
                       <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-text-secondary font-medium">Months</span>
                     </div>
                   </div>
@@ -201,7 +172,10 @@ export default function CinematicPortal() {
                   <span className="text-xl md:text-4xl font-bold text-accent">Rs.{course.price}</span>
                 </div>
 
-                <button className="group flex items-center gap-2 md:gap-3 bg-accent text-[#131014] px-5 py-3 md:px-8 md:py-4 rounded-xl font-display font-bold text-[12px] md:text-sm transition-all hover:brightness-110 hover:scale-[1.02] active:scale-95 pointer-events-auto shadow-lg shadow-accent/20">
+                <button onClick={() => {
+                    window.scrollTo(0, 0);
+                    navigate(`/cohort/${course.slug}`);
+                  }} className="group flex items-center gap-2 md:gap-3 bg-accent text-[#131014] px-5 py-3 md:px-8 md:py-4 rounded-xl font-display font-bold text-[12px] md:text-sm transition-all hover:brightness-110 hover:scale-[1.02] active:scale-95 pointer-events-auto shadow-lg shadow-accent/20">
                   CHECK COURSE
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                 </button>

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useLayoutEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Zap } from "lucide-react";
 import gsap from "gsap";
@@ -45,7 +45,7 @@ export const COURSES_DATA = [
     slug: "data-science",
     image: "https://images.unsplash.com/photo-1775896194071-f3311de4dabb?w=1200&auto=format&fit=crop&q=80",
     description: "Master the full data lifecycle. From complex statistical modeling to deploying AI-driven predictive systems in production with global mentors.",
-    techTags: ["Python", "Machine Learning", "Gen-AI", "Data Viz"],
+    techTags: ["Python", "ML", "Gen-AI", "Data Viz"],
     features: ["1-on-1 Mentorship", "Job Portal", "Live Projects"],
     price: "3,499",
     oldPrice: "7,999",
@@ -87,6 +87,17 @@ export const COURSES_DATA = [
 
 export default function CoursesPage() {
   const containerRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+    window.requestAnimationFrame(resetScroll);
+  }, []);
 
   // GSAP Mouse Effect - Slightly throttled for performance
   useGSAP(() => {

@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const CTASection = () => {
+  const navigate = useNavigate();
   return (
     <section
       className="relative w-full py-24 md:py-40 overflow-hidden bg-bg border-t border-border"
@@ -37,6 +39,10 @@ export const CTASection = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              onClick={() => {
+                window.scrollTo(0, 0);
+                navigate("/courses");
+              }}
               className="group relative flex items-center justify-center gap-4 px-10 py-5 md:px-12 md:py-6 rounded-full bg-accent text-bg font-display font-bold text-lg md:text-xl tracking-tight shadow-[0_20px_50px_rgba(230,206,200,0.2)] overflow-hidden"
             >
               <span className="relative z-10">Explore Courses</span>
