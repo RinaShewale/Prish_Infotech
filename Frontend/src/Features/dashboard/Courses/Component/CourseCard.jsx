@@ -15,7 +15,7 @@ export default function CourseCard({ course }) {
       className="relative group h-full"
     >
       {/* Background Glow Effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-accent/0 via-accent/20 to-accent/0 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 rounded-[2.5rem]" />
+      <div className="absolute -inset-1 bg-linear-to-r from-accent/0 via-accent/20 to-accent/0 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 rounded-[2.5rem]" />
 
       <div className="relative h-full flex flex-col bg-[#1a171c]/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden transition-all duration-500 group-hover:border-accent/40 group-hover:bg-[#1a171c]/80 shadow-2xl">
         
@@ -26,7 +26,7 @@ export default function CourseCard({ course }) {
             alt={course.title} 
             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#131014] via-transparent to-transparent opacity-80" />
+          <div className="absolute inset-0 bg-linear-to-t from-bg via-transparent to-transparent opacity-80" />
           
           {/* Tech Tags */}
           <div className="absolute top-5 left-5 flex gap-2">
@@ -47,7 +47,7 @@ export default function CourseCard({ course }) {
         </div>
 
         {/* Content Section */}
-        <div className="p-8 flex flex-col flex-grow">
+        <div className="p-8 flex flex-col grow">
           <h3 className="font-display text-2xl mb-4 leading-tight group-hover:text-accent transition-colors duration-300 text-white">
             {course.title}
           </h3>
@@ -95,10 +95,10 @@ export default function CourseCard({ course }) {
                     hover: { x: ["-100%", "200%"] }
                 }}
                 transition={{ duration: 0.8, ease: "easeInOut" }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 -translate-x-full"
+                className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent -skew-x-12 -translate-x-full"
               />
 
-              <span className="relative z-10 font-display font-bold text-[#131014] text-lg tracking-tight">
+              <span className="relative z-10 font-display font-bold text-bg text-lg tracking-tight">
                 Check Course
               </span>
               
@@ -108,7 +108,7 @@ export default function CourseCard({ course }) {
                 }}
                 className="relative z-10"
               >
-                <ArrowUpRight className="w-5 h-5 text-[#131014] stroke-[2.5px]" />
+                <ArrowUpRight className="w-5 h-5 text-bg stroke-[2.5px]" />
               </motion.div>
 
               {/* Internal subtle border */}

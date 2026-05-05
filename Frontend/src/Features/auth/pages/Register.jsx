@@ -106,9 +106,9 @@ export const Register = () => {
                 </motion.button>
 
                 <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
-                  <div className="h-[1px] flex-1 bg-white/10" />
+                  <div className="h-px flex-1 bg-white/10" />
                   <span className="text-[10px] uppercase tracking-[0.3em] text-text-secondary">Or create account</span>
-                  <div className="h-[1px] flex-1 bg-white/10" />
+                  <div className="h-px flex-1 bg-white/10" />
                 </motion.div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">

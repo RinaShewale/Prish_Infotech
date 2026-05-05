@@ -103,9 +103,9 @@ export const Login = () => {
             </motion.button>
 
             <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
-              <div className="h-[1px] flex-1 bg-white/10" />
+              <div className="h-px flex-1 bg-white/10" />
               <span className="text-[10px] uppercase tracking-[0.3em] text-text-secondary">Or use email</span>
-              <div className="h-[1px] flex-1 bg-white/10" />
+              <div className="h-px flex-1 bg-white/10" />
             </motion.div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,7 +125,7 @@ export const Login = () => {
               <motion.div variants={itemVariants} className="space-y-2">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] uppercase tracking-[0.2em] text-text-secondary font-bold">Password</label>
-                  <Link to="/" className="text-[10px] uppercase tracking-[0.1em] text-accent hover:underline underline-offset-4 transition-all">Forgot?</Link>
+                  <Link to="/" className="text-[10px] uppercase tracking-widest text-accent hover:underline underline-offset-4 transition-all">Forgot?</Link>
                 </div>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-accent transition-colors" size={18} />
