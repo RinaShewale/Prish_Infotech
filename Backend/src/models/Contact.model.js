@@ -15,9 +15,26 @@ const contactSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    message: {
+    phone: {
       type: String,
       required: true,
+      trim: true,
+    },
+
+    preferredDate: {
+      type: String,
+      required: true,
+    },
+
+    preferredTime: {
+      type: String,
+      required: true,
+    },
+
+    inquiryReason: {
+      type: String,
+      required: true,
+      trim: true,
     },
   },
   {
