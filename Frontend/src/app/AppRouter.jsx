@@ -6,6 +6,7 @@ import { RequestCallback } from "../Features/auth/pages/RequestCallback";
 import { Login } from "../Features/auth/pages/Login";
 import { Register } from "../Features/auth/pages/Register";
 import { CourseDetailPage } from "../Features/dashboard/Courses/page/CoursesDetailPage";
+import ProfilePage from "../Features/dashboard/Home/Pages/ProfilePage";
 
 
 
@@ -19,6 +20,11 @@ export const router = createBrowserRouter([
     {
         path: "/courses",
         element: <CoursesPage />
+    },
+
+      {
+        path: "/profile",
+        element: <ProfilePage />
     },
 
      {

@@ -1,20 +1,33 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+
+// Backend/Auth Imports
+import { useAuth } from "../../../Features/auth/hooks/useAuth";
+import { logout as logoutAction } from "../../auth/auth.slice";
 
 export const Nav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const dropdownRef = useRef(null);
 
   const user = useSelector((state) => state.auth.user);
+  const { handleLogout } = useAuth();
 
-  // Close dropdown when clicking outside
+  const navLinks = [
+    { name: "Home", path: "/" },
+    { name: "Courses", path: "/courses" },
+    { name: "Bootcamp", path: "/bootcamp" },
+    { name: "Request Callback", path: "/callback" },
+  ];
+
+  // Close desktop dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -26,36 +39,43 @@ export const Nav = () => {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    // dispatch(logoutAction()); 
-    setDropdownOpen(false);
-    setMobileMenuOpen(false);
-    navigate("/");
-  };
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "unset";
+  }, [mobileMenuOpen]);
 
-  const navLinks = ["Home", "Courses", "Bootcamp", "Request callback"];
-  const pathMap = {
-    Home: "/",
-    Courses: "/courses",
-    Bootcamp: "/bootcamp",
-    "Request callback": "/callback",
-  };
+  const logoutUser = useCallback(async () => {
+    try {
+      await handleLogout();
+      dispatch(logoutAction());
+      setMobileMenuOpen(false);
+      setDropdownOpen(false);
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout Error:", error);
+    }
+  }, [handleLogout, dispatch, navigate]);
 
+  const mobileItemStyle = "text-2xl font-display font-light text-white hover:text-accent transition-all duration-300";
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled && !mobileMenuOpen ? "py-4 backdrop-blur-md bg-bg/80 shadow-sm" : "py-8 bg-transparent"}`}>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${isScrolled
+          ? "py-4 bg-bg/90 backdrop-blur-md shadow-lg"
+          : "py-8 bg-transparent"
+        }`}
+    >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        
+
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 z-[110]">
           <div className="w-8 h-8 rounded-full border border-accent flex items-center justify-center">
             <div className="w-4 h-4 bg-accent rounded-sm rotate-45"></div>
           </div>
-          <span className="font-display font-medium text-xl tracking-tight">
+          <span className="font-display font-medium text-xl tracking-tight text-white uppercase">
             Prish<span className="opacity-50 font-normal">Infotech</span>
           </span>
         </Link>
@@ -63,48 +83,58 @@ export const Nav = () => {
         {/* DESKTOP NAV */}
         <div className="hidden md:flex items-center gap-10 text-[13px] font-medium uppercase tracking-[0.2em] text-text-secondary">
           {navLinks.map((item) => (
-            <Link key={item} to={pathMap[item]} className="hover:text-accent transition-colors">{item}</Link>
+            <Link key={item.name} to={item.path} className="hover:text-accent transition-colors">
+              {item.name}
+            </Link>
           ))}
 
-          {/* USER PROFILE CIRCLE */}
           {user ? (
             <div className="relative" ref={dropdownRef}>
-              <button 
+              <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-10 h-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-accent font-bold text-lg hover:bg-accent/30 transition-all shadow-lg shadow-accent/5"
+                className="w-10 h-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-accent font-bold hover:bg-accent/30 transition-all"
               >
                 {user.name?.charAt(0).toUpperCase()}
               </button>
 
-              {/* POPUP MENU */}
+              {/* DESKTOP DROPDOWN POPUP */}
               <AnimatePresence>
                 {dropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    className="absolute right-0 mt-3 w-44 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute top-full right-0 mt-4 w-48 bg-bg border border-white/10 rounded-xl overflow-hidden shadow-2xl py-2"
                   >
-                    <Link to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-text-secondary hover:bg-white/5 transition-colors">
-                      <User size={16} /> Profile
-                    </Link>
-                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-400/5 transition-colors">
-                      <LogOut size={16} /> Logout
+                    <button
+                      onClick={() => { navigate("/profile"); setDropdownOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/5 transition-colors text-xs uppercase tracking-widest"
+                    >
+                      <User size={16} className="text-accent" />
+                      My Profile
+                    </button>
+                    <div className="h-[1px] bg-white/5 mx-2 my-1" />
+                    <button
+                      onClick={logoutUser}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/5 transition-colors text-xs uppercase tracking-widest"
+                    >
+                      <LogOut size={16} />
+                      Logout
                     </button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
           ) : (
-            <button onClick={() => navigate("/login")} className="px-8 py-3 border border-border rounded-full text-[13px] uppercase tracking-widest hover:border-accent">
+            <button onClick={() => navigate("/login")} className="px-8 py-3 border border-border rounded-full text-[11px] uppercase tracking-widest hover:border-accent text-white transition-all">
               Sign In
             </button>
           )}
         </div>
 
         {/* MOBILE TOGGLE */}
-        <button className="md:hidden p-2 text-text-secondary" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          {mobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
+        <button className="md:hidden p-2 text-white z-[110]" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {mobileMenuOpen ? <X size={32} strokeWidth={1.5} /> : <Menu size={32} strokeWidth={1.5} />}
         </button>
       </div>
 
@@ -115,32 +145,44 @@ export const Nav = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 w-full h-screen bg-bg flex flex-col items-center justify-center z-60"
+            className="fixed inset-0 w-full h-screen bg-bg flex flex-col items-center justify-center z-[105]"
           >
             <div className="flex flex-col items-center gap-8 text-center">
-              {navLinks.map((item) => (
-                <Link key={item} to={pathMap[item]} onClick={() => setMobileMenuOpen(false)} className="text-3xl font-display font-light">
-                  {item}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={mobileItemStyle}
+                >
+                  {link.name}
                 </Link>
               ))}
 
-              {/* MOBILE LOGOUT / LOGIN LOGIC */}
+              {user && (
+                <>
+                  <Link to="/classroom" onClick={() => setMobileMenuOpen(false)} className={mobileItemStyle}>
+                    Classroom
+                  </Link>
+                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className={mobileItemStyle}>
+                    My Profile
+                  </Link>
+                </>
+              )}
+
+              {/* LOGOUT AS BUTTON TYPE */}
               {user ? (
-                <div className="flex flex-col items-center gap-4 mt-4">
-                  <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-2xl">
-                    {user.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <button 
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 text-red-400 font-bold uppercase tracking-widest text-sm"
-                  >
-                    <LogOut size={20} /> Logout
-                  </button>
-                </div>
-              ) : (
-                <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="mt-4 px-10 py-3 bg-accent text-bg font-bold rounded-full">
-                  Sign In
+                <button
+                  type="button"
+                  onClick={logoutUser}
+                  className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black hover:scale-105`}
+                >
+                  Logout
                 </button>
+              ) : (
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black hover:scale-105`}>
+                  Sign In
+                </Link>
               )}
             </div>
           </motion.div>
