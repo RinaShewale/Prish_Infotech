@@ -1,42 +1,85 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import session from "express-session";
+import cors from "cors";
 
-import authRoutes from "../src/routes/auth.route.js";
-import testRoutes from "../src/routes/test.routes.js";
-import contactRoutes from "../src/routes/contact.route.js"
+import passport from "./config/passport.js";
+
+// ROUTES
+import authRoutes from "./routes/auth.route.js";
+import testRoutes from "./routes/test.routes.js";
+import contactRoutes from "./routes/contact.route.js";
 import courseRoutes from "./routes/course.route.js";
 import lessonRoutes from "./routes/lesson.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
+import paymentRoutes from "./routes/payment.route.js";
+
+import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
 const app = express();
 
 // ======================
-// MIDDLEWARES
+// INIT ADMIN
+// ======================
+createAdminIfNotExists();
+
+// ======================
+// CORS
+// ======================
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend
+    credentials: true,
+  })
+);
+
+// ======================
+// BODY PARSER
 // ======================
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// ======================
+// SESSION (GOOGLE OAUTH NEEDS THIS)
+// ======================
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev_secret_key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  })
+);
+
+// ======================
+// PASSPORT
+// ======================
+app.use(passport.initialize());
+app.use(passport.session());
 
 // ======================
 // ROUTES
 // ======================
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
-
 app.use("/api/contact", contactRoutes);
 app.use("/api/course", courseRoutes);
-
-
 app.use("/api/lessons", lessonRoutes);
-
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // ======================
-// HEALTH CHECK ROUTE (GOOD PRACTICE)
+// HEALTH CHECK
 // ======================
 app.get("/", (req, res) => {
-  res.status(200).json({
+  res.json({
     success: true,
-    message: "API is running 🚀",
+    message: "Server running on port 3000 🚀",
   });
 });
 

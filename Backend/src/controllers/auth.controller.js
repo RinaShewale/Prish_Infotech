@@ -19,6 +19,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password,
+      role: email === "prishinfotech@gmail.com" ? "admin" : "student",
     });
 
     const token = generateToken(user._id.toString());
@@ -87,7 +88,7 @@ export const loginUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role, // ✔ comes from DB
       },
     });
   } catch (error) {
@@ -139,5 +140,31 @@ export const logoutUser = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+export const googleCallback = (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return res.redirect(`${process.env.CLIENT_URL}/login`);
+    }
+
+    // create token
+    const token = generateToken(user._id.toString());
+
+    // set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // 🔥 FINAL FIX: redirect to HOME PAGE
+    return res.redirect(`${process.env.CLIENT_URL}/`);
+  } catch (error) {
+    console.log("Google Callback Error:", error);
+    return res.redirect(`${process.env.CLIENT_URL}/login`);
   }
 };

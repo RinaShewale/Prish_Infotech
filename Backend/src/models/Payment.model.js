@@ -19,13 +19,32 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
+    currency: {
+      type: String,
+      default: "INR",
+    },
+
+    razorpayOrderId: {
+      type: String,
+      required: true,
+    },
+
+    razorpayPaymentId: {
+      type: String,
+    },
+
+    razorpaySignature: {
+      type: String,
+    },
+
     paymentStatus: {
       type: String,
+      enum: ["pending", "paid", "failed"],
       default: "pending",
     },
 
-    paymentId: {
-      type: String,
+    paidAt: {
+      type: Date,
     },
   },
   {

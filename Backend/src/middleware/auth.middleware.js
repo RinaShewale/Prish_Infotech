@@ -1,14 +1,12 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
 
-
-
-// ✅ PROTECT ROUTE
+// 🔐 PROTECT ROUTE
 export const protect = async (req, res, next) => {
   try {
     let token;
 
-    // ✅ Check Bearer token
+    // Bearer token
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -16,12 +14,11 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
 
-    // ✅ Check Cookie token
+    // Cookie token
     else if (req.cookies.token) {
       token = req.cookies.token;
     }
 
-    // ❌ No token
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -29,15 +26,9 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // ✅ Verify token
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ Find user
-    const user = await User.findById(decoded.id)
-      .select("-password");
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(401).json({
@@ -46,38 +37,12 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // ✅ Attach user
     req.user = user;
-
     next();
-
   } catch (error) {
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",
-    });
-  }
-};
-
-
-
-// ✅ ADMIN ONLY
-export const adminOnly = (req, res, next) => {
-  try {
-
-    if (req.user.role !== "admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Admin access only",
-      });
-    }
-
-    next();
-
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
     });
   }
 };

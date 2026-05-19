@@ -4,23 +4,49 @@ import {
   registerUser,
   loginUser,
   getProfile,
+  googleCallback,
+  logoutUser,
 } from "../controllers/auth.controller.js";
 
 import { protect } from "../middleware/auth.middleware.js";
+import passport from "../config/passport.js";
 
 const router = express.Router();
 
 // ======================
 // AUTH ROUTES
 // ======================
-
-// Register user
 router.post("/register", registerUser);
-
-// Login user
 router.post("/login", loginUser);
-
-// Get logged-in user profile (protected)
 router.get("/me", protect, getProfile);
+router.post("/logout", logoutUser);
+
+// ======================
+// GOOGLE OAUTH ROUTES
+// ======================
+
+/**
+ * STEP 1: Redirect to Google
+ */
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account",
+    session: false, // 🔥 ADD THIS for consistency
+  })
+);
+
+/**
+ * STEP 2: Google callback
+ */
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: `${process.env.CLIENT_URL}/login`,
+    session: false,
+  }),
+  googleCallback
+);
 
 export default router;
