@@ -36,18 +36,17 @@ export function useCourse() {
 
       const res = await getCourses();
 
-      dispatch(
-        setCourses(res?.data?.courses || [])
-      );
+      const courses = res?.data?.courses || [];
+
+      dispatch(setCourses(courses));
 
       return {
         success: true,
-        courses: res?.data?.courses,
+        courses,
       };
     } catch (err) {
       const message =
-        err?.response?.data?.message ||
-        "Failed to fetch courses";
+        err?.response?.data?.message || "Failed to fetch courses";
 
       dispatch(setError(message));
 
@@ -61,32 +60,26 @@ export function useCourse() {
   };
 
   // ======================================================
-  // ✅ GET SINGLE COURSE
+  // ✅ GET SINGLE COURSE (BY SLUG - IMPORTANT FIX)
   // ======================================================
-  const handleGetSingleCourse = async (
-    id
-  ) => {
+  const handleGetSingleCourse = async (slug) => {
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
 
-      const res =
-        await getSingleCourse(id);
+      const res = await getSingleCourse(slug);
 
-      dispatch(
-        setSingleCourse(
-          res?.data?.course
-        )
-      );
+      const course = res?.data?.course;
+
+      dispatch(setSingleCourse(course));
 
       return {
         success: true,
-        course: res?.data?.course,
+        course,
       };
     } catch (err) {
       const message =
-        err?.response?.data?.message ||
-        "Failed to fetch course";
+        err?.response?.data?.message || "Failed to fetch course";
 
       dispatch(setError(message));
 
@@ -100,21 +93,22 @@ export function useCourse() {
   };
 
   // ======================================================
-  // ✅ CREATE COURSE
+  // ✅ CREATE COURSE (AUTO REFRESH FIX)
   // ======================================================
-  const handleCreateCourse = async (
-    data
-  ) => {
+  const handleCreateCourse = async (data) => {
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
 
       const res = await createCourse(data);
 
-      if (res?.data?.course) {
-        dispatch(
-          addCourse(res.data.course)
-        );
+      const newCourse = res?.data?.course;
+
+      if (newCourse) {
+        dispatch(addCourse(newCourse));
+
+        // 🔥 IMPORTANT: refresh list after create
+        await handleGetCourses();
       }
 
       return {
@@ -123,8 +117,7 @@ export function useCourse() {
       };
     } catch (err) {
       const message =
-        err?.response?.data?.message ||
-        "Course creation failed";
+        err?.response?.data?.message || "Course creation failed";
 
       dispatch(setError(message));
 
@@ -140,25 +133,17 @@ export function useCourse() {
   // ======================================================
   // ✅ UPDATE COURSE
   // ======================================================
-  const handleUpdateCourse = async (
-    id,
-    data
-  ) => {
+  const handleUpdateCourse = async (id, data) => {
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
 
-      const res = await updateCourse(
-        id,
-        data
-      );
+      const res = await updateCourse(id, data);
 
-      if (res?.data?.course) {
-        dispatch(
-          updateCourseState(
-            res.data.course
-          )
-        );
+      const updatedCourse = res?.data?.course;
+
+      if (updatedCourse) {
+        dispatch(updateCourseState(updatedCourse));
       }
 
       return {
@@ -167,8 +152,7 @@ export function useCourse() {
       };
     } catch (err) {
       const message =
-        err?.response?.data?.message ||
-        "Course update failed";
+        err?.response?.data?.message || "Course update failed";
 
       dispatch(setError(message));
 
@@ -184,9 +168,7 @@ export function useCourse() {
   // ======================================================
   // ✅ DELETE COURSE
   // ======================================================
-  const handleDeleteCourse = async (
-    id
-  ) => {
+  const handleDeleteCourse = async (id) => {
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
@@ -195,13 +177,15 @@ export function useCourse() {
 
       dispatch(removeCourse(id));
 
+      // optional refresh (recommended)
+      await handleGetCourses();
+
       return {
         success: true,
       };
     } catch (err) {
       const message =
-        err?.response?.data?.message ||
-        "Course delete failed";
+        err?.response?.data?.message || "Course delete failed";
 
       dispatch(setError(message));
 
@@ -217,45 +201,37 @@ export function useCourse() {
   // ======================================================
   // ✅ UPLOAD COURSE VIDEO
   // ======================================================
-  const handleUploadCourseVideo =
-    async (id, formData) => {
-      try {
-        dispatch(setLoading(true));
-        dispatch(setError(null));
+  const handleUploadCourseVideo = async (id, formData) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
 
-        const res =
-          await uploadCourseVideo(
-            id,
-            formData
-          );
+      const res = await uploadCourseVideo(id, formData);
 
-        if (res?.data?.course) {
-          dispatch(
-            updateCourseState(
-              res.data.course
-            )
-          );
-        }
+      const updatedCourse = res?.data?.course;
 
-        return {
-          success: true,
-          data: res?.data,
-        };
-      } catch (err) {
-        const message =
-          err?.response?.data?.message ||
-          "Video upload failed";
-
-        dispatch(setError(message));
-
-        return {
-          success: false,
-          message,
-        };
-      } finally {
-        dispatch(setLoading(false));
+      if (updatedCourse) {
+        dispatch(updateCourseState(updatedCourse));
       }
-    };
+
+      return {
+        success: true,
+        data: res?.data,
+      };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Video upload failed";
+
+      dispatch(setError(message));
+
+      return {
+        success: false,
+        message,
+      };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   return {
     handleGetCourses,

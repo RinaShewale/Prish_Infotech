@@ -1,69 +1,65 @@
-import React, { useLayoutEffect, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useSelector } from 'react-redux';
-import { useCourse } from '../hooks/useCourse';
+import React, { useLayoutEffect, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Loader2 } from "lucide-react";
 
-// Components
-import { AICohortDetails } from '../Cohort/pages/AICohortDetails';
-import { DataScienceCohortDetails } from '../Cohort/pages/DataScienceCohortDetails';
-import { FullStackCohortDetails } from '../Cohort/pages/FullStackCohortDetails';
-import { Nav } from '../../components/Nav';
-import { Footer } from '../../components/Footer';
+import { useCourse } from "../hooks/useCourse";
+import { CohortPage  } from "../Cohort/pages/CohortPage";
+
+import { Nav } from "../../components/Nav";
+import { Footer } from "../../components/Footer";
 import { FluidBackground } from "../../components/FluidBackground";
 
 export const CourseDetailPage = () => {
   const { slug } = useParams();
-  const { handleGetCourses } = useCourse();
-  const { courses, loading } = useSelector((state) => state.course);
+  const navigate = useNavigate();
+  const { handleGetSingleCourse } = useCourse();
+
+  const { singleCourse: courseData, loading, error } = useSelector(
+    (state) => state.course
+  );
 
   useEffect(() => {
-    if (courses.length === 0) handleGetCourses();
-  }, []);
-
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
+    if (slug) {
+      handleGetSingleCourse(slug);
+    }
   }, [slug]);
 
-  // Helper to generate slug exactly as CourseCard does
-  const generateSlug = (title) => title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [slug]);
 
-  const currentCourse = courses.find(c => generateSlug(c.title) === slug);
-
-  const renderCohort = () => {
-    if (loading) return <div className="h-[60vh] flex items-center justify-center text-accent">Loading Cohort...</div>;
-    
-    if (!currentCourse) return (
-      <div className="h-[60vh] flex flex-col items-center justify-center text-white">
-        <h2 className="font-display text-4xl mb-4">Cohort Not Found</h2>
-        <p className="text-white/50">The requested course does not exist.</p>
+  if (loading && !courseData) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-bg text-accent">
+        <Loader2 className="w-12 h-12 animate-spin mb-4" />
+        <p className="font-mono text-xs uppercase tracking-[0.3em] opacity-60">Initializing Cohort Data...</p>
       </div>
     );
+  }
 
-    const title = currentCourse.title.toLowerCase();
-    const category = currentCourse.category?.toLowerCase() || "";
-
-    // Pass the specific currentCourse as a prop
-    if (title.includes('ai') || category.includes('ai') || title.includes('machine')) {
-      return <AICohortDetails courseData={currentCourse} />;
-    } else if (title.includes('data') || category.includes('data')) {
-      return <DataScienceCohortDetails courseData={currentCourse} />;
-    } else {
-      return <FullStackCohortDetails courseData={currentCourse} />;
-    }
-  };
+  if (error || (!loading && !courseData)) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-bg text-white px-6 text-center">
+        <h2 className="text-4xl font-bold mb-4 tracking-tighter">Course Not Found</h2>
+        <button 
+          onClick={() => navigate("/")} 
+          className="px-8 py-4 bg-accent text-bg font-black rounded-2xl uppercase text-xs tracking-widest hover:scale-105 transition-all"
+        >
+          Go Back Home
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-bg min-h-screen relative overflow-x-hidden selection:bg-accent/30">
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-30"><FluidBackground /></div>
-      <div className="noise-bg z-[1] fixed inset-0 pointer-events-none" />
+    <div className="bg-bg min-h-screen relative overflow-x-hidden">
+      <div className="fixed inset-0 z-0 opacity-30 pointer-events-none">
+        <FluidBackground />
+      </div>
       <div className="relative z-50"><Nav /></div>
-      <main className="relative z-10 pt-20">
-        <AnimatePresence mode="wait">
-          <motion.div key={slug} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.6 }}>
-            {renderCohort()}
-          </motion.div>
-        </AnimatePresence>
+      <main className="relative z-10">
+        <CohortPage courseData={courseData} />
       </main>
       <div className="relative z-10"><Footer /></div>
     </div>

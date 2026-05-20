@@ -8,9 +8,10 @@ import API from "../../../auth/services/api";
 export const getCourses = () =>
   API.get("/course");
 
-// GET SINGLE COURSE
-export const getSingleCourse = (id) =>
-  API.get(`/course/${id}`);
+
+// GET SINGLE COURSE (BY SLUG)
+export const getSingleCourse = (slug) =>
+  API.get(`/course/${slug}`);
 
 // CREATE COURSE
 export const createCourse = (data) =>

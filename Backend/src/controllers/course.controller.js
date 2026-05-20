@@ -1,40 +1,31 @@
-// ======================================================
-// 📁 controllers/course.controller.js
-// ======================================================
-
 import Course from "../models/Course.model.js";
+import slugify from "slugify";
 
-// ======================================================
-// ✅ CREATE COURSE
-// ======================================================
-export const createCourse = async (
-  req,
-  res
-) => {
+// ================= CREATE COURSE =================
+export const createCourse = async (req, res) => {
   try {
     const {
       title,
       description,
       price,
+      oldPrice,
+      accessDuration,
       level,
       category,
+      type,
+      heroQuote,
+      heroHighlight,
+      syllabus,
     } = req.body;
 
-    if (
-      !title ||
-      !description ||
-      !price ||
-      !category
-    ) {
+    if (!title || !description || price === undefined || !category) {
       return res.status(400).json({
         success: false,
         message: "Please fill all fields",
       });
     }
 
-    // CLOUDINARY IMAGE URL
     const thumbnail = req.file?.path;
-
     if (!thumbnail) {
       return res.status(400).json({
         success: false,
@@ -42,84 +33,88 @@ export const createCourse = async (
       });
     }
 
+    const slug = slugify(title, {
+      lower: true,
+      strict: true,
+    });
+
+    const existingCourse = await Course.findOne({ slug });
+
+    if (existingCourse) {
+      return res.status(400).json({
+        success: false,
+        message: "Course already exists",
+      });
+    }
+
+    const formattedCategory = Array.isArray(category)
+      ? category.map((c) => c.trim())
+      : [category.trim()];
+
+    const parsedSyllabus =
+      typeof syllabus === "string" ? JSON.parse(syllabus) : syllabus || [];
+
     const course = await Course.create({
       title,
+      slug,
       description,
       thumbnail,
-      price,
-      level,
-      category,
+      video: req.body.video || "",
+      type: type || "recorded",
+      price: Number(price) || 0,
+      oldPrice: Number(oldPrice) || 0,
+      accessDuration: accessDuration || "Lifetime Access",
+      level: level || "beginner",
+      category: formattedCategory,
+      heroQuote:
+        heroQuote || "Build Enterprise Software Like The Top 1%",
+      heroHighlight: heroHighlight || "Become Industry Ready",
+      syllabus: parsedSyllabus,
       instructor: req.user._id,
     });
 
-    await course.populate(
-      "instructor",
-      "name email"
-    );
+    await course.populate("instructor", "name email");
 
     res.status(201).json({
       success: true,
-      message: "Course created successfully",
       course,
     });
-  } catch (error) {
-    console.log(
-      "CREATE COURSE ERROR:",
-      error
-    );
-
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Server Error",
+      message: err.message,
     });
   }
 };
 
-// ======================================================
-// ✅ GET ALL COURSES
-// ======================================================
-export const getAllCourses = async (
-  req,
-  res
-) => {
+// ================= GET ALL =================
+export const getAllCourses = async (req, res) => {
   try {
     const courses = await Course.find()
       .populate("instructor", "name email")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    res.json({
       success: true,
-      count: courses.length,
       courses,
     });
-  } catch (error) {
-    console.log(
-      "GET COURSES ERROR:",
-      error
-    );
-
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Server Error",
+      message: err.message,
     });
   }
 };
 
-// ======================================================
-// ✅ GET SINGLE COURSE
-// ======================================================
-export const getSingleCourse = async (
-  req,
-  res
-) => {
+// ================= GET SINGLE (FIXED) =================
+export const getSingleCourse = async (req, res) => {
   try {
-    const course =
-      await Course.findById(
-        req.params.id
-      ).populate(
-        "instructor",
-        "name email"
-      );
+    const { slug } = req.params;
+
+    const course = await Course.findOne({ slug }).populate(
+      "instructor",
+      "name email"
+    );
 
     if (!course) {
       return res.status(404).json({
@@ -128,82 +123,67 @@ export const getSingleCourse = async (
       });
     }
 
-    res.status(200).json({
+    res.json({
       success: true,
       course,
     });
-  } catch (error) {
-    console.log(
-      "GET SINGLE COURSE ERROR:",
-      error
-    );
-
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Server Error",
+      message: err.message,
     });
   }
 };
 
-// ======================================================
-// ✅ UPDATE COURSE
-// ======================================================
-export const updateCourse = async (
-  req,
-  res
-) => {
+// ================= UPDATE =================
+export const updateCourse = async (req, res) => {
   try {
-    const course =
-      await Course.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-          runValidators: true,
-        }
-      ).populate(
-        "instructor",
-        "name email"
-      );
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
+    if (req.body.title) {
+      req.body.slug = slugify(req.body.title, {
+        lower: true,
+        strict: true,
       });
     }
 
-    res.status(200).json({
+    const course = await Course.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    ).populate("instructor", "name email");
+
+    res.json({
       success: true,
-      message:
-        "Course updated successfully",
       course,
     });
-  } catch (error) {
-    console.log(
-      "UPDATE COURSE ERROR:",
-      error
-    );
-
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Server Error",
+      message: err.message,
     });
   }
 };
 
-// ======================================================
-// ✅ DELETE COURSE
-// ======================================================
-export const deleteCourse = async (
-  req,
-  res
-) => {
+// ================= DELETE =================
+export const deleteCourse = async (req, res) => {
   try {
-    const course =
-      await Course.findById(
-        req.params.id
-      );
+    await Course.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: "Deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// ================= VIDEO UPLOAD =================
+export const uploadCourseVideo = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
 
     if (!course) {
       return res.status(404).json({
@@ -212,71 +192,24 @@ export const deleteCourse = async (
       });
     }
 
-    await course.deleteOne();
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Video required",
+      });
+    }
 
-    res.status(200).json({
+    course.video = req.file.path;
+    await course.save();
+
+    res.json({
       success: true,
-      message:
-        "Course deleted successfully",
+      course,
     });
-  } catch (error) {
-    console.log(
-      "DELETE COURSE ERROR:",
-      error
-    );
-
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Server Error",
+      message: err.message,
     });
   }
 };
-
-// ======================================================
-// ✅ UPLOAD COURSE VIDEO
-// ======================================================
-export const uploadCourseVideo =
-  async (req, res) => {
-    try {
-      const course =
-        await Course.findById(
-          req.params.id
-        );
-
-      if (!course) {
-        return res.status(404).json({
-          success: false,
-          message: "Course not found",
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "Video is required",
-        });
-      }
-
-      // CLOUDINARY VIDEO URL
-      course.video = req.file.path;
-
-      await course.save();
-
-      res.status(200).json({
-        success: true,
-        message:
-          "Video uploaded successfully",
-        course,
-      });
-    } catch (error) {
-      console.log(
-        "UPLOAD VIDEO ERROR:",
-        error
-      );
-
-      res.status(500).json({
-        success: false,
-        message: "Server Error",
-      });
-    }
-  };

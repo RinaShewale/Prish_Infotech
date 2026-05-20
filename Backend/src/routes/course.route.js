@@ -43,7 +43,7 @@ router.get("/", getAllCourses);
 // ======================================================
 // ✅ GET SINGLE COURSE
 // ======================================================
-router.get("/:id", getSingleCourse);
+router.get("/:slug", getSingleCourse);
 
 // ======================================================
 // ✅ UPDATE COURSE

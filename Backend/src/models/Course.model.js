@@ -1,30 +1,136 @@
-// ======================================================
-// 📁 models/Course.model.js
-// ======================================================
-
 import mongoose from "mongoose";
 
-const courseSchema = new mongoose.Schema(
+// ======================================================
+// ✅ SYLLABUS SCHEMA
+// ======================================================
+
+const syllabusSchema = new mongoose.Schema(
   {
+    // ======================================================
+    // ✅ PHASE
+    // ======================================================
+
+    phase: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ======================================================
+    // ✅ MODULE TITLE
+    // ======================================================
+
     title: {
       type: String,
       required: true,
       trim: true,
     },
 
+    // ======================================================
+    // ✅ DURATION
+    // ======================================================
+
+    duration: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ======================================================
+    // ✅ TOPICS
+    // ======================================================
+
+    topics: {
+      type: [String],
+      default: [],
+    },
+
+    // ======================================================
+    // ✅ TOOLS / TECH STACK
+    // ======================================================
+
+    tools: {
+      type: [String],
+      default: [],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+// ======================================================
+// ✅ COURSE SCHEMA
+// ======================================================
+
+const courseSchema = new mongoose.Schema(
+  {
+    // ======================================================
+    // ✅ COURSE TITLE
+    // ======================================================
+
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ======================================================
+    // ✅ SEO FRIENDLY URL SLUG
+    // ======================================================
+
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    // ======================================================
+    // ✅ COURSE DESCRIPTION
+    // ======================================================
+
     description: {
       type: String,
       required: true,
+      maxlength: [
+        250,
+        "Description cannot exceed 250 characters",
+      ],
     },
+
+    // ======================================================
+    // ✅ COURSE THUMBNAIL
+    // ======================================================
 
     thumbnail: {
       type: String,
       required: true,
     },
 
+    // ======================================================
+    // ✅ COURSE VIDEO
+    // ======================================================
+
     video: {
       type: String,
+      default: "",
     },
+
+    // ======================================================
+    // ✅ COURSE TYPE
+    // ======================================================
+
+    type: {
+      type: String,
+      enum: ["live", "recorded"],
+      default: "recorded",
+    },
+
+    // ======================================================
+    // ✅ CURRENT PRICE
+    // ======================================================
 
     price: {
       type: Number,
@@ -32,24 +138,80 @@ const courseSchema = new mongoose.Schema(
       min: 0,
     },
 
-    // ⭐ NEW FIELD
+    // ======================================================
+    // ✅ OLD PRICE
+    // ======================================================
+
     oldPrice: {
       type: Number,
       default: 0,
       min: 0,
     },
 
+    // ======================================================
+    // ✅ COURSE LEVEL
+    // ======================================================
+
     level: {
       type: String,
-      enum: ["beginner", "intermediate", "advanced"],
+      enum: [
+        "beginner",
+        "intermediate",
+        "advanced",
+      ],
       default: "beginner",
     },
 
+    // ======================================================
+    // ✅ MULTIPLE CATEGORIES
+    // ======================================================
+
     category: {
-      type: String,
+      type: [String],
       required: true,
-      trim: true,
     },
+
+    // ======================================================
+    // ✅ ACCESS DURATION
+    // ======================================================
+
+    accessDuration: {
+      type: String,
+      default: "Lifetime Access",
+    },
+
+    // ======================================================
+    // ✅ HERO QUOTE
+    // ======================================================
+
+    heroQuote: {
+      type: String,
+      default:
+        "Build Enterprise Software Like The Top 1%",
+    },
+
+    // ======================================================
+    // ✅ HERO HIGHLIGHT TEXT
+    // ======================================================
+
+    heroHighlight: {
+      type: String,
+      default:
+        "Become Industry Ready",
+    },
+
+    // ======================================================
+    // ✅ COURSE SYLLABUS
+    // ======================================================
+
+    syllabus: {
+      type: [syllabusSchema],
+      default: [],
+    },
+
+    // ======================================================
+    // ✅ COURSE INSTRUCTOR
+    // ======================================================
 
     instructor: {
       type: mongoose.Schema.Types.ObjectId,
@@ -61,6 +223,13 @@ const courseSchema = new mongoose.Schema(
   }
 );
 
-const Course = mongoose.model("Course", courseSchema);
+// ======================================================
+// ✅ EXPORT MODEL
+// ======================================================
+
+const Course = mongoose.model(
+  "Course",
+  courseSchema
+);
 
 export default Course;
