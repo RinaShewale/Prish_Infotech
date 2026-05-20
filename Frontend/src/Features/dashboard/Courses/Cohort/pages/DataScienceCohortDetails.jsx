@@ -1,22 +1,20 @@
-import React, { useRef, useLayoutEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useLayoutEffect, useState, useMemo, useEffect } from 'react';
+import { useSelector } from "react-redux";
+import { useCourse } from "../../hooks/useCourse";
 import { 
-  Play, ArrowRight, Zap, CheckCircle2, 
-  BarChart3, Database, BrainCircuit, LineChart,
-  Sparkles, ShieldCheck, CreditCard 
+  ArrowRight, CheckCircle2, Sparkles, BrainCircuit, 
+  Zap, ChevronRight, Cpu, Layers, MousePointer2, 
+  BarChart3, Database, LineChart, Binary 
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Components
+// Integrated Components
 import { FluidBackground } from "../../../components/FluidBackground";
 import ComparisonSection from "../../../components/ComparisonSection";
 import { FAQSection } from '../../../components/FAQSection';
 import CertificationSection from '../component/CertificationSection';
 import { PrishEnrollment } from '../component/PrishEnrollment';
-
-// Data
-import { COURSES_DATA } from "../../page/CoursePage";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,252 +22,275 @@ export const DataScienceCohortDetails = () => {
   const containerRef = useRef(null);
   const syllabusRef = useRef(null);
   const enrollmentRef = useRef(null);
+  const contentRef = useRef(null);
+  const heroImageRef = useRef(null);
+  
+  const [activeModule, setActiveModule] = useState(0);
 
-  const course = COURSES_DATA[1]; // Data Science course
-  const PRICE = course.price;
-  const OLD_PRICE = course.oldPrice;
+  // DATA FETCHING LOGIC
+  const { handleGetCourses } = useCourse();
+  const { courses } = useSelector((state) => state.course);
 
-  useLayoutEffect(() => {
-    let ctx = gsap.context(() => {
-      // 1. Hero Entrance Animation
-      const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1 } });
-      
-      tl.from(".hero-tag", { y: 20, opacity: 0, stagger: 0.1, duration: 0.6 })
-        .from(".hero-title", { y: 40, opacity: 0 }, "-=0.4")
-        .from(".hero-desc", { y: 20, opacity: 0 }, "-=0.6")
-        .from(".hero-stats", { y: 20, opacity: 0 }, "-=0.6")
-        .from(".hero-btns", { y: 20, opacity: 0 }, "-=0.4")
-        .from(".hero-image", { x: 40, duration: 0.7 }, "-=1");
-
-      // 2. Syllabus Scroll Animation
-      gsap.from(".syllabus-card", {
-        scrollTrigger: {
-          trigger: syllabusRef.current,
-          start: "top 80%",
-        },
-        y: 50,
-        opacity: 0,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power2.out"
-      });
-
-      // 3. Sticky CTA Animation
-      gsap.from(".sticky-cta", {
-        scrollTrigger: {
-          trigger: "body",
-          start: "top -15%",
-          toggleActions: "play none none reverse"
-        },
-        y: 100,
-        opacity: 0,
-        duration: 0.5,
-        ease: "back.out(1.7)"
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
+  useEffect(() => {
+    if (!courses?.length) handleGetCourses();
   }, []);
 
+  const course = useMemo(() => {
+    const found = courses?.find(
+      (c) =>
+        c.category?.toLowerCase().includes("data") ||
+        c.title?.toLowerCase().includes("data")
+    );
+
+    return found || {
+      title: "Data Science Mastery",
+      price: 3499,
+      description: "Master the full lifecycle of data engineering, statistical modeling, and machine learning deployment.",
+      thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
+    };
+  }, [courses]);
+
+  const PRICE = Math.floor(course.price);
+  const OLD_PRICE = Math.floor(course.price * 2.5);
+
   const SYLLABUS = [
-    {
-      phase: "Phase 01",
-      title: "Data Engineering & Analysis",
-      topics: ["Advanced Python for Data Science", "NumPy & Pandas Deep Dive", "Automated EDA Patterns", "Data Cleaning at Scale"]
+    { 
+      phase: "Phase 01", title: "Foundations & Viz", 
+      icon: <BarChart3 className="w-5 h-5" />,
+      topics: ["Advanced Python for Data", "Statistical Inference", "Exploratory Data Analysis", "Vectorized Operations"],
+      tools: ["NumPy", "Pandas", "Seaborn"],
+      duration: "Week 1-3"
     },
-    {
-      phase: "Phase 02",
-      title: "Statistical Learning & ML",
-      topics: ["Inferential Statistics & Probability", "Supervised & Unsupervised Learning", "Feature Engineering Mastery", "Model Evaluation & Selection"]
+    { 
+      phase: "Phase 02", title: "ML Engineering", 
+      icon: <Binary className="w-5 h-5" />,
+      topics: ["Regression Architectures", "Classification Deep-Dive", "Hyperparameter Tuning", "Ensemble Methods"],
+      tools: ["Scikit-Learn", "XGBoost"],
+      duration: "Week 4-7"
     },
-    {
-      phase: "Phase 03",
-      title: "Gen-AI for Data Scientists",
-      topics: ["LLMs for SQL Generation", "Automated Insight Extraction", "Synthetic Data Generation", "Fine-tuning Models for Analysis"]
+    { 
+      phase: "Phase 03", title: "Deep Learning", 
+      icon: <BrainCircuit className="w-5 h-5" />,
+      topics: ["Neural Network Theory", "CNNs & Computer Vision", "Sequence Modeling (RNNs)", "Optimization Algorithms"],
+      tools: ["PyTorch", "TensorFlow"],
+      duration: "Week 8-10"
     },
-    {
-      phase: "Phase 04",
-      title: "Deployment & Visualization",
-      topics: ["Building Dashboards (Streamlit/Tableau)", "Deploying Models with FastAPI", "Cloud Data Warehousing", "Industry Capstone Project"]
+    { 
+      phase: "Phase 04", title: "Big Data & MLOps", 
+      icon: <Database className="w-5 h-5" />,
+      topics: ["Feature Stores", "Model Versioning", "Spark Data Processing", "API Deployment (FastAPI)"],
+      tools: ["Apache Spark", "MLFlow", "Docker"],
+      duration: "Week 11-14"
     }
   ];
 
-  const CERT_DATA = {
-    mainHeading: "Validate Your",
-    highlightedText: "Data Expertise",
-    description: "Showcase your ability to turn complex data into actionable insights. Our certificates are cryptographically signed and recognized by industry leaders.",
-    certType: "Expert",
-    skillsLearned: "Statistical Modeling, Predictive Analytics, Gen-AI Integration, and Big Data Visualization",
+  useLayoutEffect(() => {
+    let ctx = gsap.context(() => {
+      // Hero Entrance
+      gsap.from(".hero-reveal", { y: 50, opacity: 0, stagger: 0.1, duration: 1.2, ease: "power4.out" });
+
+      // Section Reveals
+      gsap.utils.toArray('.reveal-section').forEach(section => {
+        gsap.from(section, {
+          scrollTrigger: { trigger: section, start: "top 90%" },
+          y: 40, opacity: 0, duration: 1, ease: "power3.out"
+        });
+      });
+
+      // Sticky CTA
+      gsap.from(".sticky-cta", {
+        scrollTrigger: { trigger: "body", start: "top -5%", toggleActions: "play none none reverse" },
+        y: 120, duration: 0.5, ease: "power2.out"
+      });
+    }, containerRef);
+    return () => ctx.revert();
+  }, []);
+
+  const handleTabChange = (index) => {
+    if(index === activeModule) return;
+    gsap.to(contentRef.current, {
+        opacity: 0, x: -20, duration: 0.2,
+        onComplete: () => {
+            setActiveModule(index);
+            gsap.to(contentRef.current, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" });
+        }
+    });
   };
 
-  return (
-    <div ref={containerRef} className="text-text min-h-screen selection:bg-accent/30 overflow-x-hidden bg-bg">
-      
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-20">
-        <FluidBackground />
-      </div>
+  const titleWords = course.title.split(' ');
+  const mainTitle = titleWords.slice(0, -1).join(' ');
+  const lastWord = titleWords.slice(-1);
 
-      <main className="relative z-10 pt-20 md:pt-32 pb-24 px-4 sm:px-6 max-w-7xl mx-auto">
+  return (
+    <div ref={containerRef} className="text-text min-h-screen bg-bg selection:bg-accent/30 overflow-x-hidden relative font-sans">
+      
+      {/* BACKGROUND LAYERS */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <FluidBackground />
+        <div className="absolute inset-0 opacity-[0.05]" 
+             style={{ backgroundImage: `linear-gradient(rgba(var(--accent-rgb), 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--accent-rgb), 0.5) 1px, transparent 1px)`, backgroundSize: '50px 50px' }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/20 to-bg" />
+      </div>
+      
+      <main className="relative z-10 pt-28 md:pt-44 pb-24 px-4 sm:px-8 max-w-7xl mx-auto">
         
-        {/* --- HERO SECTION --- */}
-        <section className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-24 md:mb-32">
-          <div className="order-2 lg:order-1 text-center lg:text-left">
-            <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-6">
-              {["Python", "Machine Learning", "Gen-AI", "Data Viz"].map((tag) => (
-                <span key={tag} className="hero-tag px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-bold tracking-[0.2em] uppercase">
-                  {tag}
-                </span>
+        {/* HERO SECTION */}
+        <section className="grid lg:grid-cols-2 gap-16 items-center mb-36 md:mb-56">
+          <div className="text-center lg:text-left order-2 lg:order-1">
+            <span className="hero-reveal px-5 py-2 border border-accent/20 bg-accent/5 rounded-full text-[10px] font-black tracking-[0.4em] uppercase text-accent mb-8 inline-block">Data Engineering Cohort</span>
+            <h1 className="hero-reveal text-5xl sm:text-7xl md:text-[100px] font-bold leading-[0.85] tracking-tighter text-white mb-10">
+              {mainTitle} <br />
+              <span className="italic font-serif text-accent">{lastWord}</span>
+            </h1>
+            <p className="hero-reveal text-lg md:text-2xl text-text-secondary max-w-xl mb-12 font-light leading-relaxed mx-auto lg:mx-0 opacity-80">
+              {course.description}
+            </p>
+            <div className="hero-reveal flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-10">
+                <div className="text-center md:text-left">
+                    <span className="text-[10px] font-bold tracking-widest text-text-secondary/40 uppercase block mb-2">Registration Open</span>
+                    <div className="flex items-baseline gap-4">
+                        <span className="text-5xl md:text-7xl font-bold text-white tracking-tighter">₹{PRICE}</span>
+                        <span className="text-xl md:text-2xl text-text-secondary/20 line-through">₹{OLD_PRICE}</span>
+                    </div>
+                </div>
+                <button 
+                  onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} 
+                  className="w-full whitespace-nowrap sm:w-auto px-12 py-7 bg-accent text-bg font-black rounded-3xl hover:scale-105 transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-4 shadow-[0_25px_60px_-10px_rgba(var(--accent-rgb),0.4)]"
+                >
+                  JOIN COHORT <ArrowRight className="w-5 h-5" />
+                </button>
+            </div>
+          </div>
+
+          <div className="hero-reveal order-1 lg:order-2">
+             <div className="relative group max-w-[550px] mx-auto">
+                <div className="absolute -inset-8 bg-accent/20 blur-[120px] rounded-full opacity-30" />
+                <div className="relative rounded-[50px] overflow-hidden border border-white/10 aspect-[4/5] bg-black/40 backdrop-blur-3xl shadow-2xl">
+                    <img src={course.thumbnail} className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700" alt={course.title} />
+                </div>
+             </div>
+          </div>
+        </section>
+
+        {/* CURRICULUM BLUEPRINT */}
+        <section ref={syllabusRef} className="reveal-section mb-36 md:mb-56">
+          <header className="mb-16 text-center md:text-left">
+                <span className="text-accent text-[10px] font-black tracking-[0.5em] uppercase block mb-4">Course Map</span>
+                <h2 className="text-6xl md:text-[90px] font-bold text-white tracking-tighter leading-[0.8]">The Curriculum</h2>
+          </header>
+
+          <div className="grid lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-4 flex lg:flex-col gap-3 overflow-x-auto pb-4 lg:pb-0 no-scrollbar">
+              {SYLLABUS.map((item, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => handleTabChange(idx)}
+                  className={`flex-shrink-0 lg:w-full p-7 rounded-[32px] border transition-all duration-500 flex items-center justify-between gap-6 ${
+                    activeModule === idx 
+                    ? "bg-accent border-accent text-bg shadow-xl" 
+                    : "bg-white/[0.03] border-white/5 text-text-secondary hover:bg-white/[0.06]"
+                  }`}
+                >
+                  <div className="flex items-center gap-6">
+                    <div className={`${activeModule === idx ? 'text-bg' : 'text-accent'}`}>{item.icon}</div>
+                    <h3 className="font-bold uppercase text-[11px] md:text-xs tracking-[0.2em] whitespace-nowrap">{item.title}</h3>
+                  </div>
+                  <ChevronRight className={`hidden md:block w-5 h-5 ${activeModule === idx ? "rotate-90" : ""}`} />
+                </button>
               ))}
             </div>
 
-            <h1 className="hero-title text-4xl sm:text-6xl md:text-7xl font-display font-bold text-white mb-6 leading-[1.1] md:leading-[0.9] tracking-tighter">
-              {course.heading}
-              <span className="italic font-serif text-accent block">{course.subheading}</span>
-            </h1>
-
-            <p className="hero-desc text-lg md:text-xl text-text-secondary mb-8 md:mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-light">
-              {course.description}
-            </p>
-
-            <div className="hero-stats flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 sm:gap-10 mb-10">
-              <div className="text-center sm:text-left">
-                <span className="text-[10px] text-accent font-bold uppercase tracking-widest mb-2 block">Starting at</span>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl md:text-5xl font-display font-bold text-white">₹{PRICE}</span>
-                  <span className="text-lg md:text-xl text-text-secondary line-through opacity-40">₹{OLD_PRICE}</span>
+            <div className="lg:col-span-8">
+              <div className="bg-white/[0.01] border border-white/10 rounded-[40px] md:rounded-[64px] p-8 md:p-20 min-h-[500px] relative overflow-hidden backdrop-blur-2xl">
+                <div ref={contentRef} className="relative z-10">
+                    <span className="text-accent font-black tracking-[0.6em] uppercase text-[10px] block mb-8">{SYLLABUS[activeModule].duration}</span>
+                    <h3 className="text-4xl md:text-7xl font-bold text-white mb-12 tracking-tighter leading-[0.9]">{SYLLABUS[activeModule].title}</h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-16">
+                        <div className="space-y-10">
+                            <h4 className="text-text-secondary/30 text-[10px] font-black uppercase tracking-[0.4em]">Core Outcomes</h4>
+                            <ul className="space-y-5">
+                                {SYLLABUS[activeModule].topics.map((t, i) => (
+                                    <li key={i} className="flex gap-4 text-lg md:text-xl text-text-secondary font-light">
+                                        <CheckCircle2 className="w-6 h-6 text-accent/30 shrink-0 mt-1" />
+                                        {t}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="bg-white/[0.03] border border-white/5 rounded-[32px] p-8">
+                            <h4 className="text-text-secondary/30 text-[10px] font-black uppercase tracking-[0.4em] mb-10">Industry Tools</h4>
+                            <div className="flex flex-wrap gap-3">
+                                {SYLLABUS[activeModule].tools.map((tool, i) => (
+                                    <span key={i} className="px-5 py-3 bg-black/40 border border-white/10 rounded-2xl text-[11px] font-mono text-accent uppercase tracking-widest">{tool}</span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
               </div>
-              <div className="hidden sm:block h-12 w-px bg-white/10" />
-              <div className="text-center sm:text-left">
-                <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-2 block">Next Batch</span>
-                <p className="text-lg md:text-xl font-display text-white italic flex items-center gap-2">
-                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                   Enrollment Open
-                </p>
-              </div>
-            </div>
-
-            <div className="hero-btns flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <button 
-                onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-10 py-5 bg-accent text-bg font-bold rounded-2xl flex items-center justify-center gap-4 hover:brightness-110 transition-all shadow-[0_20px_50px_rgba(var(--accent-rgb),0.3)]">
-                ENROLL AT — ₹{PRICE} <ArrowRight className="w-5 h-5" />
-              </button>
-              <button className="px-10 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl flex items-center justify-center gap-4 hover:bg-white/10 transition-all">
-                VIEW CURRICULUM
-              </button>
-            </div>
-          </div>
-
-          {/* HERO IMAGE */}
-          <div className="hero-image order-1 lg:order-2 relative rounded-4xl md:rounded-[40px] overflow-hidden border border-white/10 shadow-2xl aspect-square max-w-lg mx-auto lg:max-w-none group">
-            <img 
-              src="https://images.unsplash.com/photo-1775896194071-f3311de4dabb?w=1200&auto=format&fit=crop&q=80" 
-              className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
-              alt="Data Science" 
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent" />
-            <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-left">
-              <div className="bg-accent/90 text-bg px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 inline-block">Certification Included</div>
-              <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">Statistical AI Pipelines</h3>
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 cursor-pointer hover:scale-110 transition-transform">
-                <Play className="fill-white w-6 h-6 ml-1" />
-              </div>
             </div>
           </div>
         </section>
 
-        {/* --- SYLLABUS SECTION --- */}
-        <section ref={syllabusRef} className="mb-24 md:mb-44">
-          <div className="text-center mb-12 md:mb-20">
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">The <span className="text-accent italic">Curriculum</span></h2>
-            <p className="text-text-secondary max-w-2xl mx-auto px-4">A rigorous 12-week roadmap designed for data enthusiasts to transition into elite Data Science roles.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 text-left">
-            {SYLLABUS.map((item, idx) => (
-              <div key={idx} className="syllabus-card p-6 md:p-10 bg-[#111] rounded-4xl md:rounded-[40px] border border-white/5 relative overflow-hidden group hover:border-accent/20 transition-colors">
-                <div className="absolute top-0 right-0 p-6 text-6xl font-black text-white/2 group-hover:text-accent/5 transition-colors">
-                  0{idx + 1}
-                </div>
-                <span className="text-accent font-bold text-xs uppercase tracking-widest mb-4 block">{item.phase}</span>
-                <h4 className="text-xl md:text-2xl font-bold text-white mb-6">{item.title}</h4>
-                <ul className="space-y-4">
-                  {item.topics.map((topic, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary group-hover:text-text transition-colors">
-                      <CheckCircle2 className="w-4 h-4 text-accent/40 mt-0.5 shrink-0" />
-                      {topic}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mb-24 md:mb-44">
-          <ComparisonSection />
-        </section>
-
-        {/* --- FINAL CALL TO ACTION --- */}
-        <section className="mb-24 md:mb-44 bg-accent/5 border border-accent/10 rounded-[40px] p-8 md:p-20 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-accent to-transparent opacity-30" />
-            <Sparkles className="w-12 h-12 text-accent mx-auto mb-8 opacity-50" />
-            <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">Ready to Lead the Data Revolution?</h2>
-            <p className="text-text-secondary text-lg md:text-xl mb-12 max-w-2xl mx-auto">Join an elite cohort of engineers turning data into world-changing AI products.</p>
-            
-            <div className="inline-flex flex-col items-center gap-6">
-                <button 
-                  onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-12 py-6 bg-accent text-bg font-bold rounded-2xl flex items-center gap-4 hover:scale-105 transition-all text-lg shadow-xl shadow-accent/20">
-                    START LEARNING NOW — ₹{PRICE}
-                </button>
-                <div className="flex items-center gap-8 text-xs text-text-secondary font-bold uppercase tracking-widest">
-                    <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-accent" /> Professional Certification</span>
-                    <span className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> Flexible EMI Options</span>
-                </div>
-            </div>
-        </section>
-
-        <div className="mb-24 md:mb-44">
-          <CertificationSection data={CERT_DATA} />
+        {/* COMPARISON */}
+        <div className="reveal-section mb-36 md:mb-56 backdrop-blur-2xl rounded-[60px] border border-white/5 overflow-hidden">
+            <ComparisonSection />
         </div>
 
-        <section className="mb-24 md:mb-44">
-          <FAQSection />
+        {/* CTA CARD */}
+        <section className="reveal-section mb-36 md:mb-56 relative py-32 px-6 bg-white/[0.02] border border-white/10 rounded-[60px] md:rounded-[100px] text-center overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--accent-rgb),0.1),transparent_70%)]" />
+            <div className="relative z-10">
+                <MousePointer2 className="w-16 h-16 text-accent mx-auto mb-10 opacity-40 animate-bounce" />
+                <h2 className="text-5xl md:text-[100px] font-bold text-white mb-16 leading-[0.8] tracking-tighter">
+                    Don't Just View Data. <br/> <span className="text-accent italic font-serif">Engineer Insight.</span>
+                </h2>
+                <div className="flex justify-center">
+                    <button 
+                        onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} 
+                        className="group flex items-center justify-center gap-6 px-10 md:px-16 py-7 md:py-9 bg-white text-bg font-black rounded-3xl text-lg md:text-2xl uppercase tracking-widest shadow-2xl transition-all hover:scale-105 active:scale-95 max-w-full"
+                    >
+                        <span className="whitespace-nowrap sm:whitespace-normal">JOIN THE COHORT — ₹{PRICE}</span>
+                        <ArrowRight className="w-6 h-6 md:w-8 md:h-8 group-hover:translate-x-2 transition-transform" />
+                    </button>
+                </div>
+            </div>
         </section>
 
-        {/* ENROLLMENT SECTION */}
-        <section ref={enrollmentRef} className="mb-24 md:mb-44">
-          <PrishEnrollment 
-            courseData={course}
-            title={course.title}
-            price={course.price} 
-            oldPrice={course.oldPrice}
-          />
-        </section>
+        <CertificationSection data={{
+            mainHeading: "Validate Your", highlightedText: "Expertise",
+            description: "Industry-standard certification for Data Science & Engineering.",
+            certType: "Specialist", skillsLearned: "MLOps, Deep Learning, and Statistical Modeling",
+        }} />
+        
+        <div className="reveal-section mt-36 md:mt-56"><FAQSection /></div>
 
+        <section ref={enrollmentRef} className="mb-32 md:mb-48 pt-24">
+            <PrishEnrollment courseData={course} title={course.title} price={PRICE} oldPrice={OLD_PRICE} />
+        </section>
       </main>
 
-      {/* STICKY ENROLL */}
-      <div className="sticky-cta fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-2xl">
-        <div className="bg-[#111]/80 backdrop-blur-2xl border border-white/10 rounded-2xl md:rounded-full p-2 flex items-center justify-between shadow-2xl">
-          <div className="pl-6 md:pl-10 text-left">
-            <div className="flex items-baseline gap-2">
-                <span className="text-xl md:text-2xl font-display font-bold text-white">₹{PRICE}</span>
-                <span className="text-[10px] text-accent font-bold uppercase tracking-tight italic">Starting Price</span>
-            </div>
-            <p className="hidden md:block text-[10px] text-white/40 font-bold uppercase tracking-[0.2em]">Become a Certified Data Scientist</p>
+      {/* STICKY CTA FOOTER */}
+      <div className="sticky-cta fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-[540px]">
+        <div className="bg-bg/40 backdrop-blur-[40px] border border-white/10 rounded-[35px] p-3 flex items-center justify-between shadow-2xl">
+          <div className="pl-8">
+            <span className="text-[9px] uppercase tracking-[0.4em] text-text-secondary/40 font-black block mb-1">Limited Access</span>
+            <span className="text-3xl md:text-4xl font-bold text-white tracking-tighter">₹{PRICE}</span>
           </div>
           <button 
-            onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-accent text-bg px-8 md:px-12 py-3 md:py-4 rounded-xl md:rounded-full font-bold text-xs md:text-sm hover:brightness-110 transition-all whitespace-nowrap shadow-lg shadow-accent/20">
-            ENROLL NOW <ArrowRight className="inline-block ml-2 w-4 h-4" />
+            onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} 
+            className="bg-accent text-bg px-10 md:px-14 py-5 md:py-6 rounded-[28px] font-black text-xs md:text-sm uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all shadow-xl"
+          >
+            Enroll Now
           </button>
         </div>
       </div>
+
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };

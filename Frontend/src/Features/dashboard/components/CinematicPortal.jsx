@@ -5,13 +5,9 @@ import { useGSAP } from "@gsap/react";
 import Lenis from "@studio-freight/lenis";
 import { Clock, BadgeCheck, PhoneCall, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-
-import { COURSES_DATA } from "../Courses/page/CoursePage";
+import { useSelector } from "react-redux"; // Import Redux hook
 
 gsap.registerPlugin(ScrollTrigger);
-
-
 
 export default function CinematicPortal() {
   const navigate = useNavigate();
@@ -21,6 +17,13 @@ export default function CinematicPortal() {
   const word2Ref = useRef(null);
   const cardsRef = useRef([]);
   const textRefs = useRef([]);
+
+  // Get courses from Redux backend state
+  const { courses } = useSelector((state) => state.course);
+
+  // URL-friendly slug generator (Matching your CourseCard logic)
+  const generateSlug = (title) => 
+    title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -37,6 +40,9 @@ export default function CinematicPortal() {
   }, []);
 
   useGSAP(() => {
+    // Prevent animation from running if courses aren't loaded yet
+    if (!courses || courses.length === 0) return;
+
     const cards = cardsRef.current;
     const texts = textRefs.current;
 
@@ -44,7 +50,7 @@ export default function CinematicPortal() {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: "+=1200%", // Increased scroll length to accommodate the "hold"
+        end: "+=1200%", 
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
@@ -59,10 +65,10 @@ export default function CinematicPortal() {
     gsap.set(cards, { opacity: 0, scale: 0.85, yPercent: 30 });
     gsap.set(texts, { autoAlpha: 0, x: 40 });
 
-    // 1. HOLD EFFECT: This empty tween makes the text stay on screen while scrolling
+    // 1. HOLD EFFECT
     tl.to({}, { duration: 3 }); 
 
-    // 2. DELAYED ZOOM: Now the zoom starts after the hold
+    // 2. DELAYED ZOOM
     tl.to([word1Ref.current, plusRef.current, word2Ref.current], {
       z: 1500, 
       scale: 15, 
@@ -70,11 +76,11 @@ export default function CinematicPortal() {
       filter: "blur(20px)",
       stagger: 0.1, 
       ease: "power2.inOut", 
-      duration: 3 // Slower, more cinematic zoom
+      duration: 3 
     });
 
-   COURSES_DATA.forEach((_, index) => {
-      // Reveal items
+    // Loop through backend courses
+    courses.forEach((_, index) => {
       tl.to(cards[index], {
         opacity: 1, scale: 1, yPercent: 0,
         duration: 2.5, ease: "power2.out"
@@ -84,9 +90,9 @@ export default function CinematicPortal() {
           duration: 2, ease: "power2.out"
         }, "-=2");
 
-      tl.to({}, { duration: 3 }); // Stay on current course
+      tl.to({}, { duration: 3 }); 
 
-    if (index < COURSES_DATA.length - 1){
+      if (index < courses.length - 1){
         tl.to(cards[index], {
           xPercent: -130, scale: 0.5, opacity: 0,
           duration: 3, ease: "power2.inOut",
@@ -97,7 +103,10 @@ export default function CinematicPortal() {
           }, "-=3");
       }
     });
-  }, { scope: containerRef });
+  }, { scope: containerRef, dependencies: [courses] }); // Re-run when courses load
+
+  // Show nothing or a small loader while courses are fetching to prevent GSAP glitches
+  if (!courses || courses.length === 0) return <div className="h-screen bg-bg" />;
 
   return (
     <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-bg" style={{ perspective: "1200px" }}>
@@ -118,14 +127,14 @@ export default function CinematicPortal() {
 
           {/* Card Container */}
           <div className="md:col-span-6 relative aspect-[16/10] md:aspect-video flex items-center justify-center w-full">
-            {COURSES_DATA.map((course, index) => (
+            {courses.map((course, index) => (
               <div
-                key={course.id}
+                key={course._id}
                 ref={(el) => (cardsRef.current[index] = el)}
                 className="absolute inset-0 overflow-hidden rounded-2xl md:rounded-[32px] shadow-[0_40px_80px_rgba(0,0,0,0.6)] border border-border/50"
-                style={{ zIndex: 10 - index }}
+                style={{ zIndex: courses.length - index }}
               >
-                <img src={course.image} alt={course.title} className="h-full w-full object-cover" />
+                <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                 <div className="absolute inset-0 gloss-overlay pointer-events-none" />
               </div>
             ))}
@@ -133,8 +142,8 @@ export default function CinematicPortal() {
 
           {/* Text Container */}
           <div className="md:col-span-6 relative h-[45vh] md:h-[520px] flex flex-col justify-center">
-         {COURSES_DATA.map((course, index) => (
-              <div key={index} ref={(el) => (textRefs.current[index] = el)} className="absolute inset-0 flex flex-col justify-start md:justify-center text-left items-start">
+            {courses.map((course, index) => (
+              <div key={course._id} ref={(el) => (textRefs.current[index] = el)} className="absolute inset-0 flex flex-col justify-start md:justify-center text-left items-start">
                 <h2 className="font-display text-xl md:text-[2.75rem] font-medium text-text mb-2 md:mb-4 leading-[1.15] tracking-tight">
                   {course.title}
                 </h2>
@@ -147,8 +156,8 @@ export default function CinematicPortal() {
                   <div className="flex items-center gap-2 md:gap-3">
                     <div className="p-1.5 md:p-2.5 rounded-xl bg-accent/10 text-accent"><Clock size={16} /></div>
                     <div className="flex flex-col">
-                      <span className="text-xs md:text-sm font-bold text-text leading-none">{course.duration?.split(' ')[0] || "5"}</span>
-                      <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-text-secondary font-medium">Months</span>
+                      <span className="text-xs md:text-sm font-bold text-text leading-none">{course.duration || "5"}</span>
+                      <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-text-secondary font-medium">Duration</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 md:gap-3">
@@ -169,13 +178,16 @@ export default function CinematicPortal() {
 
                 <div className="flex items-baseline gap-2 mb-4 md:mb-8">
                   <span className="text-lg md:text-3xl font-medium text-text">Price</span>
-                  <span className="text-xl md:text-4xl font-bold text-accent">Rs.{course.price}</span>
+                  <span className="text-xl md:text-4xl font-bold text-accent">₹{course.price}</span>
                 </div>
 
-                <button onClick={() => {
+                <button 
+                  onClick={() => {
                     window.scrollTo(0, 0);
-                    navigate(`/cohort/${course.slug}`);
-                  }} className="group flex items-center gap-2 md:gap-3 bg-accent text-[#131014] px-5 py-3 md:px-8 md:py-4 rounded-xl font-display font-bold text-[12px] md:text-sm transition-all hover:brightness-110 hover:scale-[1.02] active:scale-95 pointer-events-auto shadow-lg shadow-accent/20">
+                    navigate(`/cohort/${generateSlug(course.title)}`);
+                  }} 
+                  className="group flex items-center gap-2 md:gap-3 bg-accent text-[#131014] px-5 py-3 md:px-8 md:py-4 rounded-xl font-display font-bold text-[12px] md:text-sm transition-all hover:brightness-110 hover:scale-[1.02] active:scale-95 pointer-events-auto shadow-lg shadow-accent/20"
+                >
                   CHECK COURSE
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                 </button>

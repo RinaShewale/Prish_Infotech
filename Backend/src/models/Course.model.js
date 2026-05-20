@@ -1,3 +1,7 @@
+// ======================================================
+// 📁 models/Course.model.js
+// ======================================================
+
 import mongoose from "mongoose";
 
 const courseSchema = new mongoose.Schema(
@@ -18,9 +22,20 @@ const courseSchema = new mongoose.Schema(
       required: true,
     },
 
+    video: {
+      type: String,
+    },
+
     price: {
       type: Number,
       required: true,
+      min: 0,
+    },
+
+    // ⭐ NEW FIELD
+    oldPrice: {
+      type: Number,
+      default: 0,
       min: 0,
     },
 
