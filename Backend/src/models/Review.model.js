@@ -8,12 +8,6 @@ const reviewSchema = new mongoose.Schema(
       required: true,
     },
 
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
-    },
-
     rating: {
       type: Number,
       required: true,
@@ -23,6 +17,7 @@ const reviewSchema = new mongoose.Schema(
 
     comment: {
       type: String,
+      required: true,
     },
   },
   {

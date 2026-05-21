@@ -1,11 +1,14 @@
 import User from "../models/User.model.js";
 import generateToken from "../utils/generateToken.js";
 
-// REGISTER USER
+/* =========================
+   REGISTER USER
+========================= */
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    // check if user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -15,6 +18,7 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    // create new user
     const user = await User.create({
       name,
       email,
@@ -22,15 +26,18 @@ export const registerUser = async (req, res) => {
       role: email === "prishinfotech@gmail.com" ? "admin" : "student",
     });
 
+    // generate JWT token
     const token = generateToken(user._id.toString());
 
+    // set cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // set true in production (HTTPS)
+      secure: false, // true in production (HTTPS)
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // send response
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -49,11 +56,14 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// LOGIN USER
+/* =========================
+   LOGIN USER
+========================= */
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // find user + include password
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
@@ -63,6 +73,7 @@ export const loginUser = async (req, res) => {
       });
     }
 
+    // check password
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
@@ -72,8 +83,10 @@ export const loginUser = async (req, res) => {
       });
     }
 
+    // generate token
     const token = generateToken(user._id.toString());
 
+    // set cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
@@ -81,6 +94,7 @@ export const loginUser = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // send response
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -88,7 +102,7 @@ export const loginUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role, // ✔ comes from DB
+        role: user.role,
       },
     });
   } catch (error) {
@@ -99,7 +113,9 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// GET PROFILE
+/* =========================
+   GET CURRENT USER
+========================= */
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -111,6 +127,7 @@ export const getProfile = async (req, res) => {
       });
     }
 
+    // send full user (includes avatar)
     res.status(200).json({
       success: true,
       user,
@@ -123,9 +140,12 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// LOGOUT USER
+/* =========================
+   LOGOUT USER
+========================= */
 export const logoutUser = async (req, res) => {
   try {
+    // clear cookie
     res.cookie("token", "", {
       httpOnly: true,
       expires: new Date(0),
@@ -142,15 +162,20 @@ export const logoutUser = async (req, res) => {
     });
   }
 };
+
+/* =========================
+   GOOGLE OAUTH CALLBACK
+========================= */
 export const googleCallback = (req, res) => {
   try {
     const user = req.user;
 
+    // if login failed
     if (!user) {
       return res.redirect(`${process.env.CLIENT_URL}/login`);
     }
 
-    // create token
+    // generate token
     const token = generateToken(user._id.toString());
 
     // set cookie
@@ -161,10 +186,11 @@ export const googleCallback = (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // 🔥 FINAL FIX: redirect to HOME PAGE
+    // redirect to frontend home
     return res.redirect(`${process.env.CLIENT_URL}/`);
   } catch (error) {
     console.log("Google Callback Error:", error);
+
     return res.redirect(`${process.env.CLIENT_URL}/login`);
   }
 };

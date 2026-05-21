@@ -5,7 +5,7 @@ import { useGSAP } from "@gsap/react";
 import Lenis from "@studio-freight/lenis";
 import { Clock, BadgeCheck, PhoneCall, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux"; // Import Redux hook
+import { useSelector } from "react-redux";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,7 +21,7 @@ export default function CinematicPortal() {
   // Get courses from Redux backend state
   const { courses } = useSelector((state) => state.course);
 
-  // URL-friendly slug generator (Matching your CourseCard logic)
+  // URL-friendly slug generator
   const generateSlug = (title) => 
     title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 
@@ -40,7 +40,6 @@ export default function CinematicPortal() {
   }, []);
 
   useGSAP(() => {
-    // Prevent animation from running if courses aren't loaded yet
     if (!courses || courses.length === 0) return;
 
     const cards = cardsRef.current;
@@ -65,10 +64,8 @@ export default function CinematicPortal() {
     gsap.set(cards, { opacity: 0, scale: 0.85, yPercent: 30 });
     gsap.set(texts, { autoAlpha: 0, x: 40 });
 
-    // 1. HOLD EFFECT
     tl.to({}, { duration: 3 }); 
 
-    // 2. DELAYED ZOOM
     tl.to([word1Ref.current, plusRef.current, word2Ref.current], {
       z: 1500, 
       scale: 15, 
@@ -79,7 +76,6 @@ export default function CinematicPortal() {
       duration: 3 
     });
 
-    // Loop through backend courses
     courses.forEach((_, index) => {
       tl.to(cards[index], {
         opacity: 1, scale: 1, yPercent: 0,
@@ -103,9 +99,8 @@ export default function CinematicPortal() {
           }, "-=3");
       }
     });
-  }, { scope: containerRef, dependencies: [courses] }); // Re-run when courses load
+  }, { scope: containerRef, dependencies: [courses] });
 
-  // Show nothing or a small loader while courses are fetching to prevent GSAP glitches
   if (!courses || courses.length === 0) return <div className="h-screen bg-bg" />;
 
   return (
@@ -134,6 +129,17 @@ export default function CinematicPortal() {
                 className="absolute inset-0 overflow-hidden rounded-2xl md:rounded-[32px] shadow-[0_40px_80px_rgba(0,0,0,0.6)] border border-border/50"
                 style={{ zIndex: courses.length - index }}
               >
+                {/* LIVE TAG OVER IMAGE */}
+                {course.type === "live" && (
+                  <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-red-600 rounded-full shadow-xl border border-white/20">
+                    <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-white"></span>
+                    </span>
+                    <span className="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest">Live Now</span>
+                  </div>
+                )}
+
                 <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                 <div className="absolute inset-0 gloss-overlay pointer-events-none" />
               </div>

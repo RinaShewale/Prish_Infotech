@@ -3,13 +3,15 @@ import { RouterProvider } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 import { router } from "./AppRouter";
-import { getme } from "../Features/auth/services/auth.api"; // adjust path
-import { setUser } from "../Features/auth/auth.slice"; // adjust path
+import { getme } from "../Features/auth/services/auth.api";
+import { setUser, setAuthChecked } from "../Features/auth/auth.slice";
 
 const App = () => {
   const dispatch = useDispatch();
 
-  // 🔥 FIX: load user on every refresh (VERY IMPORTANT for Google login)
+  /* =========================
+     AUTH CHECK ON APP LOAD
+  ========================= */
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -17,16 +19,23 @@ const App = () => {
 
         if (res.data?.user) {
           dispatch(setUser(res.data.user));
+        } else {
+          dispatch(setUser(null));
         }
       } catch (err) {
-        console.log("No logged-in user");
+        dispatch(setUser(null));
+      } finally {
+        // 🔥 VERY IMPORTANT: tells app auth check is done
+        dispatch(setAuthChecked(true));
       }
     };
 
     loadUser();
   }, [dispatch]);
 
-  // scroll fix
+  /* =========================
+     SCROLL FIX (UI UX)
+  ========================= */
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";

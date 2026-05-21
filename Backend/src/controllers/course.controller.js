@@ -1,7 +1,7 @@
 import Course from "../models/Course.model.js";
 import slugify from "slugify";
 
-// ================= CREATE COURSE =================
+// CREATE COURSE 
 export const createCourse = async (req, res) => {
   try {
     const {
@@ -87,7 +87,7 @@ export const createCourse = async (req, res) => {
   }
 };
 
-// ================= GET ALL =================
+//  GET ALL 
 export const getAllCourses = async (req, res) => {
   try {
     const courses = await Course.find()
@@ -106,7 +106,7 @@ export const getAllCourses = async (req, res) => {
   }
 };
 
-// ================= GET SINGLE (FIXED) =================
+// SINGLE (FIXED) 
 export const getSingleCourse = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -135,7 +135,7 @@ export const getSingleCourse = async (req, res) => {
   }
 };
 
-// ================= UPDATE =================
+// UPDATE 
 export const updateCourse = async (req, res) => {
   try {
     if (req.body.title) {
@@ -163,7 +163,7 @@ export const updateCourse = async (req, res) => {
   }
 };
 
-// ================= DELETE =================
+//  DELETE 
 export const deleteCourse = async (req, res) => {
   try {
     await Course.findByIdAndDelete(req.params.id);
@@ -180,7 +180,7 @@ export const deleteCourse = async (req, res) => {
   }
 };
 
-// ================= VIDEO UPLOAD =================
+//  VIDEO UPLOAD 
 export const uploadCourseVideo = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);

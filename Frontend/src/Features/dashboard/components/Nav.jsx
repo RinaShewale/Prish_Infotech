@@ -4,7 +4,6 @@ import { Menu, X, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
-// Backend/Auth Imports
 import { useAuth } from "../../../Features/auth/hooks/useAuth";
 import { logout as logoutAction } from "../../auth/auth.slice";
 
@@ -27,7 +26,6 @@ export const Nav = () => {
     { name: "Request Callback", path: "/callback" },
   ];
 
-  // Close desktop dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -60,12 +58,12 @@ export const Nav = () => {
     }
   }, [handleLogout, dispatch, navigate]);
 
-  const mobileItemStyle = "text-2xl font-display font-light text-white hover:text-accent transition-all duration-300";
+  const mobileItemStyle =
+    "text-2xl font-display font-light text-white hover:text-accent transition-all duration-300";
+
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${isScrolled
-          ? "py-4 bg-bg/90 backdrop-blur-md shadow-lg"
-          : "py-8 bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${isScrolled ? "py-4 bg-bg/90 backdrop-blur-md shadow-lg" : "py-8 bg-transparent"
         }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -92,12 +90,23 @@ export const Nav = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-10 h-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-accent font-bold hover:bg-accent/30 transition-all"
+                className="w-10 h-10 rounded-full bg-accent/20 border border-accent/30 overflow-hidden flex items-center justify-center text-accent font-bold hover:bg-accent/30 transition-all"
               >
-                {user.name?.charAt(0).toUpperCase()}
+                {/* ✅ AVATAR FIX */}
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-lg font-bold">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </button>
 
-              {/* DESKTOP DROPDOWN POPUP */}
+              {/* DROPDOWN */}
               <AnimatePresence>
                 {dropdownOpen && (
                   <motion.div
@@ -107,13 +116,18 @@ export const Nav = () => {
                     className="absolute top-full right-0 mt-4 w-48 bg-bg border border-white/10 rounded-xl overflow-hidden shadow-2xl py-2"
                   >
                     <button
-                      onClick={() => { navigate("/profile"); setDropdownOpen(false); }}
+                      onClick={() => {
+                        navigate("/profile");
+                        setDropdownOpen(false);
+                      }}
                       className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/5 transition-colors text-xs uppercase tracking-widest"
                     >
                       <User size={16} className="text-accent" />
                       My Profile
                     </button>
+
                     <div className="h-[1px] bg-white/5 mx-2 my-1" />
+
                     <button
                       onClick={logoutUser}
                       className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/5 transition-colors text-xs uppercase tracking-widest"
@@ -126,14 +140,20 @@ export const Nav = () => {
               </AnimatePresence>
             </div>
           ) : (
-            <button onClick={() => navigate("/login")} className="px-8 py-3 border border-border rounded-full text-[11px] uppercase tracking-widest hover:border-accent text-white transition-all">
+            <button
+              onClick={() => navigate("/login")}
+              className="px-8 py-3 border border-border rounded-full text-[11px] uppercase tracking-widest hover:border-accent text-white transition-all"
+            >
               Sign In
             </button>
           )}
         </div>
 
         {/* MOBILE TOGGLE */}
-        <button className="md:hidden p-2 text-white z-[110]" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        <button
+          className="md:hidden p-2 text-white z-[110]"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
           {mobileMenuOpen ? <X size={32} strokeWidth={1.5} /> : <Menu size={32} strokeWidth={1.5} />}
         </button>
       </div>
@@ -170,7 +190,6 @@ export const Nav = () => {
                 </>
               )}
 
-              {/* LOGOUT AS BUTTON TYPE */}
               {user ? (
                 <button
                   type="button"
@@ -180,7 +199,11 @@ export const Nav = () => {
                   Logout
                 </button>
               ) : (
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black hover:scale-105`}>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black hover:scale-105`}
+                >
                   Sign In
                 </Link>
               )}

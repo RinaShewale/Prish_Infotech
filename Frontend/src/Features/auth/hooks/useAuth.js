@@ -7,9 +7,6 @@ import {
   getme,
   updateProfile,
   logout as logoutApi,
-  updatePassword,
-  forgotPassword,
-  resetPassword,
   googleLogin,
 } from "../services/auth.api";
 
@@ -25,7 +22,7 @@ export function useAuth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // ================= REGISTER =================
+  /* ================= REGISTER ================= */
   const handleRegister = async (data) => {
     try {
       dispatch(setLoading(true));
@@ -52,38 +49,42 @@ export function useAuth() {
     }
   };
 
-  // ================= LOGIN =================
+  /* ================= LOGIN ================= */
   const handleLogin = async (data) => {
     try {
       dispatch(setLoading(true));
+      dispatch(setError(null));
 
       const res = await login(data);
 
-      const user = res.data?.user;
+      const user = res?.data?.user;
 
       if (user) {
         dispatch(setUser(user));
       }
 
-      if (res.data?.token) {
+      // optional token support (if using local auth)
+      if (res?.data?.token) {
         localStorage.setItem("token", res.data.token);
       }
 
       return { success: true, user };
     } catch (err) {
-      dispatch(setError(err.response?.data?.message));
+      const message =
+        err?.response?.data?.message || "Login failed";
+
+      dispatch(setError(message));
+
       return {
         success: false,
-        message: err.response?.data?.message,
+        message,
       };
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-
-  
-  // ================= GET ME =================
+  /* ================= GET CURRENT USER ================= */
   const handleGetMe = async () => {
     try {
       dispatch(setLoading(true));
@@ -95,14 +96,15 @@ export function useAuth() {
       return { success: true };
     } catch (err) {
       dispatch(setUser(null));
+
       return { success: false };
     } finally {
       dispatch(setLoading(false));
-      dispatch(setAuthChecked(true));
+      dispatch(setAuthChecked(true)); // 🔥 IMPORTANT FIX
     }
   };
 
-  // ================= UPDATE PROFILE =================
+  /* ================= UPDATE PROFILE ================= */
   const handleUpdateProfile = async (data) => {
     try {
       dispatch(setLoading(true));
@@ -113,19 +115,23 @@ export function useAuth() {
 
       return { success: true };
     } catch (err) {
-      dispatch(setError(err?.response?.data?.message));
-      return { success: false };
+      const message =
+        err?.response?.data?.message || "Update failed";
+
+      dispatch(setError(message));
+
+      return { success: false, message };
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  // ================= LOGOUT =================
+  /* ================= LOGOUT ================= */
   const handleLogout = async () => {
     try {
       await logoutApi();
     } catch (err) {
-      console.log("Logout error ignored");
+      console.log("Logout API error ignored");
     } finally {
       localStorage.removeItem("token");
       dispatch(logoutAction());
@@ -133,9 +139,10 @@ export function useAuth() {
     }
   };
 
-  // ================= GOOGLE LOGIN =================
+  /* ================= GOOGLE LOGIN ================= */
   const handleGoogleLogin = () => {
-    googleLogin(); // redirects to backend
+    // backend redirect (OAuth flow)
+    googleLogin();
   };
 
   return {

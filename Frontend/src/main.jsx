@@ -6,10 +6,14 @@ import App from "./app/App.jsx";
 import { Provider } from "react-redux";
 import { store } from "./app/store.js";
 
+import { ReviewProvider } from "./Features/dashboard/components/context/ReviewContext.jsx";
+
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  
     <Provider store={store}>
-      <App />
+      <ReviewProvider>
+        <App />
+      </ReviewProvider>
     </Provider>
-  </StrictMode>
+ 
 );

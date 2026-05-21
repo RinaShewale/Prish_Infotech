@@ -14,15 +14,22 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        // ✅ find user by googleId
         let user = await User.findOne({ googleId: profile.id });
 
         if (!user) {
+          // 👤 create new user
           user = await User.create({
             name: profile.displayName,
-            email: profile.emails[0].value,
+            email: profile.emails?.[0]?.value,
             googleId: profile.id,
+            avatar: profile.photos?.[0]?.value || "",
             role: "student",
           });
+        } else {
+          // 🔄 optional: keep avatar updated
+          user.avatar = profile.photos?.[0]?.value || user.avatar;
+          await user.save();
         }
 
         return done(null, user);
@@ -33,14 +40,20 @@ passport.use(
   )
 );
 
-// session support
+// ======================
+// SESSION SUPPORT
+// ======================
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 export default passport;

@@ -84,18 +84,18 @@ export const Register = () => {
   };
 
   return (
-    <section className="relative min-h-screen bg-[#050505] text-white py-20 px-6 flex items-center justify-center overflow-hidden">
-
+    <section className="relative min-h-screen bg-[#050505] text-white py-12 md:py-20 px-4 md:px-6 flex items-center justify-center overflow-hidden">
+      
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent/10 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent/5 blur-[120px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] md:w-[40%] h-[40%] rounded-full bg-accent/10 blur-[80px] md:blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] md:w-[40%] h-[40%] rounded-full bg-accent/5 blur-[80px] md:blur-[120px]" />
         <div className="noise-bg opacity-20" />
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
 
-        {/* LEFT SIDE - Branding */}
+        {/* LEFT SIDE - Branding (Hidden on Mobile) */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -111,7 +111,7 @@ export const Register = () => {
             >
               Join the Community
             </motion.p>
-            <h1 className="text-7xl font-bold leading-tight tracking-tighter">
+            <h1 className="text-6xl xl:text-7xl font-bold leading-tight tracking-tighter">
               Start your <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent/50">
                 Growth Story.
@@ -139,17 +139,18 @@ export const Register = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="relative group"
+          className="relative group w-full"
         >
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-[2.5rem] blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+          {/* Subtle Outer Glow */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-[2rem] md:rounded-[2.5rem] blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
 
-          <div className="relative bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-12 border border-white/10 shadow-2xl">
+          <div className="relative bg-white/[0.03] backdrop-blur-2xl rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 border border-white/10 shadow-2xl">
 
             <AnimatePresence mode="wait">
               {!isSubmitted ? (
                 <motion.div key="register-form" exit={{ opacity: 0, scale: 0.95 }}>
                   <div className="mb-8 text-center lg:text-left">
-                    <h2 className="text-3xl font-bold mb-2">Create Account</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-2">Create Account</h2>
                     <p className="text-gray-400 text-sm">Join Prish Infotech today.</p>
                   </div>
 
@@ -168,89 +169,14 @@ export const Register = () => {
                     )}
                   </AnimatePresence>
 
-                  <form onSubmit={handleSubmit} className="space-y-5">
-
-                    {/* USERNAME */}
-                    <motion.div variants={itemVariants} className="space-y-2">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400 ml-1">Full Name</label>
-                      <div className="relative group/input">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-accent transition-colors" size={20} />
-                        <input
-                          type="text"
-                          required
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full bg-white/[0.05] border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all duration-300"
-                          placeholder="John Doe"
-                        />
-                      </div>
-                    </motion.div>
-
-                    {/* EMAIL */}
-                    <motion.div variants={itemVariants} className="space-y-2">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400 ml-1">Email Address</label>
-                      <div className="relative group/input">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-accent transition-colors" size={20} />
-                        <input
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full bg-white/[0.05] border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all duration-300"
-                          placeholder="john@example.com"
-                        />
-                      </div>
-                    </motion.div>
-
-                    {/* PASSWORD */}
-                    <motion.div variants={itemVariants} className="space-y-2">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400 ml-1">Password</label>
-                      <div className="relative group/input">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-accent transition-colors" size={20} />
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          required
-                          value={formData.password}
-                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                          className="w-full bg-white/[0.05] border border-white/10 rounded-2xl py-4 pl-12 pr-12 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all duration-300"
-                          placeholder="••••••••"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-                        >
-                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
-                      </div>
-                    </motion.div>
-
-                    {/* REGISTER BUTTON */}
-                    <motion.button
-                      variants={itemVariants}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full bg-accent hover:bg-accent/90 text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-accent/20 mt-2"
-                    >
-                      {isLoading ? <Loader2 className="animate-spin" /> : <>Create Account <ArrowRight size={18} /></>}
-                    </motion.button>
-
-                    {/* DIVIDER */}
-                    <motion.div variants={itemVariants} className="flex items-center gap-4 py-2">
-                      <div className="h-px bg-white/10 flex-1" />
-                      <span className="text-xs text-gray-500 uppercase tracking-widest whitespace-nowrap">or sign up with</span>
-                      <div className="h-px bg-white/10 flex-1" />
-                    </motion.div>
-
-                    {/* GOOGLE BUTTON */}
+                  {/* GOOGLE BUTTON AT TOP */}
+                  <div className="space-y-6">
                     <motion.button
                       variants={itemVariants}
                       type="button"
                       onClick={onGoogleSignUp}
                       disabled={isGoogleLoading}
-                      className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white py-4 rounded-2xl font-medium flex items-center justify-center gap-3 transition-all"
+                      className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white py-4 rounded-2xl font-medium flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
                     >
                       {isGoogleLoading ? <Loader2 className="animate-spin" /> : (
                         <>
@@ -260,18 +186,94 @@ export const Register = () => {
                             <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                             <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                           </svg>
-                          Google
+                          Continue with Google
                         </>
                       )}
                     </motion.button>
 
-                    <motion.p variants={itemVariants} className="text-center text-sm text-gray-400 mt-4">
-                      Already have an account?{" "}
-                      <Link to="/login" className="text-accent font-semibold hover:text-accent/80 transition-colors">
-                        Sign In
-                      </Link>
-                    </motion.p>
-                  </form>
+                    {/* DIVIDER */}
+                    <motion.div variants={itemVariants} className="flex items-center gap-4">
+                      <div className="h-px bg-white/10 flex-1" />
+                      <span className="text-[10px] text-gray-500 uppercase tracking-[0.2em] whitespace-nowrap">or register with email</span>
+                      <div className="h-px bg-white/10 flex-1" />
+                    </motion.div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+                      {/* USERNAME */}
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 ml-1">Full Name</label>
+                        <div className="relative group/input">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-accent transition-colors" size={18} />
+                          <input
+                            type="text"
+                            required
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            className="w-full bg-white/[0.05] border border-white/10 rounded-2xl py-3.5 md:py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all duration-300 text-sm md:text-base"
+                            placeholder="John Doe"
+                          />
+                        </div>
+                      </motion.div>
+
+                      {/* EMAIL */}
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 ml-1">Email Address</label>
+                        <div className="relative group/input">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-accent transition-colors" size={18} />
+                          <input
+                            type="email"
+                            required
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="w-full bg-white/[0.05] border border-white/10 rounded-2xl py-3.5 md:py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all duration-300 text-sm md:text-base"
+                            placeholder="john@example.com"
+                          />
+                        </div>
+                      </motion.div>
+
+                      {/* PASSWORD */}
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 ml-1">Password</label>
+                        <div className="relative group/input">
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-accent transition-colors" size={18} />
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            required
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            className="w-full bg-white/[0.05] border border-white/10 rounded-2xl py-3.5 md:py-4 pl-12 pr-12 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all duration-300 text-sm md:text-base"
+                            placeholder="••••••••"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                          >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </motion.div>
+
+                      {/* REGISTER BUTTON */}
+                      <motion.button
+                        variants={itemVariants}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full bg-accent hover:bg-accent/90 text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-accent/20 mt-2 text-sm md:text-base"
+                      >
+                        {isLoading ? <Loader2 className="animate-spin" /> : <>Create Account <ArrowRight size={18} /></>}
+                      </motion.button>
+
+                      <motion.p variants={itemVariants} className="text-center text-sm text-gray-400 mt-4">
+                        Already have an account?{" "}
+                        <Link to="/login" className="text-accent font-semibold hover:text-accent/80 transition-colors">
+                          Sign In
+                        </Link>
+                      </motion.p>
+                    </form>
+                  </div>
                 </motion.div>
               ) : (
                 /* SUCCESS STATE */
@@ -281,11 +283,11 @@ export const Register = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-10"
                 >
-                  <div className="w-24 h-24 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-6">
-                    <ShieldCheck className="text-accent" size={48} />
+                  <div className="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-6">
+                    <ShieldCheck className="text-accent" size={40} />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4">Welcome to the Team!</h2>
-                  <p className="text-gray-400 mb-8">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4">Welcome to the Team!</h2>
+                  <p className="text-gray-400 text-sm md:text-base mb-8">
                     Your account has been created successfully. <br /> Redirecting you to login...
                   </p>
                   <Loader2 className="animate-spin mx-auto text-accent" size={32} />

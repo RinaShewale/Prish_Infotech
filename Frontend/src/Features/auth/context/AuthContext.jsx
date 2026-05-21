@@ -1,53 +1,30 @@
-
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext } from "react";
 import { getme } from "../../auth/services/auth.api";
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [authChecked, setAuthChecked] = useState(false);
+  /* =========================
+     API ONLY (NO STATE HERE)
+  ========================= */
 
-  // ================= LOAD USER =================
-  const loadUser = async () => {
+  // fetch current user (optional helper)
+  const fetchCurrentUser = async () => {
     try {
-      setLoading(true);
-
       const res = await getme();
-
-      if (res?.data?.user) {
-        setUser(res.data.user);
-      } else {
-        setUser(null);
-      }
+      return res?.data?.user || null;
     } catch (err) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-      setAuthChecked(true);
+      return null;
     }
   };
 
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  // ================= REFRESH USER =================
-  const refreshUser = async () => {
-    await loadUser();
-  };
-
-  // ================= CONTEXT VALUE =================
+  /* =========================
+     CONTEXT VALUE
+  ========================= */
   return (
     <AuthContext.Provider
       value={{
-        user,
-        setUser,
-        loading,
-        authChecked,
-        loadUser,
-        refreshUser,
+        fetchCurrentUser, // optional helper only
       }}
     >
       {children}
@@ -55,12 +32,14 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ================= CUSTOM HOOK =================
-export const useAuth = () => {
+/* =========================
+   CUSTOM HOOK
+========================= */
+export const useAuthContext = () => {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
+    throw new Error("useAuthContext must be used inside AuthProvider");
   }
 
   return context;

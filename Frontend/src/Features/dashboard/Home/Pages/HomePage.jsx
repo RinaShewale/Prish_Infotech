@@ -137,6 +137,8 @@ export default function HomePage() {
               {/* Portal Effect remains cinematic */}
               <ZoomEffect />
 
+              
+
               <ScrollReveal y={40}>
                 <section className="relative z-10 py-24">
                   <TestimonialSection />

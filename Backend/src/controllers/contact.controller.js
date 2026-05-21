@@ -1,4 +1,11 @@
+
+// 📁 controllers/contact.controller.js
+
+
 import Contact from "../models/Contact.model.js";
+
+
+// ✅ CREATE CONTACT
 
 export const createContact = async (req, res) => {
   try {
@@ -11,7 +18,9 @@ export const createContact = async (req, res) => {
       inquiryReason,
     } = req.body;
 
-    // ✅ Validation
+    
+    // ✅ VALIDATION
+    
     if (
       !name ||
       !email ||
@@ -26,7 +35,9 @@ export const createContact = async (req, res) => {
       });
     }
 
-    // ✅ Create Contact
+    
+    // ✅ CREATE CONTACT
+    
     const contact = await Contact.create({
       name,
       email,
@@ -43,6 +54,59 @@ export const createContact = async (req, res) => {
     });
   } catch (error) {
     console.log("CONTACT ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+
+// ✅ GET ALL CONTACTS (ADMIN)
+
+export const getAllContacts = async (req, res) => {
+  try {
+    const contacts = await Contact.find().sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      contacts,
+    });
+  } catch (error) {
+    console.log("GET CONTACTS ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+
+// ✅ DELETE CONTACT
+
+export const deleteContact = async (req, res) => {
+  try {
+    const contact = await Contact.findById(req.params.id);
+
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact request not found",
+      });
+    }
+
+    await Contact.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Contact request deleted successfully",
+    });
+  } catch (error) {
+    console.log("DELETE CONTACT ERROR:", error);
 
     res.status(500).json({
       success: false,

@@ -1,37 +1,45 @@
-import Review from "../models/Review.model.js";
+import Review from "../models/review.model.js";
 
-
-
+// ======================================================
 // CREATE REVIEW
+// ======================================================
 export const createReview = async (req, res) => {
   try {
-    const { course, rating, comment } = req.body;
+    const { rating, comment } = req.body;
+
+    if (!rating || !comment) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating and comment are required",
+      });
+    }
 
     const alreadyReviewed = await Review.findOne({
       user: req.user.id,
-      course,
     });
 
     if (alreadyReviewed) {
       return res.status(400).json({
         success: false,
-        message: "You already reviewed this course",
+        message: "You already added a review",
       });
     }
 
     const review = await Review.create({
       user: req.user.id,
-      course,
       rating,
       comment,
     });
 
+    // ⭐ THIS IS THE IMPORTANT PART (populate before sending)
+    const populatedReview = await Review.findById(review._id)
+      .populate("user", "name avatar");
+
     res.status(201).json({
       success: true,
       message: "Review added successfully",
-      review,
+      review: populatedReview,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -40,22 +48,19 @@ export const createReview = async (req, res) => {
   }
 };
 
-
-
-
-// GET ALL REVIEWS
+// ======================================================
+// GET ALL REVIEWS (⭐ FIXED HERE)
+// ======================================================
 export const getAllReviews = async (req, res) => {
   try {
-
     const reviews = await Review.find()
-      .populate("user")
-      .populate("course");
+      .populate("user", "name avatar") // ✅ FIXED (avatar instead of profilePic)
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       reviews,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -64,16 +69,13 @@ export const getAllReviews = async (req, res) => {
   }
 };
 
-
-
-
-// GET SINGLE REVIEW
+// ======================================================
+// GET SINGLE REVIEW (⭐ FIXED HERE)
+// ======================================================
 export const getSingleReview = async (req, res) => {
   try {
-
     const review = await Review.findById(req.params.id)
-      .populate("user")
-      .populate("course");
+      .populate("user", "name avatar"); // ✅ FIXED
 
     if (!review) {
       return res.status(404).json({
@@ -86,7 +88,6 @@ export const getSingleReview = async (req, res) => {
       success: true,
       review,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -95,36 +96,12 @@ export const getSingleReview = async (req, res) => {
   }
 };
 
-
-
-
-// GET COURSE REVIEWS
-export const getCourseReviews = async (req, res) => {
-  try {
-
-    const reviews = await Review.find({
-      course: req.params.courseId,
-    }).populate("user");
-
-    res.status(200).json({
-      success: true,
-      reviews,
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-
-
-
+// ======================================================
 // UPDATE REVIEW
+// ======================================================
 export const updateReview = async (req, res) => {
   try {
+    const { rating, comment } = req.body;
 
     const review = await Review.findById(req.params.id);
 
@@ -135,7 +112,6 @@ export const updateReview = async (req, res) => {
       });
     }
 
-    // only owner can update
     if (review.user.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
@@ -143,8 +119,8 @@ export const updateReview = async (req, res) => {
       });
     }
 
-    review.rating = req.body.rating || review.rating;
-    review.comment = req.body.comment || review.comment;
+    review.rating = rating || review.rating;
+    review.comment = comment || review.comment;
 
     await review.save();
 
@@ -153,7 +129,6 @@ export const updateReview = async (req, res) => {
       message: "Review updated successfully",
       review,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -162,13 +137,11 @@ export const updateReview = async (req, res) => {
   }
 };
 
-
-
-
+// ======================================================
 // DELETE REVIEW
+// ======================================================
 export const deleteReview = async (req, res) => {
   try {
-
     const review = await Review.findById(req.params.id);
 
     if (!review) {
@@ -178,7 +151,6 @@ export const deleteReview = async (req, res) => {
       });
     }
 
-    // only owner can delete
     if (review.user.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
@@ -192,7 +164,6 @@ export const deleteReview = async (req, res) => {
       success: true,
       message: "Review deleted successfully",
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
