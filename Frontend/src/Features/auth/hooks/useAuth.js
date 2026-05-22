@@ -30,20 +30,21 @@ export function useAuth() {
 
       const res = await register(data);
 
-      return {
-        success: true,
-        data: res?.data,
-      };
+      const user = res?.data?.user;
+
+      if (user) {
+        dispatch(setUser(user));
+        dispatch(setAuthChecked(true)); // 🔥 FIX
+      }
+
+      return { success: true, data: res?.data };
     } catch (err) {
       const message =
         err?.response?.data?.message || "Registration failed";
 
       dispatch(setError(message));
 
-      return {
-        success: false,
-        message,
-      };
+      return { success: false, message };
     } finally {
       dispatch(setLoading(false));
     }
@@ -60,13 +61,15 @@ export function useAuth() {
       const user = res?.data?.user;
 
       if (user) {
-        dispatch(setUser(user));
+        dispatch(setUser(user));          // 🔥 instant UI update
+        dispatch(setAuthChecked(true));   // 🔥 CRITICAL FIX
       }
 
-      // optional token support (if using local auth)
       if (res?.data?.token) {
         localStorage.setItem("token", res.data.token);
       }
+
+      navigate("/");
 
       return { success: true, user };
     } catch (err) {
@@ -75,10 +78,7 @@ export function useAuth() {
 
       dispatch(setError(message));
 
-      return {
-        success: false,
-        message,
-      };
+      return { success: false, message };
     } finally {
       dispatch(setLoading(false));
     }
@@ -100,7 +100,7 @@ export function useAuth() {
       return { success: false };
     } finally {
       dispatch(setLoading(false));
-      dispatch(setAuthChecked(true)); // 🔥 IMPORTANT FIX
+      dispatch(setAuthChecked(true)); // 🔥 IMPORTANT
     }
   };
 
@@ -141,7 +141,6 @@ export function useAuth() {
 
   /* ================= GOOGLE LOGIN ================= */
   const handleGoogleLogin = () => {
-    // backend redirect (OAuth flow)
     googleLogin();
   };
 

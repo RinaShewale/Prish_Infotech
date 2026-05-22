@@ -1,84 +1,72 @@
-import React from "react";
-import { motion } from "motion/react";
-import { Star } from "lucide-react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Star, CheckCircle2 } from "lucide-react";
 
 export const StudentCard = ({ name, role, testimonial, rating, image }) => {
+  const [imgError, setImgError] = useState(false);
+  const initial = name ? name.charAt(0).toUpperCase() : "?";
+
   return (
-    <div className="w-[280px] sm:w-[350px] md:w-[400px] shrink-0">
-      <motion.div
-        whileHover={{ y: -5 }}
-        className="glow-card glass p-6 md:p-8 rounded-2xl md:rounded-3xl group relative overflow-hidden border border-white/5 h-full flex flex-col"
-      >
-        <div className="absolute inset-0 gloss-overlay pointer-events-none opacity-20"></div>
+    <motion.div
+      whileHover={{ y: -5 }}
+      // Responsive Width: 280px on mobile, 340px on desktop
+      className="glow-card glass group relative w-[280px] sm:w-[310px] md:w-[340px] shrink-0 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-6 flex flex-col justify-between h-[230px] md:h-[250px]"
+    >
+      <div className="noise-bg" />
+      <div className="gloss-overlay absolute inset-0 pointer-events-none" />
 
-        <div className="relative z-10">
-
-          {/* AVATAR (Same as Nav) */}
-          <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-accent/20 border border-accent/30 flex items-center justify-center shrink-0">
-
-              {image ? (
-                <img
-                  src={image}
-                  alt={name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-accent font-bold text-lg md:text-xl">
-                  {name?.charAt(0)?.toUpperCase() || "U"}
-                </span>
-              )}
-
-            </div>
-
-            <div>
-              <h3 className="font-display text-base md:text-lg text-white font-medium line-clamp-1">
-                {name}
-              </h3>
-              <p className="text-accent text-[8px] md:text-[10px] uppercase tracking-widest font-bold italic font-serif">
-                {role}
-              </p>
-            </div>
-
+      {/* TOP: Profile Info */}
+      <div className="relative z-10 flex items-center gap-3">
+        <div className="relative shrink-0">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-bg2 border border-accent/20 flex items-center justify-center overflow-hidden">
+            {image && !imgError ? (
+              <img
+                src={image}
+                alt={name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <span className="text-accent font-display font-bold text-base md:text-lg">
+                {initial}
+              </span>
+            )}
           </div>
-
-          {/* Divider */}
-          <div className="h-[1px] w-full bg-white/10 mb-4 md:mb-6" />
-
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-3 md:mb-4">
-            <span className="text-white/60 text-[10px] md:text-xs font-bold mr-1 md:mr-2">
-              {rating}
-            </span>
-
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={10}
-                  fill={
-                    i < Math.floor(rating || 0)
-                      ? "var(--accent, #EAB308)"
-                      : "transparent"
-                  }
-                  className={`${
-                    i < Math.floor(rating || 0)
-                      ? "text-accent"
-                      : "text-white/10"
-                  } md:w-[12px] md:h-[12px]`}
-                />
-              ))}
-            </div>
+          <div className="absolute -bottom-1 -right-1 bg-bg rounded-full p-0.5 border border-border">
+            <CheckCircle2 size={10} className="md:size-3 text-accent" />
           </div>
-
-          {/* Quote */}
-          <p className="text-[#b8a9a6] text-xs md:text-sm font-light leading-relaxed">
-            "{testimonial}"
-          </p>
-
         </div>
-      </motion.div>
-    </div>
+
+        <div className="overflow-hidden">
+          <h4 className="font-display text-text font-bold text-sm md:text-base truncate tracking-tight">
+            {name}
+          </h4>
+          <p className="text-accent/60 text-[9px] md:text-[10px] uppercase tracking-widest font-bold">
+            {role || "Verified Student"}
+          </p>
+        </div>
+      </div>
+
+      {/* MIDDLE: Testimonial */}
+      <div className="relative z-10 mt-3 md:mt-4 flex-grow">
+        <p className="font-serif italic text-text/80 text-xs md:text-[15px] leading-relaxed line-clamp-3 tracking-wide">
+          "{testimonial}"
+        </p>
+      </div>
+
+      {/* BOTTOM: Rating */}
+      <div className="relative z-10 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border/40 flex justify-between items-center">
+        <div className="flex gap-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              size={10}
+              fill={i < Math.floor(rating || 5) ? "var(--color-accent)" : "none"}
+              className={i < Math.floor(rating || 5) ? "text-accent" : "text-border/30"}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
   );
 };

@@ -14,21 +14,29 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // ✅ find user by googleId
-        let user = await User.findOne({ googleId: profile.id });
+        const email = profile.emails?.[0]?.value;
+
+        if (!email) {
+          return done(new Error("No email from Google"), null);
+        }
+
+        let user = await User.findOne({ email });
+
+        const avatar =
+          profile.photos?.[0]?.value ||
+          `https://ui-avatars.com/api/?name=${profile.displayName}&background=random`;
 
         if (!user) {
-          // 👤 create new user
           user = await User.create({
             name: profile.displayName,
-            email: profile.emails?.[0]?.value,
+            email,
             googleId: profile.id,
-            avatar: profile.photos?.[0]?.value || "",
+            avatar,
             role: "student",
           });
         } else {
-          // 🔄 optional: keep avatar updated
-          user.avatar = profile.photos?.[0]?.value || user.avatar;
+          user.googleId = profile.id;
+          user.avatar = avatar; // ✅ always update
           await user.save();
         }
 
@@ -40,9 +48,6 @@ passport.use(
   )
 );
 
-// ======================
-// SESSION SUPPORT
-// ======================
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });

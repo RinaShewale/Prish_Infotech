@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useMemo } from "react"; // Added useMemo
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -21,6 +21,11 @@ export default function CinematicPortal() {
   // Get courses from Redux backend state
   const { courses } = useSelector((state) => state.course);
 
+  // 1. LIMIT TO TOP 3 LATEST COURSES
+  const latestCourses = useMemo(() => {
+    return courses ? courses.slice(0, 3) : [];
+  }, [courses]);
+
   // URL-friendly slug generator
   const generateSlug = (title) => 
     title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
@@ -40,7 +45,7 @@ export default function CinematicPortal() {
   }, []);
 
   useGSAP(() => {
-    if (!courses || courses.length === 0) return;
+    if (!latestCourses || latestCourses.length === 0) return;
 
     const cards = cardsRef.current;
     const texts = textRefs.current;
@@ -76,7 +81,7 @@ export default function CinematicPortal() {
       duration: 3 
     });
 
-    courses.forEach((_, index) => {
+    latestCourses.forEach((_, index) => {
       tl.to(cards[index], {
         opacity: 1, scale: 1, yPercent: 0,
         duration: 2.5, ease: "power2.out"
@@ -88,7 +93,7 @@ export default function CinematicPortal() {
 
       tl.to({}, { duration: 3 }); 
 
-      if (index < courses.length - 1){
+      if (index < latestCourses.length - 1){
         tl.to(cards[index], {
           xPercent: -130, scale: 0.5, opacity: 0,
           duration: 3, ease: "power2.inOut",
@@ -99,9 +104,9 @@ export default function CinematicPortal() {
           }, "-=3");
       }
     });
-  }, { scope: containerRef, dependencies: [courses] });
+  }, { scope: containerRef, dependencies: [latestCourses] });
 
-  if (!courses || courses.length === 0) return <div className="h-screen bg-bg" />;
+  if (!latestCourses || latestCourses.length === 0) return <div className="h-screen bg-bg" />;
 
   return (
     <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-bg" style={{ perspective: "1200px" }}>
@@ -122,14 +127,13 @@ export default function CinematicPortal() {
 
           {/* Card Container */}
           <div className="md:col-span-6 relative aspect-[16/10] md:aspect-video flex items-center justify-center w-full">
-            {courses.map((course, index) => (
+            {latestCourses.map((course, index) => (
               <div
                 key={course._id}
                 ref={(el) => (cardsRef.current[index] = el)}
                 className="absolute inset-0 overflow-hidden rounded-2xl md:rounded-[32px] shadow-[0_40px_80px_rgba(0,0,0,0.6)] border border-border/50"
-                style={{ zIndex: courses.length - index }}
+                style={{ zIndex: latestCourses.length - index }}
               >
-                {/* LIVE TAG OVER IMAGE */}
                 {course.type === "live" && (
                   <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-red-600 rounded-full shadow-xl border border-white/20">
                     <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
@@ -139,7 +143,6 @@ export default function CinematicPortal() {
                     <span className="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest">Live Now</span>
                   </div>
                 )}
-
                 <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                 <div className="absolute inset-0 gloss-overlay pointer-events-none" />
               </div>
@@ -148,7 +151,7 @@ export default function CinematicPortal() {
 
           {/* Text Container */}
           <div className="md:col-span-6 relative h-[45vh] md:h-[520px] flex flex-col justify-center">
-            {courses.map((course, index) => (
+            {latestCourses.map((course, index) => (
               <div key={course._id} ref={(el) => (textRefs.current[index] = el)} className="absolute inset-0 flex flex-col justify-start md:justify-center text-left items-start">
                 <h2 className="font-display text-xl md:text-[2.75rem] font-medium text-text mb-2 md:mb-4 leading-[1.15] tracking-tight">
                   {course.title}
@@ -157,7 +160,6 @@ export default function CinematicPortal() {
                   {course.description}
                 </p>
 
-                {/* Info Badges */}
                 <div className="flex flex-wrap gap-3 md:gap-6 mb-4 md:mb-10">
                   <div className="flex items-center gap-2 md:gap-3">
                     <div className="p-1.5 md:p-2.5 rounded-xl bg-accent/10 text-accent"><Clock size={16} /></div>
@@ -173,18 +175,17 @@ export default function CinematicPortal() {
                       <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-text-secondary font-medium">Certified</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <div className="p-1.5 md:p-2.5 rounded-xl bg-accent/10 text-accent"><PhoneCall size={16} /></div>
-                    <div className="flex flex-col">
-                      <span className="text-xs md:text-sm font-bold text-text leading-none">24/7</span>
-                      <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-text-secondary font-medium">Support</span>
-                    </div>
-                  </div>
                 </div>
 
-                <div className="flex items-baseline gap-2 mb-4 md:mb-8">
-                  <span className="text-lg md:text-3xl font-medium text-text">Price</span>
+                {/* UPDATED PRICE SECTION WITH OLD PRICE */}
+                <div className="flex items-baseline gap-3 mb-4 md:mb-8">
+                  <span className="text-lg md:text-2xl font-medium text-text-secondary">Price</span>
                   <span className="text-xl md:text-4xl font-bold text-accent">₹{course.price}</span>
+                  {course.oldPrice && (
+                    <span className="text-sm md:text-xl text-text-secondary/40 line-through font-light">
+                      ₹{course.oldPrice}
+                    </span>
+                  )}
                 </div>
 
                 <button 

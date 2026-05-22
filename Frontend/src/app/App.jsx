@@ -5,8 +5,10 @@ import { useDispatch } from "react-redux";
 import { router } from "./AppRouter";
 import { getme } from "../Features/auth/services/auth.api";
 import { setUser, setAuthChecked } from "../Features/auth/auth.slice";
+import { useAuthInit } from "../Features/auth/hooks/useAuthInit";
 
 const App = () => {
+  useAuthInit();
   const dispatch = useDispatch();
 
   /* =========================

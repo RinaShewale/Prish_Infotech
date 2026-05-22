@@ -24,7 +24,10 @@ const userSchema = new mongoose.Schema(
 
     googleId: { type: String, default: null },
 
-    avatar: { type: String, default: "" },
+    avatar: {
+      type: String,
+      default: "",
+    },
 
     role: {
       type: String,
@@ -42,23 +45,20 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔐 HASH PASSWORD
+// HASH PASSWORD
 userSchema.pre("save", async function () {
   if (!this.isModified("password") || !this.password) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-
-
 });
 
-// 🔑 PASSWORD CHECK
+// COMPARE PASSWORD
 userSchema.methods.comparePassword = async function (candidatePassword) {
   if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const User =
-  mongoose.models.User || mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;

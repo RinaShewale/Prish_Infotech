@@ -16,7 +16,9 @@ export const Nav = () => {
   const dispatch = useDispatch();
   const dropdownRef = useRef(null);
 
-  const user = useSelector((state) => state.auth.user);
+  // ✅ FIX: include authChecked
+  const { user, authChecked } = useSelector((state) => state.auth);
+
   const { handleLogout } = useAuth();
 
   const navLinks = [
@@ -26,22 +28,26 @@ export const Nav = () => {
     { name: "Request Callback", path: "/callback" },
   ];
 
+  // close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // scroll effect
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // body scroll lock
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "unset";
   }, [mobileMenuOpen]);
@@ -61,10 +67,14 @@ export const Nav = () => {
   const mobileItemStyle =
     "text-2xl font-display font-light text-white hover:text-accent transition-all duration-300";
 
+  // ✅ IMPORTANT: wait until auth is checked
+  if (!authChecked) return null;
+
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${isScrolled ? "py-4 bg-bg/90 backdrop-blur-md shadow-lg" : "py-8 bg-transparent"
-        }`}
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+        isScrolled ? "py-4 bg-bg/90 backdrop-blur-md shadow-lg" : "py-8 bg-transparent"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
 
@@ -73,6 +83,7 @@ export const Nav = () => {
           <div className="w-8 h-8 rounded-full border border-accent flex items-center justify-center">
             <div className="w-4 h-4 bg-accent rounded-sm rotate-45"></div>
           </div>
+
           <span className="font-display font-medium text-xl tracking-tight text-white uppercase">
             Prish<span className="opacity-50 font-normal">Infotech</span>
           </span>
@@ -92,7 +103,6 @@ export const Nav = () => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="w-10 h-10 rounded-full bg-accent/20 border border-accent/30 overflow-hidden flex items-center justify-center text-accent font-bold hover:bg-accent/30 transition-all"
               >
-                {/* ✅ AVATAR FIX */}
                 {user.avatar ? (
                   <img
                     src={user.avatar}
@@ -106,7 +116,6 @@ export const Nav = () => {
                 )}
               </button>
 
-              {/* DROPDOWN */}
               <AnimatePresence>
                 {dropdownOpen && (
                   <motion.div
@@ -154,7 +163,7 @@ export const Nav = () => {
           className="md:hidden p-2 text-white z-[110]"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
-          {mobileMenuOpen ? <X size={32} strokeWidth={1.5} /> : <Menu size={32} strokeWidth={1.5} />}
+          {mobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
         </button>
       </div>
 
@@ -179,22 +188,10 @@ export const Nav = () => {
                 </Link>
               ))}
 
-              {user && (
-                <>
-                  <Link to="/classroom" onClick={() => setMobileMenuOpen(false)} className={mobileItemStyle}>
-                    Classroom
-                  </Link>
-                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className={mobileItemStyle}>
-                    My Profile
-                  </Link>
-                </>
-              )}
-
               {user ? (
                 <button
-                  type="button"
                   onClick={logoutUser}
-                  className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black hover:scale-105`}
+                  className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black`}
                 >
                   Logout
                 </button>
@@ -202,7 +199,7 @@ export const Nav = () => {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black hover:scale-105`}
+                  className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black`}
                 >
                   Sign In
                 </Link>
