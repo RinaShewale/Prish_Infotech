@@ -1,9 +1,17 @@
 import Course from "../models/Course.model.js";
 import slugify from "slugify";
 
-// CREATE COURSE 
-export const createCourse = async (req, res) => {
+
+// ======================================================
+// ✅ CREATE COURSE
+// ======================================================
+
+export const createCourse = async (
+  req,
+  res
+) => {
   try {
+
     const {
       title,
       description,
@@ -18,68 +26,160 @@ export const createCourse = async (req, res) => {
       syllabus,
     } = req.body;
 
-    if (!title || !description || price === undefined || !category) {
+    // ✅ VALIDATION
+
+    if (
+      !title ||
+      !description ||
+      price === undefined ||
+      !category
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Please fill all fields",
+        message:
+          "Please fill all fields",
       });
     }
 
-    const thumbnail = req.file?.path;
+    // ✅ THUMBNAIL
+
+    const thumbnail =
+      req.file?.path;
+
     if (!thumbnail) {
       return res.status(400).json({
         success: false,
-        message: "Thumbnail is required",
+        message:
+          "Thumbnail is required",
       });
     }
+
+    // ✅ GENERATE SLUG
 
     const slug = slugify(title, {
       lower: true,
       strict: true,
     });
 
-    const existingCourse = await Course.findOne({ slug });
+    // ✅ CHECK EXISTING COURSE
+
+    const existingCourse =
+      await Course.findOne({
+        slug,
+      });
 
     if (existingCourse) {
       return res.status(400).json({
         success: false,
-        message: "Course already exists",
+        message:
+          "Course already exists",
       });
     }
 
-    const formattedCategory = Array.isArray(category)
-      ? category.map((c) => c.trim())
-      : [category.trim()];
+    // ✅ FORMAT CATEGORY
+
+    const formattedCategory =
+      Array.isArray(category)
+        ? category.map((c) =>
+            c.trim()
+          )
+        : [category.trim()];
+
+    // ✅ PARSE SYLLABUS
 
     const parsedSyllabus =
-      typeof syllabus === "string" ? JSON.parse(syllabus) : syllabus || [];
+      typeof syllabus === "string"
+        ? JSON.parse(syllabus)
+        : syllabus || [];
 
-    const course = await Course.create({
-      title,
-      slug,
-      description,
-      thumbnail,
-      video: req.body.video || "",
-      type: type || "recorded",
-      price: Number(price) || 0,
-      oldPrice: Number(oldPrice) || 0,
-      accessDuration: accessDuration || "Lifetime Access",
-      level: level || "beginner",
-      category: formattedCategory,
-      heroQuote:
-        heroQuote || "Build Enterprise Software Like The Top 1%",
-      heroHighlight: heroHighlight || "Become Industry Ready",
-      syllabus: parsedSyllabus,
-      instructor: req.user._id,
-    });
+    // ✅ PRICE CONVERSION
 
-    await course.populate("instructor", "name email");
+    const finalPrice =
+      Number(price) || 0;
+
+    const finalOldPrice =
+      Number(oldPrice) || 0;
+
+    // ✅ CALCULATE DISCOUNT
+
+    let discount = 0;
+
+    if (
+      finalOldPrice > 0 &&
+      finalOldPrice >
+        finalPrice
+    ) {
+
+      discount = Math.round(
+        (
+          (finalOldPrice -
+            finalPrice) /
+          finalOldPrice
+        ) * 100
+      );
+    }
+
+    // ✅ CREATE COURSE
+
+    const course =
+      await Course.create({
+        title,
+        slug,
+        description,
+        thumbnail,
+
+        video:
+          req.body.video || "",
+
+        type:
+          type || "recorded",
+
+        price: finalPrice,
+
+        oldPrice:
+          finalOldPrice,
+
+        discount,
+
+        accessDuration:
+          accessDuration ||
+          "Lifetime Access",
+
+        level:
+          level || "beginner",
+
+        category:
+          formattedCategory,
+
+        heroQuote:
+          heroQuote ||
+          "Build Enterprise Software Like The Top 1%",
+
+        heroHighlight:
+          heroHighlight ||
+          "Become Industry Ready",
+
+        syllabus:
+          parsedSyllabus,
+
+        instructor:
+          req.user._id,
+      });
+
+    // ✅ POPULATE INSTRUCTOR
+
+    await course.populate(
+      "instructor",
+      "name email"
+    );
 
     res.status(201).json({
       success: true,
       course,
     });
+
   } catch (err) {
+
     res.status(500).json({
       success: false,
       message: err.message,
@@ -87,129 +187,269 @@ export const createCourse = async (req, res) => {
   }
 };
 
-//  GET ALL 
-export const getAllCourses = async (req, res) => {
-  try {
-    const courses = await Course.find()
-      .populate("instructor", "name email")
-      .sort({ createdAt: -1 });
 
-    res.json({
-      success: true,
-      courses,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
+// ======================================================
+// ✅ GET ALL COURSES
+// ======================================================
 
-// SINGLE (FIXED) 
-export const getSingleCourse = async (req, res) => {
-  try {
-    const { slug } = req.params;
+export const getAllCourses =
+  async (req, res) => {
+    try {
 
-    const course = await Course.findOne({ slug }).populate(
-      "instructor",
-      "name email"
-    );
+      const courses =
+        await Course.find()
+          .populate(
+            "instructor",
+            "name email"
+          )
+          .sort({
+            createdAt: -1,
+          });
 
-    if (!course) {
-      return res.status(404).json({
+      res.json({
+        success: true,
+        courses,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
         success: false,
-        message: "Course not found",
+        message: err.message,
       });
     }
+  };
 
-    res.json({
-      success: true,
-      course,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
 
-// UPDATE 
-export const updateCourse = async (req, res) => {
-  try {
-    if (req.body.title) {
-      req.body.slug = slugify(req.body.title, {
-        lower: true,
-        strict: true,
+// ======================================================
+// ✅ GET SINGLE COURSE
+// ======================================================
+
+export const getSingleCourse =
+  async (req, res) => {
+    try {
+
+      const { slug } =
+        req.params;
+
+      const course =
+        await Course.findOne({
+          slug,
+        }).populate(
+          "instructor",
+          "name email"
+        );
+
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Course not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        course,
       });
-    }
 
-    const course = await Course.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    ).populate("instructor", "name email");
+    } catch (err) {
 
-    res.json({
-      success: true,
-      course,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
-
-//  DELETE 
-export const deleteCourse = async (req, res) => {
-  try {
-    await Course.findByIdAndDelete(req.params.id);
-
-    res.json({
-      success: true,
-      message: "Deleted successfully",
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
-
-//  VIDEO UPLOAD 
-export const uploadCourseVideo = async (req, res) => {
-  try {
-    const course = await Course.findById(req.params.id);
-
-    if (!course) {
-      return res.status(404).json({
+      res.status(500).json({
         success: false,
-        message: "Course not found",
+        message: err.message,
       });
     }
+  };
 
-    if (!req.file) {
-      return res.status(400).json({
+
+// ======================================================
+// ✅ UPDATE COURSE
+// ======================================================
+
+export const updateCourse =
+  async (req, res) => {
+    try {
+
+      // ✅ GENERATE NEW SLUG
+
+      if (req.body.title) {
+        req.body.slug =
+          slugify(
+            req.body.title,
+            {
+              lower: true,
+              strict: true,
+            }
+          );
+      }
+
+      // ✅ CONVERT PRICES
+
+      if (req.body.price) {
+        req.body.price =
+          Number(
+            req.body.price
+          );
+      }
+
+      if (req.body.oldPrice) {
+        req.body.oldPrice =
+          Number(
+            req.body.oldPrice
+          );
+      }
+
+      // ✅ CALCULATE DISCOUNT
+
+      const price =
+        req.body.price || 0;
+
+      const oldPrice =
+        req.body.oldPrice || 0;
+
+      if (
+        oldPrice > 0 &&
+        oldPrice > price
+      ) {
+
+        req.body.discount =
+          Math.round(
+            (
+              (oldPrice -
+                price) /
+              oldPrice
+            ) * 100
+          );
+
+      } else {
+
+        req.body.discount = 0;
+      }
+
+      // ✅ UPDATE COURSE
+
+      const course =
+        await Course.findByIdAndUpdate(
+          req.params.id,
+          req.body,
+          {
+            new: true,
+            runValidators: true,
+          }
+        ).populate(
+          "instructor",
+          "name email"
+        );
+
+      // ✅ NOT FOUND
+
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Course not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        course,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
         success: false,
-        message: "Video required",
+        message: err.message,
       });
     }
+  };
 
-    course.video = req.file.path;
-    await course.save();
 
-    res.json({
-      success: true,
-      course,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
+// ======================================================
+// ✅ DELETE COURSE
+// ======================================================
+
+export const deleteCourse =
+  async (req, res) => {
+    try {
+
+      const course =
+        await Course.findByIdAndDelete(
+          req.params.id
+        );
+
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Course not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        message:
+          "Deleted successfully",
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  };
+
+
+// ======================================================
+// ✅ UPLOAD COURSE VIDEO
+// ======================================================
+
+export const uploadCourseVideo =
+  async (req, res) => {
+    try {
+
+      const course =
+        await Course.findById(
+          req.params.id
+        );
+
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Course not found",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Video required",
+        });
+      }
+
+      // ✅ SAVE VIDEO PATH
+
+      course.video =
+        req.file.path;
+
+      await course.save();
+
+      res.json({
+        success: true,
+        course,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  };

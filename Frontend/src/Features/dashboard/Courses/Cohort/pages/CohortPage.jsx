@@ -1,6 +1,6 @@
 import React, { useRef, useLayoutEffect, useState } from 'react';
-import { 
-  ArrowRight, CheckCircle2, ChevronRight, MousePointer2, 
+import {
+  ArrowRight, CheckCircle2, ChevronRight, MousePointer2,
   Sparkles, Terminal, Layers, ShieldCheck, BrainCircuit, Zap, Cpu
 } from 'lucide-react';
 import { gsap } from 'gsap';
@@ -53,7 +53,7 @@ export const CohortPage = ({ courseData }) => {
         });
       });
 
-      gsap.fromTo(".sticky-cta", 
+      gsap.fromTo(".sticky-cta",
         { y: 120, opacity: 0 },
         {
           scrollTrigger: {
@@ -68,7 +68,7 @@ export const CohortPage = ({ courseData }) => {
         }
       );
     }, containerRef);
-    
+
     return () => ctx.revert();
   }, [courseData]);
 
@@ -78,8 +78,8 @@ export const CohortPage = ({ courseData }) => {
       opacity: 0, x: -10, duration: 0.2,
       onComplete: () => {
         setActiveModule(index);
-        gsap.fromTo(contentRef.current, 
-          { opacity: 0, x: 10 }, 
+        gsap.fromTo(contentRef.current,
+          { opacity: 0, x: 10 },
           { opacity: 1, x: 0, duration: 0.4 }
         );
       }
@@ -88,7 +88,7 @@ export const CohortPage = ({ courseData }) => {
 
   return (
     <div ref={containerRef} className="bg-bg text-text min-h-screen selection:bg-accent/30 overflow-x-hidden relative font-sans">
-      
+
       {/* BACKGROUND ELEMENTS */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <FluidBackground />
@@ -116,49 +116,57 @@ export const CohortPage = ({ courseData }) => {
             </p>
 
             <div className="hero-reveal flex flex-wrap justify-center lg:justify-start gap-2 mb-10">
-                {CATEGORIES.map((cat, index) => (
-                  <span key={index} className="px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-lg text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                    {cat}
-                  </span>
-                ))}
+              {CATEGORIES.map((cat, index) => (
+                <span key={index} className="px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-lg text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                  {cat}
+                </span>
+              ))}
             </div>
-            
-            <div className="hero-reveal flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-8">
-                <div className="flex flex-col items-center lg:items-start">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-5xl md:text-6xl font-bold text-white tracking-tighter">₹{PRICE}</span>
-                    <span className="text-xl text-text-secondary/20 line-through">₹{OLD_PRICE}</span>
-                  </div>
-                  <span className="text-[10px] text-accent font-black uppercase tracking-widest mt-1">Limited Enrollment Open</span>
-                </div>
 
-                <button
-                  onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="w-full sm:w-auto px-10 py-5 bg-accent text-bg font-black rounded-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(var(--accent-rgb),0.3)]"
-                >
-                  Reserve Your Seat <ArrowRight className="w-4 h-4" />
-                </button>
+            <div className="hero-reveal flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-8">
+              <div className="flex flex-col items-center lg:items-start">
+                {/* IMPROVED DISCOUNT UI */}
+                <div className="flex items-center gap-4">
+                  <span className="text-5xl md:text-7xl font-bold text-white tracking-tighter">₹{PRICE}</span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-lg md:text-xl text-white/20 line-through decoration-accent/40 leading-none">₹{OLD_PRICE}</span>
+                    {courseData.discount > 0 && (
+                      <span className="mt-1.5 px-2 py-0.5 bg-accent/10 border border-accent/20 text-accent rounded-md text-[9px] font-black uppercase tracking-wider">
+                        {courseData.discount}% OFF
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="text-[10px] text-accent font-black uppercase tracking-widest mt-2">Limited Enrollment Open</span>
+              </div>
+
+              <button
+                onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                className="w-full sm:w-auto px-10 py-5 bg-accent text-bg font-black rounded-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(var(--accent-rgb),0.3)]"
+              >
+                Reserve Your Seat <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* HERO IMAGE - PLAY ICON REMOVED */}
+          {/* HERO IMAGE */}
           <div ref={heroImageRef} className="order-1 lg:order-2">
             <div className="relative group max-w-[500px] mx-auto">
               <div className="absolute -inset-4 bg-accent/20 blur-[80px] rounded-full opacity-20 group-hover:opacity-40 transition-opacity" />
-              
+
               <div className="relative rounded-[32px] md:rounded-[40px] overflow-hidden border border-white/10 aspect-square bg-black/40 backdrop-blur-3xl shadow-2xl">
                 <img src={courseData.thumbnail} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700" alt={courseData.title} />
-                
+
                 {isLive && (
-                    <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-red-600 rounded-full shadow-xl border border-white/20">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                        </span>
-                        <span className="text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest">Live Now</span>
-                    </div>
+                  <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-red-600 rounded-full shadow-xl border border-white/20">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    <span className="text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest">Live Now</span>
+                  </div>
                 )}
-                
+
                 <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-bg via-bg/20 to-transparent" />
               </div>
             </div>
@@ -167,18 +175,18 @@ export const CohortPage = ({ courseData }) => {
 
         {/* STATS STRIP */}
         <div className="reveal-section grid grid-cols-2 md:grid-cols-4 gap-4 mb-24 md:mb-48">
-            {[
-              { label: 'Modules', val: SYLLABUS.length, icon: Layers },
-              { label: 'Tools', val: '12+ Tech', icon: Terminal },
-              { label: 'Projects', val: 'Industrial', icon: Sparkles },
-              { label: 'Certification', val: 'Verified', icon: ShieldCheck },
-            ].map((stat, i) => (
-              <div key={i} className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col items-center text-center hover:bg-white/[0.05] transition-colors">
-                <stat.icon className="w-5 h-5 text-accent/50 mb-3 md:mb-4" />
-                <span className="text-xl md:text-2xl font-bold text-white mb-1">{stat.val}</span>
-                <span className="text-[9px] md:text-[10px] text-text-secondary/40 font-black uppercase tracking-widest">{stat.label}</span>
-              </div>
-            ))}
+          {[
+            { label: 'Modules', val: SYLLABUS.length, icon: Layers },
+            { label: 'Tools', val: '12+ Tech', icon: Terminal },
+            { label: 'Projects', val: 'Industrial', icon: Sparkles },
+            { label: 'Certification', val: 'Verified', icon: ShieldCheck },
+          ].map((stat, i) => (
+            <div key={i} className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col items-center text-center hover:bg-white/[0.05] transition-colors">
+              <stat.icon className="w-5 h-5 text-accent/50 mb-3 md:mb-4" />
+              <span className="text-xl md:text-2xl font-bold text-white mb-1">{stat.val}</span>
+              <span className="text-[9px] md:text-[10px] text-text-secondary/40 font-black uppercase tracking-widest">{stat.label}</span>
+            </div>
+          ))}
         </div>
 
         {/* SYLLABUS SECTION */}
@@ -190,7 +198,6 @@ export const CohortPage = ({ courseData }) => {
             </div>
 
             <div className="grid lg:grid-cols-12 gap-6 lg:gap-12">
-              {/* Tab Selector */}
               <div className="lg:col-span-4 flex lg:flex-col gap-3 overflow-x-auto pb-4 lg:pb-0 no-scrollbar snap-x snap-mandatory">
                 {SYLLABUS.map((item, idx) => (
                   <button
@@ -208,7 +215,6 @@ export const CohortPage = ({ courseData }) => {
                 ))}
               </div>
 
-              {/* Content Area */}
               <div className="lg:col-span-8">
                 <div className="relative bg-white/[0.01] border border-white/10 rounded-[32px] md:rounded-[60px] p-6 md:p-16 min-h-[450px] md:min-h-[500px] backdrop-blur-3xl overflow-hidden shadow-2xl">
                   <div className="absolute top-0 right-0 p-6 md:p-10 opacity-[0.02] pointer-events-none hidden md:block">
@@ -217,7 +223,7 @@ export const CohortPage = ({ courseData }) => {
 
                   <div ref={contentRef} className="relative z-10 flex flex-col h-full">
                     <span className="text-accent/60 font-black tracking-[0.2em] uppercase text-[10px] md:text-[12px] mb-4 md:mb-6 block">
-                        {SYLLABUS[activeModule]?.phase}
+                      {SYLLABUS[activeModule]?.phase}
                     </span>
 
                     <h3 className="text-3xl md:text-6xl lg:text-7xl font-bold text-white mb-8 md:mb-12 tracking-tighter leading-[1]">
@@ -228,12 +234,12 @@ export const CohortPage = ({ courseData }) => {
                       <ul className="space-y-4 md:space-y-6">
                         {SYLLABUS[activeModule]?.topics?.map((t, i) => (
                           <li key={i} className="flex gap-3 md:gap-4 text-sm md:text-lg text-text-secondary/70 font-light items-start">
-                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-accent/40 shrink-0 mt-1" /> 
+                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-accent/40 shrink-0 mt-1" />
                             <span>{t}</span>
                           </li>
                         ))}
                       </ul>
-                      
+
                       <div className="bg-white/[0.03] border border-white/5 rounded-2xl md:rounded-[32px] p-6 md:p-8 h-fit">
                         <h4 className="text-text-secondary/30 text-[9px] font-black uppercase tracking-widest mb-4 md:mb-6">Core Modules</h4>
                         <div className="flex flex-wrap gap-2">
@@ -266,7 +272,7 @@ export const CohortPage = ({ courseData }) => {
                 <MousePointer2 className="w-6 h-6 md:w-7 md:h-7 text-accent" />
               </div>
               <h2 className="text-3xl md:text-[80px] font-bold text-white mb-10 md:mb-16 leading-[1.1] tracking-tighter">
-                {courseData.heroQuote || "Don't Just Use AI."} <br/>
+                {courseData.heroQuote || "Don't Just Use AI."} <br />
                 <span className="text-accent italic font-serif">Engineer It.</span>
               </h2>
               <div className="flex justify-center">
@@ -275,7 +281,7 @@ export const CohortPage = ({ courseData }) => {
                   className="group relative flex items-center justify-center gap-4 md:gap-6 px-8 md:px-16 py-6 md:py-10 bg-white text-bg rounded-full transition-all hover:scale-[1.03] active:scale-95 shadow-2xl"
                 >
                   <span className="text-xs md:text-2xl font-black uppercase tracking-tighter">
-                  ENROLL NOW
+                    ENROLL NOW
                   </span>
                   <ArrowRight className="w-5 h-5 md:w-8 md:h-8 shrink-0 group-hover:translate-x-2 transition-transform" />
                 </button>
@@ -297,12 +303,17 @@ export const CohortPage = ({ courseData }) => {
         </section>
       </main>
 
-      {/* STICKY CTA */}
+      {/* STICKY CTA - IMPROVED PRICE DISPLAY */}
       <div className="sticky-cta fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-[500px]">
         <div className="bg-bg/80 backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-2 flex items-center justify-between shadow-2xl">
           <div className="pl-4 md:pl-6 text-left">
-            <span className="text-[7px] md:text-[8px] uppercase tracking-[0.2em] text-accent font-black block mb-0.5">Limited Slots</span>
-            <span className="text-xl md:text-2xl font-bold text-white tracking-tighter leading-none">₹{PRICE}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl md:text-2xl font-bold text-white tracking-tighter leading-none">₹{PRICE}</span>
+              <span className="text-[10px] md:text-xs text-white/20 line-through">₹{OLD_PRICE}</span>
+            </div>
+            <span className="text-[7px] md:text-[8px] uppercase tracking-[0.2em] text-accent font-black block mt-1">
+              Limited Slots Left • {courseData.discount}% OFF
+            </span>
           </div>
           <button
             onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}

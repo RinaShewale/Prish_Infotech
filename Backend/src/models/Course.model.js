@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
 
 
+// ======================================================
 // ✅ SYLLABUS SCHEMA
-
+// ======================================================
 
 const syllabusSchema = new mongoose.Schema(
   {
-
     // ✅ PHASE
-
 
     phase: {
       type: String,
@@ -16,9 +15,7 @@ const syllabusSchema = new mongoose.Schema(
       trim: true,
     },
 
-
     // ✅ MODULE TITLE
-
 
     title: {
       type: String,
@@ -26,9 +23,7 @@ const syllabusSchema = new mongoose.Schema(
       trim: true,
     },
 
-
     // ✅ DURATION
-
 
     duration: {
       type: String,
@@ -36,18 +31,14 @@ const syllabusSchema = new mongoose.Schema(
       trim: true,
     },
 
-
     // ✅ TOPICS
-
 
     topics: {
       type: [String],
       default: [],
     },
 
-
     // ✅ TOOLS / TECH STACK
-
 
     tools: {
       type: [String],
@@ -60,14 +51,13 @@ const syllabusSchema = new mongoose.Schema(
 );
 
 
+// ======================================================
 // ✅ COURSE SCHEMA
-
+// ======================================================
 
 const courseSchema = new mongoose.Schema(
   {
-
     // ✅ COURSE TITLE
-
 
     title: {
       type: String,
@@ -75,9 +65,7 @@ const courseSchema = new mongoose.Schema(
       trim: true,
     },
 
-
     // ✅ SEO FRIENDLY URL SLUG
-
 
     slug: {
       type: String,
@@ -87,9 +75,7 @@ const courseSchema = new mongoose.Schema(
       trim: true,
     },
 
-
     // ✅ COURSE DESCRIPTION
-
 
     description: {
       type: String,
@@ -100,27 +86,21 @@ const courseSchema = new mongoose.Schema(
       ],
     },
 
-
     // ✅ COURSE THUMBNAIL
-
 
     thumbnail: {
       type: String,
       required: true,
     },
 
-
     // ✅ COURSE VIDEO
-
 
     video: {
       type: String,
       default: "",
     },
 
-
     // ✅ COURSE TYPE
-
 
     type: {
       type: String,
@@ -128,9 +108,7 @@ const courseSchema = new mongoose.Schema(
       default: "recorded",
     },
 
-
     // ✅ CURRENT PRICE
-
 
     price: {
       type: Number,
@@ -138,9 +116,7 @@ const courseSchema = new mongoose.Schema(
       min: 0,
     },
 
-
     // ✅ OLD PRICE
-
 
     oldPrice: {
       type: Number,
@@ -148,9 +124,15 @@ const courseSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // ✅ AUTO DISCOUNT PERCENT
+
+    discount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
 
     // ✅ COURSE LEVEL
-
 
     level: {
       type: String,
@@ -162,27 +144,21 @@ const courseSchema = new mongoose.Schema(
       default: "beginner",
     },
 
-
     // ✅ MULTIPLE CATEGORIES
-
 
     category: {
       type: [String],
       required: true,
     },
 
-
     // ✅ ACCESS DURATION
-
 
     accessDuration: {
       type: String,
       default: "Lifetime Access",
     },
 
-
     // ✅ HERO QUOTE
-
 
     heroQuote: {
       type: String,
@@ -190,9 +166,7 @@ const courseSchema = new mongoose.Schema(
         "Build Enterprise Software Like The Top 1%",
     },
 
-
     // ✅ HERO HIGHLIGHT TEXT
-
 
     heroHighlight: {
       type: String,
@@ -200,18 +174,14 @@ const courseSchema = new mongoose.Schema(
         "Become Industry Ready",
     },
 
-
     // ✅ COURSE SYLLABUS
-
 
     syllabus: {
       type: [syllabusSchema],
       default: [],
     },
 
-
     // ✅ COURSE INSTRUCTOR
-
 
     instructor: {
       type: mongoose.Schema.Types.ObjectId,
@@ -224,8 +194,38 @@ const courseSchema = new mongoose.Schema(
 );
 
 
-// ✅ EXPORT MODEL
+// ======================================================
+// ✅ AUTO CALCULATE DISCOUNT
+// ======================================================
 
+courseSchema.pre("save", function () {
+
+  // If oldPrice exists and is greater than price
+
+  if (
+    this.oldPrice > 0 &&
+    this.oldPrice > this.price
+  ) {
+
+    this.discount = Math.round(
+      (
+        (this.oldPrice - this.price) /
+        this.oldPrice
+      ) * 100
+    );
+
+  } else {
+
+    this.discount = 0;
+  }
+
+
+});
+
+
+// ======================================================
+// ✅ EXPORT MODEL
+// ======================================================
 
 const Course = mongoose.model(
   "Course",

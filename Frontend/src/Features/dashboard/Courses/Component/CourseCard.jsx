@@ -76,7 +76,7 @@ export default function CourseCard({ course }) {
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-[10px] px-2 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded-md font-bold">SAVINGS</span>
+                <span className="text-[10px] px-2 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded-md font-bold"> {course.discount}% OFF</span>
               </div>
             </div>
 
