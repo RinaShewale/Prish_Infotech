@@ -20,6 +20,7 @@ export const CohortPage = ({ courseData }) => {
   const enrollmentRef = useRef(null);
   const contentRef = useRef(null);
   const heroImageRef = useRef(null);
+  const tabsRef = useRef(null); 
   const [activeModule, setActiveModule] = useState(0);
 
   const PRICE = Math.floor(courseData?.price || 0);
@@ -32,6 +33,7 @@ export const CohortPage = ({ courseData }) => {
   const mainTitle = titleWords.slice(0, -1).join(' ');
   const lastWord = titleWords.slice(-1);
 
+  // Initial Entrance Animations
   useLayoutEffect(() => {
     if (!courseData) return;
 
@@ -72,18 +74,31 @@ export const CohortPage = ({ courseData }) => {
     return () => ctx.revert();
   }, [courseData]);
 
+  // OPTIMIZED CONTENT SWITCH (Fixes Lag)
+  useLayoutEffect(() => {
+    if (!contentRef.current) return;
+    
+    // Smooth fade in/up whenever activeModule changes
+    gsap.fromTo(contentRef.current, 
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+    );
+  }, [activeModule]);
+
   const handleTabChange = (index) => {
     if (index === activeModule) return;
-    gsap.to(contentRef.current, {
-      opacity: 0, x: -10, duration: 0.2,
-      onComplete: () => {
-        setActiveModule(index);
-        gsap.fromTo(contentRef.current,
-          { opacity: 0, x: 10 },
-          { opacity: 1, x: 0, duration: 0.4 }
-        );
-      }
-    });
+
+    const tabElement = tabsRef.current?.children[index];
+    if (tabElement) {
+      tabElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+    
+    // Set state immediately for responsiveness
+    setActiveModule(index);
   };
 
   return (
@@ -106,7 +121,7 @@ export const CohortPage = ({ courseData }) => {
               {courseData.heroHighlight || "Engineering Cohort"}
             </span>
 
-            <h1 className="hero-reveal text-5xl sm:text-6xl lg:text-[90px] font-bold leading-[0.95] tracking-tighter text-white mb-8">
+            <h1 className="hero-reveal text-4xl sm:text-6xl lg:text-[80px] xl:text-[90px] font-bold leading-[0.95] tracking-tighter text-white mb-8">
               {mainTitle} <br />
               <span className="italic font-serif text-accent">{lastWord}</span>
             </h1>
@@ -125,7 +140,6 @@ export const CohortPage = ({ courseData }) => {
 
             <div className="hero-reveal flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-8">
               <div className="flex flex-col items-center lg:items-start">
-                {/* IMPROVED DISCOUNT UI */}
                 <div className="flex items-center gap-4">
                   <span className="text-5xl md:text-7xl font-bold text-white tracking-tighter">₹{PRICE}</span>
                   <div className="flex flex-col items-start">
@@ -149,14 +163,11 @@ export const CohortPage = ({ courseData }) => {
             </div>
           </div>
 
-          {/* HERO IMAGE */}
           <div ref={heroImageRef} className="order-1 lg:order-2">
             <div className="relative group max-w-[500px] mx-auto">
               <div className="absolute -inset-4 bg-accent/20 blur-[80px] rounded-full opacity-20 group-hover:opacity-40 transition-opacity" />
-
               <div className="relative rounded-[32px] md:rounded-[40px] overflow-hidden border border-white/10 aspect-square bg-black/40 backdrop-blur-3xl shadow-2xl">
                 <img src={courseData.thumbnail} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700" alt={courseData.title} />
-
                 {isLive && (
                   <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-red-600 rounded-full shadow-xl border border-white/20">
                     <span className="relative flex h-2 w-2">
@@ -166,82 +177,86 @@ export const CohortPage = ({ courseData }) => {
                     <span className="text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest">Live Now</span>
                   </div>
                 )}
-
                 <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-bg via-bg/20 to-transparent" />
               </div>
             </div>
           </div>
         </section>
 
-        {/* STATS STRIP */}
-        <div className="reveal-section grid grid-cols-2 md:grid-cols-4 gap-4 mb-24 md:mb-48">
-          {[
-            { label: 'Modules', val: SYLLABUS.length, icon: Layers },
-            { label: 'Tools', val: '12+ Tech', icon: Terminal },
-            { label: 'Projects', val: 'Industrial', icon: Sparkles },
-            { label: 'Certification', val: 'Verified', icon: ShieldCheck },
-          ].map((stat, i) => (
-            <div key={i} className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col items-center text-center hover:bg-white/[0.05] transition-colors">
-              <stat.icon className="w-5 h-5 text-accent/50 mb-3 md:mb-4" />
-              <span className="text-xl md:text-2xl font-bold text-white mb-1">{stat.val}</span>
-              <span className="text-[9px] md:text-[10px] text-text-secondary/40 font-black uppercase tracking-widest">{stat.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* SYLLABUS SECTION */}
+        {/* SYLLABUS SECTION - OPTIMIZED FOR PERFORMANCE & RESPONSIVENESS */}
         {SYLLABUS.length > 0 && (
           <section ref={syllabusRef} className="reveal-section mb-24 md:mb-48">
-            <div className="mb-12 text-center md:text-left">
+            <div className="mb-10 md:mb-16 text-center lg:text-left px-2">
               <h2 className="text-4xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-6">Curriculum<span className="text-accent">.</span></h2>
-              <p className="text-text-secondary/50 text-base md:text-lg">A structured roadmap designed for industry mastery.</p>
+              <p className="text-text-secondary/50 text-base md:text-lg">Structured roadmap designed for industry-level mastery.</p>
             </div>
 
-            <div className="grid lg:grid-cols-12 gap-6 lg:gap-12">
-              <div className="lg:col-span-4 flex lg:flex-col gap-3 overflow-x-auto pb-4 lg:pb-0 no-scrollbar snap-x snap-mandatory">
-                {SYLLABUS.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleTabChange(idx)}
-                    className={`flex-shrink-0 w-[260px] lg:w-full p-6 rounded-2xl md:rounded-[32px] border transition-all duration-500 text-left snap-center group ${activeModule === idx ? "bg-accent border-accent text-bg" : "bg-white/[0.03] border-white/5 text-text-secondary hover:border-white/20"}`}
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+              
+              {/* SIDEBAR TABS */}
+              <div className="w-full lg:col-span-4 lg:sticky lg:top-32 z-20">
+                <div className="relative">
+                  {/* Fade mask for mobile horizontal scroll */}
+                  <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-bg to-transparent z-10 lg:hidden pointer-events-none" />
+                  
+                  <div 
+                    ref={tabsRef}
+                    className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto pb-4 lg:pb-0 lg:max-h-[100vh] no-scrollbar snap-x snap-mandatory lg:pr-2 px-2 lg:px-0"
                   >
-                    <div className="flex flex-col items-start gap-1">
-                      <span className={`text-[9px] font-black uppercase tracking-widest ${activeModule === idx ? "text-bg/60" : "text-accent/60"}`}>
-                        0{idx + 1} — {item.phase}
-                      </span>
-                      <h3 className="font-bold uppercase text-base md:text-xl tracking-tight leading-tight">{item.title}</h3>
-                    </div>
-                  </button>
-                ))}
+                    {SYLLABUS.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleTabChange(idx)}
+                        className={`flex-shrink-0 w-[280px] lg:w-full p-5 md:p-6 rounded-2xl md:rounded-[28px] border transition-all duration-300 text-left snap-center group outline-none ${
+                          activeModule === idx 
+                          ? "bg-accent border-accent text-bg shadow-[0_10px_30px_rgba(var(--accent-rgb),0.2)]" 
+                          : "bg-white/[0.03] border-white/5 text-text-secondary hover:border-white/20"
+                        }`}
+                      >
+                        <div className="flex flex-col items-start gap-1 pointer-events-none">
+                          <span className={`text-[9px] font-black uppercase tracking-widest ${activeModule === idx ? "text-bg/60" : "text-accent/60"}`}>
+                            0{idx + 1} — {item.phase}
+                          </span>
+                          <h3 className="font-bold uppercase text-sm md:text-lg tracking-tight leading-tight">{item.title}</h3>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div className="lg:col-span-8">
-                <div className="relative bg-white/[0.01] border border-white/10 rounded-[32px] md:rounded-[60px] p-6 md:p-16 min-h-[450px] md:min-h-[500px] backdrop-blur-3xl overflow-hidden shadow-2xl">
-                  <div className="absolute top-0 right-0 p-6 md:p-10 opacity-[0.02] pointer-events-none hidden md:block">
+              {/* CONTENT PANEL */}
+              <div className="w-full lg:col-span-8">
+                <div className="relative bg-white/[0.01] border border-white/10 rounded-[32px] md:rounded-[60px] p-6 md:p-12 lg:p-16 min-h-[400px] md:min-h-[500px] backdrop-blur-3xl overflow-hidden shadow-2xl">
+                  {/* Decorative Terminal Icon (Desktop only) */}
+                  <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none hidden lg:block">
                     <Terminal size={300} />
                   </div>
 
-                  <div ref={contentRef} className="relative z-10 flex flex-col h-full">
-                    <span className="text-accent/60 font-black tracking-[0.2em] uppercase text-[10px] md:text-[12px] mb-4 md:mb-6 block">
+                  <div ref={contentRef} className="relative z-10 flex flex-col h-full will-change-transform">
+                    <span className="text-accent/60 font-black tracking-[0.2em] uppercase text-[10px] md:text-[12px] mb-4 block">
                       {SYLLABUS[activeModule]?.phase}
                     </span>
 
-                    <h3 className="text-3xl md:text-6xl lg:text-7xl font-bold text-white mb-8 md:mb-12 tracking-tighter leading-[1]">
+                    <h3 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white mb-8 md:mb-12 tracking-tighter leading-[1.1]">
                       {SYLLABUS[activeModule]?.title}
                     </h3>
 
-                    <div className="grid md:grid-cols-2 gap-8 md:gap-12 mt-auto">
-                      <ul className="space-y-4 md:space-y-6">
-                        {SYLLABUS[activeModule]?.topics?.map((t, i) => (
-                          <li key={i} className="flex gap-3 md:gap-4 text-sm md:text-lg text-text-secondary/70 font-light items-start">
-                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-accent/40 shrink-0 mt-1" />
-                            <span>{t}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="grid md:grid-cols-2 gap-10 md:gap-12 mt-auto">
+                      <div>
+                        <h4 className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-6 border-l-2 border-accent/30 pl-3">Learning Objectives</h4>
+                        <ul className="space-y-4 md:space-y-5">
+                          {SYLLABUS[activeModule]?.topics?.map((t, i) => (
+                            <li key={i} className="flex gap-3 md:gap-4 text-sm md:text-base lg:text-lg text-text-secondary/70 font-light items-start">
+                              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-accent/40 shrink-0 mt-1" />
+                              <span>{t}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
 
                       <div className="bg-white/[0.03] border border-white/5 rounded-2xl md:rounded-[32px] p-6 md:p-8 h-fit">
-                        <h4 className="text-text-secondary/30 text-[9px] font-black uppercase tracking-widest mb-4 md:mb-6">Core Modules</h4>
+                        <h4 className="text-text-secondary/30 text-[9px] font-black uppercase tracking-widest mb-4">Core Modules</h4>
                         <div className="flex flex-wrap gap-2">
                           {SYLLABUS[activeModule]?.tools?.map((tool, i) => (
                             <span key={i} className="px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-[9px] font-mono text-accent uppercase tracking-wider">
@@ -258,20 +273,21 @@ export const CohortPage = ({ courseData }) => {
           </section>
         )}
 
+        {/* OTHER SECTIONS */}
         <div className="reveal-section mb-24 md:mb-48">
           <ComparisonSection />
         </div>
 
-        {/* QUOTE / FINAL CTA SECTION */}
-        <section className="reveal-section mb-24 md:mb-48 relative group">
+        {/* QUOTE SECTION */}
+        <section className="reveal-section mb-24 md:mb-48 relative group px-2">
           <div className="absolute inset-0 bg-accent/5 blur-[120px] rounded-full scale-50" />
-          <div className="relative py-20 md:py-40 px-6 bg-white/[0.02] border border-white/10 rounded-[40px] md:rounded-[100px] text-center overflow-hidden">
+          <div className="relative py-16 md:py-32 px-6 bg-white/[0.02] border border-white/10 rounded-[40px] md:rounded-[100px] text-center overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--accent-rgb),0.1),transparent_70%)]" />
             <div className="relative z-10 max-w-5xl mx-auto">
               <div className="w-12 h-12 md:w-16 md:h-16 bg-white/5 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-8 md:mb-10 border border-white/10 rotate-12">
                 <MousePointer2 className="w-6 h-6 md:w-7 md:h-7 text-accent" />
               </div>
-              <h2 className="text-3xl md:text-[80px] font-bold text-white mb-10 md:mb-16 leading-[1.1] tracking-tighter">
+              <h2 className="text-3xl md:text-6xl lg:text-[80px] font-bold text-white mb-10 md:mb-16 leading-[1.1] tracking-tighter">
                 {courseData.heroQuote || "Don't Just Use AI."} <br />
                 <span className="text-accent italic font-serif">Engineer It.</span>
               </h2>
@@ -303,7 +319,7 @@ export const CohortPage = ({ courseData }) => {
         </section>
       </main>
 
-      {/* STICKY CTA - IMPROVED PRICE DISPLAY */}
+      {/* STICKY CTA */}
       <div className="sticky-cta fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-[500px]">
         <div className="bg-bg/80 backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-2 flex items-center justify-between shadow-2xl">
           <div className="pl-4 md:pl-6 text-left">
@@ -327,8 +343,17 @@ export const CohortPage = ({ courseData }) => {
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @media (max-width: 640px) {
-          h1 { word-break: break-word; }
+        
+        @media (max-width: 1024px) {
+          .overflow-x-auto {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+          }
+        }
+
+        .lg\\:overflow-y-auto {
+          scrollbar-gutter: stable;
         }
       `}</style>
     </div>

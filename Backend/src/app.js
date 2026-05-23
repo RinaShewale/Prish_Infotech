@@ -13,6 +13,7 @@ import courseRoutes from "./routes/course.route.js";
 import lessonRoutes from "./routes/lesson.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import paymentRoutes from "./routes/payment.route.js";
+import certificateRoutes from "./routes/certificate.routes.js";
 
 import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
@@ -72,6 +73,7 @@ app.use("/api/course", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/certificate", certificateRoutes);
 
 // ======================
 // HEALTH CHECK
