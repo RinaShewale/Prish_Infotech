@@ -10,6 +10,8 @@ export const TestimonialSection = () => {
     handleGetReviews();
   }, []);
 
+  
+
   const validReviews = reviews?.filter((rev) => rev?.user?.name || rev?.name) || [];
 
   const displayData = validReviews.length > 0

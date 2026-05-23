@@ -21,10 +21,19 @@ export const StudentCard = ({ name, role, testimonial, rating, image }) => {
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-bg2 border border-accent/20 flex items-center justify-center overflow-hidden">
             {image && !imgError ? (
               <img
-                src={image}
+                src={
+                  !imgError && image
+                    ? image
+                    : fallbackAvatar
+                }
                 alt={name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                onError={() => setImgError(true)}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.target.onerror = null;
+
+                  setImgError(true);
+                }}
               />
             ) : (
               <span className="text-accent font-display font-bold text-base md:text-lg">
