@@ -1,31 +1,108 @@
-// ======================================================
+
 // 📁 services/course.api.js
-// ======================================================
 
-import API from "../../../auth/services/api";
 
-// GET ALL COURSES
+import API, {
+  PUBLIC_API,
+} from "../../../auth/services/api";
+
+
+// 🌍 GET ALL COURSES
+
+// Public Route
+//
+// Used on:
+// - Home Page
+// - Courses Page
+// - Landing Page
+//
+// Accessible without login/register.
+
+
 export const getCourses = () =>
-  API.get("/course");
+  PUBLIC_API.get("/course");
 
 
-// GET SINGLE COURSE (BY SLUG)
-export const getSingleCourse = (slug) =>
-  API.get(`/course/${slug}`);
+// 🌍 GET SINGLE COURSE
 
-// CREATE COURSE
-export const createCourse = (data) =>
-  API.post("/course/create", data);
+// Public Route
+//
+// Used for course details page.
+//
+// Example:
+// /course/full-stack-development
+//
+// Accessible without login/register.
 
-// UPDATE COURSE
-export const updateCourse = (id, data) =>
-  API.put(`/course/${id}`, data);
 
-// DELETE COURSE
-export const deleteCourse = (id) =>
-  API.delete(`/course/${id}`);
+export const getSingleCourse = (
+  slug
+) =>
+  PUBLIC_API.get(
+    `/course/${slug}`
+  );
 
-// UPLOAD VIDEO
+
+// 🔐 CREATE COURSE
+
+// Protected Route
+//
+// Only admin/instructor can create course.
+// Requires authentication.
+
+
+export const createCourse = (
+  data
+) =>
+  API.post(
+    "/course/create",
+    data
+  );
+
+
+// 🔐 UPDATE COURSE
+
+// Protected Route
+//
+// Only admin/instructor can update course.
+// Requires authentication.
+
+
+export const updateCourse = (
+  id,
+  data
+) =>
+  API.put(
+    `/course/${id}`,
+    data
+  );
+
+
+// 🔐 DELETE COURSE
+
+// Protected Route
+//
+// Only admin/instructor can delete course.
+// Requires authentication.
+
+
+export const deleteCourse = (
+  id
+) =>
+  API.delete(
+    `/course/${id}`
+  );
+
+
+// 🔐 UPLOAD COURSE VIDEO
+
+// Protected Route
+//
+// Only authenticated admin/instructor
+// can upload videos.
+// Requires authentication.
+
+
 export const uploadCourseVideo = (
   id,
   data

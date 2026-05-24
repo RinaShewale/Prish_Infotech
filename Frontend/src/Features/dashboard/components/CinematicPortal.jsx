@@ -6,6 +6,7 @@ import Lenis from "@studio-freight/lenis";
 import { Clock, BadgeCheck, PhoneCall, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useCourse } from "../../dashboard/Courses/hooks/useCourse";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -19,7 +20,20 @@ export default function CinematicPortal() {
   const textRefs = useRef([]);
 
   // Get courses from Redux backend state
-  const { courses } = useSelector((state) => state.course);
+  const { handleGetCourses } = useCourse();
+
+  const { courses } = useSelector(
+    (state) => state.course
+  );
+
+
+  useEffect(() => {
+
+    handleGetCourses();
+
+  }, []);
+
+
 
   // 1. LIMIT TO TOP 3 LATEST COURSES
   const latestCourses = useMemo(() => {
@@ -27,7 +41,7 @@ export default function CinematicPortal() {
   }, [courses]);
 
   // URL-friendly slug generator
-  const generateSlug = (title) => 
+  const generateSlug = (title) =>
     title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 
   useEffect(() => {
@@ -45,7 +59,20 @@ export default function CinematicPortal() {
   }, []);
 
   useGSAP(() => {
-    if (!latestCourses || latestCourses.length === 0) return;
+    if (
+      !latestCourses ||
+      latestCourses.length === 0
+    ) {
+
+      return (
+
+        <div className="h-screen bg-bg flex items-center justify-center">
+
+          <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
+
+        </div>
+      );
+    }
 
     const cards = cardsRef.current;
     const texts = textRefs.current;
@@ -54,7 +81,7 @@ export default function CinematicPortal() {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: "+=1200%", 
+        end: "+=1200%",
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
@@ -69,16 +96,16 @@ export default function CinematicPortal() {
     gsap.set(cards, { opacity: 0, scale: 0.85, yPercent: 30 });
     gsap.set(texts, { autoAlpha: 0, x: 40 });
 
-    tl.to({}, { duration: 3 }); 
+    tl.to({}, { duration: 3 });
 
     tl.to([word1Ref.current, plusRef.current, word2Ref.current], {
-      z: 1500, 
-      scale: 15, 
-      opacity: 0, 
+      z: 1500,
+      scale: 15,
+      opacity: 0,
       filter: "blur(20px)",
-      stagger: 0.1, 
-      ease: "power2.inOut", 
-      duration: 3 
+      stagger: 0.1,
+      ease: "power2.inOut",
+      duration: 3
     });
 
     latestCourses.forEach((_, index) => {
@@ -91,9 +118,9 @@ export default function CinematicPortal() {
           duration: 2, ease: "power2.out"
         }, "-=2");
 
-      tl.to({}, { duration: 3 }); 
+      tl.to({}, { duration: 3 });
 
-      if (index < latestCourses.length - 1){
+      if (index < latestCourses.length - 1) {
         tl.to(cards[index], {
           xPercent: -130, scale: 0.5, opacity: 0,
           duration: 3, ease: "power2.inOut",
@@ -188,11 +215,11 @@ export default function CinematicPortal() {
                   )}
                 </div>
 
-                <button 
+                <button
                   onClick={() => {
                     window.scrollTo(0, 0);
                     navigate(`/cohort/${generateSlug(course.title)}`);
-                  }} 
+                  }}
                   className="group flex items-center gap-2 md:gap-3 bg-accent text-[#131014] px-5 py-3 md:px-8 md:py-4 rounded-xl font-display font-bold text-[12px] md:text-sm transition-all hover:brightness-110 hover:scale-[1.02] active:scale-95 pointer-events-auto shadow-lg shadow-accent/20"
                 >
                   CHECK COURSE

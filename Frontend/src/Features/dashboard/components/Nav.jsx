@@ -38,22 +38,23 @@ import {
 } from "../../auth/auth.slice";
 
 export const Nav = () => {
-  // ======================================================
-  // ✅ STATES
-  // ======================================================
+
+  // States
 
   const [isScrolled, setIsScrolled] =
     useState(false);
 
-  const [mobileMenuOpen, setMobileMenuOpen] =
-    useState(false);
+  const [
+    mobileMenuOpen,
+    setMobileMenuOpen,
+  ] = useState(false);
 
-  const [dropdownOpen, setDropdownOpen] =
-    useState(false);
+  const [
+    dropdownOpen,
+    setDropdownOpen,
+  ] = useState(false);
 
-  // ======================================================
-  // ✅ HOOKS
-  // ======================================================
+  // Hooks
 
   const navigate = useNavigate();
 
@@ -61,18 +62,17 @@ export const Nav = () => {
 
   const dropdownRef = useRef(null);
 
-  const { handleLogout } = useAuth();
+  const { handleLogout } =
+    useAuth();
 
-  // ======================================================
-  // ✅ REDUX
-  // ======================================================
+  // Redux
 
   const { user, authChecked } =
-    useSelector((state) => state.auth);
+    useSelector(
+      (state) => state.auth
+    );
 
-  // ======================================================
-  // ✅ NAV LINKS
-  // ======================================================
+  // Navigation Links
 
   const navLinks = [
     {
@@ -96,20 +96,21 @@ export const Nav = () => {
     },
   ];
 
-  // ======================================================
-  // ✅ CLOSE DROPDOWN OUTSIDE CLICK
-  // ======================================================
+  // Close dropdown on outside click
 
   useEffect(() => {
+
     const handleClickOutside = (
       event
     ) => {
+
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(
           event.target
         )
       ) {
+
         setDropdownOpen(false);
       }
     };
@@ -120,20 +121,24 @@ export const Nav = () => {
     );
 
     return () => {
+
       document.removeEventListener(
         "mousedown",
         handleClickOutside
       );
     };
+
   }, []);
 
-  // ======================================================
-  // ✅ SCROLL EFFECT
-  // ======================================================
+  // Navbar scroll effect
 
   useEffect(() => {
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+
+      setIsScrolled(
+        window.scrollY > 20
+      );
     };
 
     window.addEventListener(
@@ -142,41 +147,47 @@ export const Nav = () => {
     );
 
     return () => {
+
       window.removeEventListener(
         "scroll",
         handleScroll
       );
     };
+
   }, []);
 
-  // ======================================================
-  // ✅ BODY SCROLL LOCK
-  // ======================================================
+  // Prevent body scroll on mobile menu
 
   useEffect(() => {
+
     document.body.style.overflow =
       mobileMenuOpen
         ? "hidden"
         : "unset";
+
   }, [mobileMenuOpen]);
 
-  // ======================================================
-  // ✅ LOGOUT
-  // ======================================================
+  // Logout handler
 
   const logoutUser = useCallback(
     async () => {
+
       try {
+
         await handleLogout();
 
-        dispatch(logoutAction());
+        dispatch(
+          logoutAction()
+        );
 
         setMobileMenuOpen(false);
 
         setDropdownOpen(false);
 
         navigate("/login");
+
       } catch (error) {
+
         console.error(
           "Logout Error:",
           error
@@ -190,20 +201,27 @@ export const Nav = () => {
     ]
   );
 
-  // ======================================================
-  // ✅ MOBILE STYLE
-  // ======================================================
+  // Mobile menu styles
 
   const mobileItemStyle =
     "text-2xl font-display font-light text-white hover:text-accent transition-all duration-300";
 
-  // ======================================================
-  // ✅ WAIT AUTH CHECK
-  // ======================================================
+  // Navbar render check
 
-  if (!authChecked) return null;
+  const shouldRenderNavbar =
+    authChecked;
+
+  // Prevent flicker
+
+  if (!shouldRenderNavbar) {
+
+    return (
+      <div className="fixed top-0 left-0 right-0 z-[100] h-24" />
+    );
+  }
 
   return (
+
     <nav
       className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
         isScrolled
@@ -211,55 +229,63 @@ export const Nav = () => {
           : "py-8 bg-transparent"
       }`}
     >
-      {/* ====================================================== */}
-      {/* ✅ CONTAINER */}
-      {/* ====================================================== */}
 
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        {/* ====================================================== */}
-        {/* ✅ LOGO */}
-        {/* ====================================================== */}
+
+        {/* Logo */}
 
         <Link
           to="/"
           className="flex items-center gap-3 z-[110]"
         >
+
           <div className="w-8 h-8 rounded-full border border-accent flex items-center justify-center">
-            <div className="w-4 h-4 bg-accent rounded-sm rotate-45"></div>
+
+            <div className="w-4 h-4 bg-accent rounded-sm rotate-45" />
+
           </div>
 
           <span className="font-display font-medium text-xl tracking-tight text-white uppercase">
+
             Prish
+
             <span className="opacity-50 font-normal">
+
               Infotech
+
             </span>
+
           </span>
+
         </Link>
 
-        {/* ====================================================== */}
-        {/* ✅ DESKTOP NAV */}
-        {/* ====================================================== */}
+        {/* Desktop Navigation */}
 
         <div className="hidden md:flex items-center gap-10 text-[13px] font-medium uppercase tracking-[0.2em] text-text-secondary">
+
           {navLinks.map((item) => (
+
             <Link
               key={item.name}
               to={item.path}
               className="hover:text-accent transition-colors"
             >
+
               {item.name}
+
             </Link>
+
           ))}
 
-          {/* ====================================================== */}
-          {/* ✅ USER DROPDOWN */}
-          {/* ====================================================== */}
+          {/* User Dropdown */}
 
           {user ? (
+
             <div
               className="relative"
               ref={dropdownRef}
             >
+
               <button
                 onClick={() =>
                   setDropdownOpen(
@@ -268,58 +294,71 @@ export const Nav = () => {
                 }
                 className="w-10 h-10 rounded-full bg-accent/20 border border-accent/30 overflow-hidden flex items-center justify-center text-accent font-bold hover:bg-accent/30 transition-all"
               >
+
                 {user?.avatar ? (
+
                   <img
                     src={user.avatar}
                     alt={user.name}
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
+
                       e.target.onerror =
                         null;
 
-                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        user.name
-                      )}&background=random&color=fff`;
+                      e.target.src =
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          user.name
+                        )}&background=random&color=fff`;
                     }}
                   />
+
                 ) : (
+
                   <span className="text-lg font-bold">
+
                     {user?.name
                       ?.charAt(0)
                       ?.toUpperCase()}
+
                   </span>
+
                 )}
+
               </button>
 
-              {/* ====================================================== */}
-              {/* ✅ DROPDOWN */}
-              {/* ====================================================== */}
-
               <AnimatePresence>
+
                 {dropdownOpen && (
+
                   <motion.div
                     initial={{
                       opacity: 0,
                       y: 10,
                       scale: 0.95,
                     }}
+
                     animate={{
                       opacity: 1,
                       y: 0,
                       scale: 1,
                     }}
+
                     exit={{
                       opacity: 0,
                       y: 10,
                       scale: 0.95,
                     }}
+
                     className="absolute top-full right-0 mt-4 w-48 bg-bg border border-white/10 rounded-xl overflow-hidden shadow-2xl py-2"
                   >
-                    {/* PROFILE */}
+
+                    {/* Profile */}
 
                     <button
                       onClick={() => {
+
                         navigate(
                           "/profile"
                         );
@@ -330,36 +369,44 @@ export const Nav = () => {
                       }}
                       className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/5 transition-colors text-xs uppercase tracking-widest"
                     >
+
                       <User
                         size={16}
                         className="text-accent"
                       />
 
                       My Profile
+
                     </button>
 
                     <div className="h-[1px] bg-white/5 mx-2 my-1" />
 
-                    {/* LOGOUT */}
+                    {/* Logout */}
 
                     <button
-                      onClick={logoutUser}
+                      onClick={
+                        logoutUser
+                      }
                       className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/5 transition-colors text-xs uppercase tracking-widest"
                     >
+
                       <LogOut
                         size={16}
                       />
 
                       Logout
+
                     </button>
+
                   </motion.div>
+
                 )}
+
               </AnimatePresence>
+
             </div>
+
           ) : (
-            // ======================================================
-            // ✅ LOGIN BUTTON
-            // ======================================================
 
             <button
               onClick={() =>
@@ -367,14 +414,16 @@ export const Nav = () => {
               }
               className="px-8 py-3 border border-border rounded-full text-[11px] uppercase tracking-widest hover:border-accent text-white transition-all"
             >
+
               Sign In
+
             </button>
+
           )}
+
         </div>
 
-        {/* ====================================================== */}
-        {/* ✅ MOBILE MENU BUTTON */}
-        {/* ====================================================== */}
+        {/* Mobile Menu Button */}
 
         <button
           className="md:hidden p-2 text-white z-[110]"
@@ -384,34 +433,43 @@ export const Nav = () => {
             )
           }
         >
+
           {mobileMenuOpen ? (
             <X size={32} />
           ) : (
             <Menu size={32} />
           )}
+
         </button>
+
       </div>
 
-      {/* ====================================================== */}
-      {/* ✅ MOBILE MENU */}
-      {/* ====================================================== */}
+      {/* Mobile Menu */}
 
       <AnimatePresence>
+
         {mobileMenuOpen && (
+
           <motion.div
             initial={{
               opacity: 0,
             }}
+
             animate={{
               opacity: 1,
             }}
+
             exit={{
               opacity: 0,
             }}
+
             className="fixed inset-0 w-full h-screen bg-bg flex flex-col items-center justify-center z-[105]"
           >
+
             <div className="flex flex-col items-center gap-8 text-center">
+
               {navLinks.map((link) => (
+
                 <Link
                   key={link.name}
                   to={link.path}
@@ -424,22 +482,30 @@ export const Nav = () => {
                     mobileItemStyle
                   }
                 >
+
                   {link.name}
+
                 </Link>
+
               ))}
 
-              {/* ====================================================== */}
-              {/* ✅ MOBILE AUTH */}
-              {/* ====================================================== */}
+              {/* Mobile Auth */}
 
               {user ? (
+
                 <button
-                  onClick={logoutUser}
+                  onClick={
+                    logoutUser
+                  }
                   className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black`}
                 >
+
                   Logout
+
                 </button>
+
               ) : (
+
                 <Link
                   to="/login"
                   onClick={() =>
@@ -449,13 +515,21 @@ export const Nav = () => {
                   }
                   className={`${mobileItemStyle} px-8 py-3 rounded-full bg-accent text-black`}
                 >
+
                   Sign In
+
                 </Link>
+
               )}
+
             </div>
+
           </motion.div>
+
         )}
+
       </AnimatePresence>
+
     </nav>
   );
 };

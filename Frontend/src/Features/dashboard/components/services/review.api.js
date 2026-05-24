@@ -2,22 +2,23 @@
 // 📁 services/review.api.js
 // ======================================================
 
-import API from "../../../auth/services/api";
+import API, {
+  PUBLIC_API,
+} from "../../../auth/services/api";
 
 // ======================================================
 // ✅ CREATE REVIEW
 // ======================================================
 
-export const createReviewApi = async (
-  reviewData
-) => {
-  const { data } = await API.post(
-    "/reviews/create",
-    reviewData
-  );
+export const createReviewApi =
+  async (reviewData) => {
+    const { data } = await API.post(
+      "/reviews/create",
+      reviewData
+    );
 
-  return data;
-};
+    return data;
+  };
 
 // ======================================================
 // ✅ GET ALL REVIEWS
@@ -25,9 +26,10 @@ export const createReviewApi = async (
 
 export const getAllReviewsApi =
   async () => {
-    const { data } = await API.get(
-      "/reviews"
-    );
+    const { data } =
+      await PUBLIC_API.get(
+        "/reviews"
+      );
 
     return data;
   };
@@ -38,9 +40,10 @@ export const getAllReviewsApi =
 
 export const getSingleReviewApi =
   async (id) => {
-    const { data } = await API.get(
-      `/reviews/${id}`
-    );
+    const { data } =
+      await PUBLIC_API.get(
+        `/reviews/${id}`
+      );
 
     return data;
   };
@@ -50,11 +53,15 @@ export const getSingleReviewApi =
 // ======================================================
 
 export const updateReviewApi =
-  async (id, reviewData) => {
-    const { data } = await API.put(
-      `/reviews/${id}`,
-      reviewData
-    );
+  async (
+    id,
+    reviewData
+  ) => {
+    const { data } =
+      await API.put(
+        `/reviews/${id}`,
+        reviewData
+      );
 
     return data;
   };
@@ -65,9 +72,10 @@ export const updateReviewApi =
 
 export const deleteReviewApi =
   async (id) => {
-    const { data } = await API.delete(
-      `/reviews/${id}`
-    );
+    const { data } =
+      await API.delete(
+        `/reviews/${id}`
+      );
 
     return data;
   };
