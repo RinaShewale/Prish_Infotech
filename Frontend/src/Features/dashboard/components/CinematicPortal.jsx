@@ -1,9 +1,9 @@
-import React, { useRef, useEffect, useMemo } from "react"; // Added useMemo
+import React, { useRef, useEffect, useMemo } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import Lenis from "@studio-freight/lenis";
-import { Clock, BadgeCheck, PhoneCall, ArrowRight } from "lucide-react";
+import { Clock, BadgeCheck, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useCourse } from "../../dashboard/Courses/hooks/useCourse";
@@ -19,34 +19,37 @@ export default function CinematicPortal() {
   const cardsRef = useRef([]);
   const textRefs = useRef([]);
 
-  // Get courses from Redux backend state
   const { handleGetCourses } = useCourse();
-
-  const { courses } = useSelector(
-    (state) => state.course
-  );
-
+  const { courses } = useSelector((state) => state.course);
 
   useEffect(() => {
-
     handleGetCourses();
+    
+    // 1. Force browser to NOT restore scroll position on back button
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
 
+    // 2. Immediate scroll to top on mount
+    window.scrollTo(0, 0);
+
+    return () => {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'auto';
+      }
+    };
   }, []);
 
-
-
-  // 1. LIMIT TO TOP 3 LATEST COURSES
   const latestCourses = useMemo(() => {
     return courses ? courses.slice(0, 3) : [];
   }, [courses]);
 
-  // URL-friendly slug generator
   const generateSlug = (title) =>
     title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.4,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smooth: true,
     });
@@ -59,23 +62,21 @@ export default function CinematicPortal() {
   }, []);
 
   useGSAP(() => {
-    if (
-      !latestCourses ||
-      latestCourses.length === 0
-    ) {
+    if (!latestCourses || latestCourses.length === 0) return;
 
-      return (
-
-        <div className="h-screen bg-bg flex items-center justify-center">
-
-          <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
-
-        </div>
-      );
-    }
+    // 3. Clear existing triggers to prevent overlapping instances on back-navigation
+    ScrollTrigger.getAll().forEach(t => t.kill());
 
     const cards = cardsRef.current;
     const texts = textRefs.current;
+
+    // Reset initial styles immediately to prevent the "blink"
+    gsap.set([word1Ref.current, plusRef.current, word2Ref.current], {
+        z: 0,
+        scale: 1,
+        opacity: 1,
+        filter: "blur(0px)"
+    });
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -85,6 +86,7 @@ export default function CinematicPortal() {
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
+        invalidateOnRefresh: true,
       },
     });
 
@@ -98,6 +100,7 @@ export default function CinematicPortal() {
 
     tl.to({}, { duration: 3 });
 
+    // The Portal Zoom Effect
     tl.to([word1Ref.current, plusRef.current, word2Ref.current], {
       z: 1500,
       scale: 15,
@@ -105,7 +108,7 @@ export default function CinematicPortal() {
       filter: "blur(20px)",
       stagger: 0.1,
       ease: "power2.inOut",
-      duration: 3
+      duration: 4
     });
 
     latestCourses.forEach((_, index) => {
@@ -131,6 +134,10 @@ export default function CinematicPortal() {
           }, "-=3");
       }
     });
+
+    // 4. Final calculation refresh
+    ScrollTrigger.refresh();
+
   }, { scope: containerRef, dependencies: [latestCourses] });
 
   if (!latestCourses || latestCourses.length === 0) return <div className="h-screen bg-bg" />;
@@ -158,7 +165,7 @@ export default function CinematicPortal() {
               <div
                 key={course._id}
                 ref={(el) => (cardsRef.current[index] = el)}
-                className="absolute inset-0 overflow-hidden rounded-2xl md:rounded-[32px] shadow-[0_40px_80px_rgba(0,0,0,0.6)] border border-border/50"
+                className="absolute inset-0 overflow-hidden rounded-2xl md:rounded-[32px] shadow-[0_40px_80px_rgba(0,0,0,0.6)] border border-border/50 bg-bg"
                 style={{ zIndex: latestCourses.length - index }}
               >
                 {course.type === "live" && (
@@ -204,7 +211,6 @@ export default function CinematicPortal() {
                   </div>
                 </div>
 
-                {/* UPDATED PRICE SECTION WITH OLD PRICE */}
                 <div className="flex items-baseline gap-3 mb-4 md:mb-8">
                   <span className="text-lg md:text-2xl font-medium text-text-secondary">Price</span>
                   <span className="text-xl md:text-4xl font-bold text-accent">₹{course.price}</span>
@@ -217,7 +223,6 @@ export default function CinematicPortal() {
 
                 <button
                   onClick={() => {
-                    window.scrollTo(0, 0);
                     navigate(`/cohort/${generateSlug(course.title)}`);
                   }}
                   className="group flex items-center gap-2 md:gap-3 bg-accent text-[#131014] px-5 py-3 md:px-8 md:py-4 rounded-xl font-display font-bold text-[12px] md:text-sm transition-all hover:brightness-110 hover:scale-[1.02] active:scale-95 pointer-events-auto shadow-lg shadow-accent/20"
