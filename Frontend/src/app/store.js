@@ -11,6 +11,9 @@ import reviewReducer from "../Features/dashboard/components/slice/review.slice";
 
 // 🎓 ADD CERTIFICATE SLICE
 import certificateReducer from "../Features/dashboard/Courses/certificate.slice";
+import enrollmentReducer from "../Features/dashboard/Courses/enrollment.slice";
+import paymentReducer from "../Features/dashboard/Courses/payment.slice";
+import couponReducer from "../Features/dashboard/Courses/coupon.slice";
 
 export const store = configureStore({
   reducer: {
@@ -21,5 +24,8 @@ export const store = configureStore({
 
     // 🎓 NEW
     certificate: certificateReducer,
+     enrollment: enrollmentReducer,
+      payment: paymentReducer,
+        coupon:couponReducer,
   },
 });

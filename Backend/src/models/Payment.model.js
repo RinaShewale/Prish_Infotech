@@ -19,6 +19,51 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
+    originalPrice: {
+      type: Number,
+      default: 0,
+    },
+
+    coursePrice: {
+      type: Number,
+      default: 0,
+    },
+
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    discountPercent: {
+      type: Number,
+      default: 0,
+    },
+
+    couponCode: {
+      type: String,
+      default: "",
+    },
+
+    couponDiscount: {
+      type: Number,
+      default: 0,
+    },
+
+    platformFee: {
+      type: Number,
+      default: 0,
+    },
+
+    gst: {
+      type: Number,
+      default: 0,
+    },
+
+    totalAmount: {
+      type: Number,
+      default: 0,
+    },
+
     currency: {
       type: String,
       default: "INR",
@@ -39,7 +84,11 @@ const paymentSchema = new mongoose.Schema(
 
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed"],
+      enum: [
+        "pending",
+        "paid",
+        "failed",
+      ],
       default: "pending",
     },
 
@@ -52,6 +101,9 @@ const paymentSchema = new mongoose.Schema(
   }
 );
 
-const Payment = mongoose.model("Payment", paymentSchema);
+const Payment = mongoose.model(
+  "Payment",
+  paymentSchema
+);
 
 export default Payment;

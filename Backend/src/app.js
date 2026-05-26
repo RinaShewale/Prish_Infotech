@@ -14,6 +14,8 @@ import lessonRoutes from "./routes/lesson.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import paymentRoutes from "./routes/payment.route.js";
 import certificateRoutes from "./routes/certificate.routes.js";
+import enrollmentRoutes from "./routes/enrollment.routes.js";
+import couponRoutes from "./routes/coupon.route.js";
 
 import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
@@ -74,6 +76,8 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/certificate", certificateRoutes);
+app.use("/api/enrollment", enrollmentRoutes);
+app.use("/api/coupon", couponRoutes);
 
 // ======================
 // HEALTH CHECK
