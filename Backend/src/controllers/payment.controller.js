@@ -1,17 +1,11 @@
 import crypto from "crypto";
-
 import razorpay from "../config/razorpay.js";
-
 import Payment from "../models/payment.model.js";
-
 import Enrollment from "../models/Enrollment.model.js";
 
-export const createOrder = async (
-  req,
-  res
-) => {
+// ================= CREATE ORDER =================
+export const createOrder = async (req, res) => {
   try {
-
     const {
       courseId,
       originalPrice,
@@ -31,36 +25,21 @@ export const createOrder = async (
       receipt: `receipt_${Date.now()}`,
     };
 
-    const order =
-      await razorpay.orders.create(
-        options
-      );
+    const order = await razorpay.orders.create(options);
 
     await Payment.create({
       user: req.user._id,
-
       course: courseId,
-
       amount: totalAmount,
-
       originalPrice,
-
       coursePrice,
-
       discountAmount,
-
       discountPercent,
-
       couponCode,
-
       couponDiscount,
-
       platformFee,
-
       gst,
-
       totalAmount,
-
       razorpayOrderId: order.id,
     });
 
@@ -68,9 +47,7 @@ export const createOrder = async (
       success: true,
       order,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -78,12 +55,9 @@ export const createOrder = async (
   }
 };
 
-export const verifyPayment = async (
-  req,
-  res
-) => {
+// ================= VERIFY PAYMENT =================
+export const verifyPayment = async (req, res) => {
   try {
-
     const {
       razorpay_order_id,
       razorpay_payment_id,
@@ -91,82 +65,77 @@ export const verifyPayment = async (
       courseId,
     } = req.body;
 
-    const sign =
-      razorpay_order_id +
-      "|" +
-      razorpay_payment_id;
+    const sign = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSign =
-      crypto
-        .createHmac(
-          "sha256",
-          process.env
-            .RAZORPAY_KEY_SECRET
-        )
-        .update(sign.toString())
-        .digest("hex");
+    const expectedSign = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(sign.toString())
+      .digest("hex");
 
-    const isAuthentic =
-      expectedSign ===
-      razorpay_signature;
-
-    if (!isAuthentic) {
+    // ❌ Invalid signature
+    if (expectedSign !== razorpay_signature) {
       return res.status(400).json({
         success: false,
-        message:
-          "Invalid payment signature",
+        message: "Invalid payment signature",
       });
     }
 
-    const payment =
-      await Payment.findOne({
-        razorpayOrderId:
-          razorpay_order_id,
-      });
+    const payment = await Payment.findOne({
+      razorpayOrderId: razorpay_order_id,
+    });
 
     if (!payment) {
       return res.status(404).json({
         success: false,
-        message:
-          "Payment not found",
+        message: "Payment not found",
       });
     }
 
-    payment.paymentStatus =
-      "paid";
+    // ================= ALREADY PAID SAFE CHECK =================
+    if (payment.paymentStatus === "paid") {
+      const existingEnrollment = await Enrollment.findOne({
+        user: req.user._id,
+        course: courseId,
+      });
 
-    payment.razorpayPaymentId =
-      razorpay_payment_id;
+      return res.status(200).json({
+        success: true,
+        message: "Already processed payment",
+        enrolled: true,
+        alreadyEnrolled: true,
+        enrollment: existingEnrollment || null,
+      });
+    }
 
-    payment.razorpaySignature =
-      razorpay_signature;
-
+    // ================= MARK PAYMENT AS PAID =================
+    payment.paymentStatus = "paid";
+    payment.razorpayPaymentId = razorpay_payment_id;
+    payment.razorpaySignature = razorpay_signature;
     payment.paidAt = new Date();
 
     await payment.save();
 
-    const alreadyEnrolled =
-      await Enrollment.findOne({
-        user: req.user._id,
-        course: courseId,
-      });
+    // ================= CREATE ENROLLMENT SAFELY =================
+    let enrollment = await Enrollment.findOne({
+      user: req.user._id,
+      course: courseId,
+    });
 
-    if (!alreadyEnrolled) {
-
-      await Enrollment.create({
+    if (!enrollment) {
+      enrollment = await Enrollment.create({
         user: req.user._id,
         course: courseId,
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message:
-        "Payment verified successfully",
+      message: "Payment verified successfully",
+      enrolled: true,
+      alreadyEnrolled: false,
+      enrollment,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,

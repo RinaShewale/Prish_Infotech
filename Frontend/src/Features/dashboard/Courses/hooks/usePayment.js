@@ -6,9 +6,7 @@ export const usePayment = () => {
 
   const payment = useSelector((state) => state.payment);
 
-  // =========================
   // CREATE ORDER
-  // =========================
   const handleCreateOrder = async (data) => {
     try {
       const result = await dispatch(createOrder(data));
@@ -17,28 +15,35 @@ export const usePayment = () => {
         return result.payload;
       }
 
-      throw new Error(result.payload || "Order failed");
+      return { success: false, message: result.payload };
     } catch (error) {
       console.log("Create Order Error:", error);
-      return null;
+      return { success: false };
     }
   };
 
-  // =========================
-  // VERIFY PAYMENT
-  // =========================
+  // VERIFY PAYMENT (🔥 FIXED)
   const handleVerifyPayment = async (data) => {
     try {
       const result = await dispatch(verifyPayment(data));
 
       if (verifyPayment.fulfilled.match(result)) {
-        return result.payload;
+        return {
+          success: true,
+          ...result.payload,
+        };
       }
 
-      throw new Error(result.payload || "Payment verification failed");
+      return {
+        success: false,
+        message: result.payload || "Payment failed",
+      };
     } catch (error) {
       console.log("Verify Payment Error:", error);
-      return null;
+      return {
+        success: false,
+        message: error.message,
+      };
     }
   };
 
