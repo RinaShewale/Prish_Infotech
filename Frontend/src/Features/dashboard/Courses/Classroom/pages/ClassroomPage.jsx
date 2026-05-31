@@ -1,16 +1,15 @@
 import React from 'react';
-import { Search, ChevronDown, Video, Headphones, LayoutGrid } from 'lucide-react';
+import { Search, ChevronDown, Video, Headphones } from 'lucide-react';
 import EnrolledCourseCards from '../components/EnrolledCourseCards';
 import NotificationPanel from '../components/NotificationPanel';
 import StatsBento from '../components/StatsBento';
 import { FluidBackground } from '../../../Home/components/FluidBackground';
 
+// 1. Import the external data
+import { coursesData } from '../data/courses'; 
 const ClassroomPage = () => {
-  const courses = [
-    { id: 1, title: "Complete DSA with Java & Spring", instructor: "Deepak Kumar", progress: 42, image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=800", date: "May 14, 2026" },
-    { id: 2, title: "2.0 Job Ready AI Powered Cohort", instructor: "Harkirat Singh", progress: 68, image: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=800", date: "Oct 29, 2025", hasDiscord: true },
-  ];
-
+  // Note: We use the imported coursesData instead of the hardcoded local array
+  
   return (
     <div className="h-screen w-full bg-[var(--color-bg)] text-text overflow-hidden font-sans relative">
       <FluidBackground />
@@ -50,8 +49,13 @@ const ClassroomPage = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar space-y-4">
-              {courses.map((course, idx) => (
-                <EnrolledCourseCards key={course.id} course={course} index={idx} />
+              {/* 2. Map through the imported coursesData */}
+              {coursesData.map((course, idx) => (
+                <EnrolledCourseCards 
+                    key={course.id} 
+                    course={course} 
+                    index={idx} 
+                />
               ))}
             </div>
           </section>
