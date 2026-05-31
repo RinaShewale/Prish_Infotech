@@ -6,9 +6,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 // Components
-import {Nav} from "../../components/Nav";
-import {FluidBackground} from "../../components/FluidBackground";
-import { Footer } from "../../components/Footer";
+import {Nav} from "../../Home/components/Nav";
+import {FluidBackground} from "../../Home/components/FluidBackground";
+import { Footer } from "../../Home/components/Footer";
 import BootcampComparison from "../Component/BootcampComparison";
 import BootcampCards from "../Component/BootcampCards";
 import BootcampVideo from "../Component/BootcampVideo";

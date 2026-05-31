@@ -6,7 +6,7 @@ import Lenis from "@studio-freight/lenis";
 import { Clock, BadgeCheck, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useCourse } from "../../dashboard/Courses/hooks/useCourse";
+import { useCourse } from "../../Courses/hooks/useCourse";
 
 gsap.registerPlugin(ScrollTrigger);
 

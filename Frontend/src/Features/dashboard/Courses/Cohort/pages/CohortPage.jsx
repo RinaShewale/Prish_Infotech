@@ -7,24 +7,27 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // Components
-import { FluidBackground } from "../../../components/FluidBackground";
-import ComparisonSection from "../../../components/ComparisonSection";
-import { FAQSection } from '../../../components/FAQSection';
+import { FluidBackground } from "../../../Home/components/FluidBackground";
+import ComparisonSection from "../../../Home/components/ComparisonSection";
+import { FAQSection } from '../../../Home/components/FAQSection';
 import CertificationSection from '../component/CertificationSection';
 import { PrishEnrollment } from '../component/PrishEnrollment';
 
 // Hooks
 import { useCertificate } from '../../hooks/useCertificate';
+import { useEnrollment } from "../../hooks/useEnrollment";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const CohortPage = ({ courseData }) => {
+
+  
   const containerRef = useRef(null);
   const syllabusRef = useRef(null);
   const enrollmentRef = useRef(null);
   const contentRef = useRef(null);
   const heroImageRef = useRef(null);
-  const tabsRef = useRef(null); 
+  const tabsRef = useRef(null);
   const [activeModule, setActiveModule] = useState(0);
 
   // ======================================================
@@ -33,13 +36,15 @@ export const CohortPage = ({ courseData }) => {
   const { user } = useSelector((state) => state.auth);
   const { myCertificates, getMyCertificates } = useCertificate();
 
+  const { enrollments, fetchEnrollments } = useEnrollment();
+
   useEffect(() => {
     getMyCertificates();
   }, []);
 
   const currentUserCertificate = useMemo(() => {
     if (!courseData?._id || !myCertificates) return null;
-    return myCertificates.find(cert => 
+    return myCertificates.find(cert =>
       (cert.course?._id === courseData._id) || (cert.course === courseData._id)
     );
   }, [myCertificates, courseData]);
@@ -66,27 +71,27 @@ export const CohortPage = ({ courseData }) => {
     let ctx = gsap.context(() => {
       // 1. Hero Entrance Timeline
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-      
-      tl.from(".hero-reveal", { 
-        y: 40, 
-        opacity: 0, 
-        stagger: 0.08, 
+
+      tl.from(".hero-reveal", {
+        y: 40,
+        opacity: 0,
+        stagger: 0.08,
         duration: 1.5,
         clearProps: "all"
       })
-      .from(heroImageRef.current, { 
-        scale: 0.95, 
-        opacity: 0, 
-        duration: 2,
-        ease: "power2.out" 
-      }, "-=1.2");
+        .from(heroImageRef.current, {
+          scale: 0.95,
+          opacity: 0,
+          duration: 2,
+          ease: "power2.out"
+        }, "-=1.2");
 
       // 2. Parallax Mouse Effect for Hero Image (Desktop Only)
       const handleMouseMove = (e) => {
         const { clientX, clientY } = e;
         const xPos = (clientX / window.innerWidth - 0.5) * 20;
         const yPos = (clientY / window.innerHeight - 0.5) * 20;
-        
+
         gsap.to(heroImageRef.current, {
           x: xPos,
           y: yPos,
@@ -96,7 +101,7 @@ export const CohortPage = ({ courseData }) => {
           ease: "power2.out"
         });
       };
-      
+
       if (window.innerWidth > 1024) {
         window.addEventListener('mousemove', handleMouseMove);
       }
@@ -141,7 +146,7 @@ export const CohortPage = ({ courseData }) => {
   // Content change transition for syllabus
   useLayoutEffect(() => {
     if (!contentRef.current) return;
-    gsap.fromTo(contentRef.current, 
+    gsap.fromTo(contentRef.current,
       { opacity: 0, x: 10, filter: 'blur(10px)' },
       { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.6, ease: "expo.out" }
     );
@@ -254,9 +259,8 @@ export const CohortPage = ({ courseData }) => {
                       <button
                         key={idx}
                         onClick={() => handleTabChange(idx)}
-                        className={`flex-shrink-0 w-[280px] lg:w-full p-5 md:p-6 rounded-2xl md:rounded-[28px] border transition-all duration-500 text-left snap-center group outline-none ${
-                          activeModule === idx ? "bg-accent border-accent text-bg shadow-[0_10px_30px_rgba(var(--accent-rgb),0.2)] scale-[1.02]" : "bg-white/[0.03] border-white/5 text-text-secondary hover:border-white/20 hover:bg-white/[0.05]"
-                        }`}
+                        className={`flex-shrink-0 w-[280px] lg:w-full p-5 md:p-6 rounded-2xl md:rounded-[28px] border transition-all duration-500 text-left snap-center group outline-none ${activeModule === idx ? "bg-accent border-accent text-bg shadow-[0_10px_30px_rgba(var(--accent-rgb),0.2)] scale-[1.02]" : "bg-white/[0.03] border-white/5 text-text-secondary hover:border-white/20 hover:bg-white/[0.05]"
+                          }`}
                       >
                         <div className="flex flex-col items-start gap-1 pointer-events-none">
                           <span className={`text-[9px] font-black uppercase tracking-widest ${activeModule === idx ? "text-bg/60" : "text-accent/60"}`}>
@@ -336,16 +340,24 @@ export const CohortPage = ({ courseData }) => {
           </div>
         </section>
 
-        <CertificationSection 
+        <CertificationSection
           userCertificate={currentUserCertificate}
-          user={user} 
+          user={{
+            ...user,
+            enrollments,
+          }}
           data={{
-            mainHeading: "Validate Your", 
+            _id: courseData?._id,
+            isEnrolled: courseData?.isEnrolled,
+
+            mainHeading: "Validate Your",
             highlightedText: "Expertise",
-            description: "Earn a specialized certification upon successful completion of the cohort curriculum and final project assessment.",
-            certType: courseData.title || "Mastery", 
+            description:
+              "Earn a specialized certification upon successful completion of the cohort curriculum and final project assessment.",
+
+            certType: courseData.title || "Mastery",
             skillsLearned: CATEGORIES.join(", "),
-          }} 
+          }}
         />
 
         <div className="reveal-section mt-24 md:mt-48"><FAQSection /></div>

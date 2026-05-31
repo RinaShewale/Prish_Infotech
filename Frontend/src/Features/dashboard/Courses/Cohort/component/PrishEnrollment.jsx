@@ -57,7 +57,7 @@ export const PrishEnrollment = ({ courseData, title }) => {
   const basePrice = Number(courseData?.price || 0); // Price after website discount
   const discountPercent = Number(courseData?.discount || 0);
   const courseDiscount = originalPrice - basePrice;
-  
+
   const platformFee = 100;
   const finalCoursePrice = basePrice - couponDiscount; // Price after Coupon
   const subtotal = finalCoursePrice + platformFee;
@@ -125,8 +125,8 @@ export const PrishEnrollment = ({ courseData, title }) => {
             });
 
             if (res?.enrolled || res?.success) {
-              fetchEnrollments();
-              setShowPopup(true);
+              await fetchEnrollments();
+              window.location.reload();
             }
           } catch (error) {
             alert("Payment Verification Failed");
@@ -173,8 +173,8 @@ export const PrishEnrollment = ({ courseData, title }) => {
                 You are enrolled in <strong>{courseData?.title}</strong>. Head to your dashboard to start learning.
               </p>
               <button
-                onClick={() => navigate("/dashboard")}
-                className="w-full bg-accent text-bg py-6 rounded-2xl font-black text-sm uppercase tracking-widest hover:brightness-110 transition-all flex items-center justify-center gap-3"
+                onClick={() => navigate(`/classroom/course/${courseData?._id}`)}
+                className="w-full bg-green-500 text-white py-6 rounded-2xl font-black text-sm uppercase flex items-center justify-center gap-4 hover:bg-green-600 transition-all shadow-xl"
               >
                 Go to Classroom <ArrowRight className="w-5 h-5" />
               </button>
@@ -306,7 +306,7 @@ export const PrishEnrollment = ({ courseData, title }) => {
                   </button>
                 ) : isAlreadyEnrolled ? (
                   <button
-                    onClick={() => navigate("/dashboard")}
+                    onClick={() => navigate(`/classroom`)}
                     className="w-full bg-green-500 text-white py-6 rounded-2xl font-black text-sm uppercase flex items-center justify-center gap-4 hover:bg-green-600 transition-all shadow-xl"
                   >
                     Go to Classroom <ArrowRight className="w-5 h-5" />
@@ -317,7 +317,8 @@ export const PrishEnrollment = ({ courseData, title }) => {
                     whileTap={{ scale: 0.98 }}
                     className="w-full group bg-white text-bg py-6 rounded-2xl font-black text-sm uppercase flex items-center justify-center gap-4 hover:bg-accent transition-all duration-500 shadow-2xl"
                   >
-                    Proceed to Checkout <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    Proceed to Checkout{" "}
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </motion.button>
                 )}
               </div>

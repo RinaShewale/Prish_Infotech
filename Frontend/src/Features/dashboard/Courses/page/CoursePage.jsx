@@ -21,19 +21,19 @@ import { useCourse } from "../hooks/useCourse";
 
 // Components
 
-import { Nav } from "../../components/Nav";
+import { Nav } from "../../Home/components/Nav";
 
-import { FluidBackground } from "../../components/FluidBackground";
+import { FluidBackground } from "../../Home/components/FluidBackground";
 
-import { Footer } from "../../components/Footer";
+import { Footer } from "../../Home/components/Footer";
 
 import CourseCard from "../Component/CourseCard";
 
-import ComparisonSection from "../../components/ComparisonSection";
+import ComparisonSection from "../../Home/components/ComparisonSection";
 
-import { FAQSection } from "../../components/FAQSection";
+import { FAQSection } from "../../Home/components/FAQSection";
 
-import { CTASection } from "../../components/CTASection";
+import { CTASection } from "../../Home/components/CTASection";
 
 export default function CoursesPage() {
 

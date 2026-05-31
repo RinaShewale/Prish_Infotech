@@ -5,17 +5,17 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 // Components
-import { Nav } from "../../components/Nav";
-import { FluidBackground } from "../../components/FluidBackground";
-import { Media } from "../../components/Media";
-import ZoomEffect from "../../components/CinematicPortal";
-import { InfiniteScroll } from "../../components/InfiniteScroll";
-import InteractiveLoader from "../../components/InteractiveLoader";
-import { Footer } from "../../components/Footer";
-import ComparisonSection from "../../components/ComparisonSection";
-import { FAQSection } from "../../components/FAQSection";
-import { CTASection } from "../../components/CTASection";
-import { TestimonialSection } from "../../components/TestimonialSection";
+import { Nav } from "../../Home/components/Nav";
+import { FluidBackground } from "../../Home/components/FluidBackground";
+import { Media } from "../../Home/components/Media";
+import ZoomEffect from "../../Home/components/CinematicPortal";
+import { InfiniteScroll } from "../../Home/components/InfiniteScroll";
+import InteractiveLoader from "../../Home/components/InteractiveLoader";
+import { Footer } from "../../Home/components/Footer";
+import ComparisonSection from "../../Home/components/ComparisonSection";
+import { FAQSection } from "../../Home/components/FAQSection";
+import { CTASection } from "../../Home/components/CTASection";
+import { TestimonialSection } from "../../Home/components/TestimonialSection";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {

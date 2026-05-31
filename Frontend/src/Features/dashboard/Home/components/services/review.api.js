@@ -4,7 +4,7 @@
 
 import API, {
   PUBLIC_API,
-} from "../../../auth/services/api";
+} from "../../../../auth/services/api";
 
 // ======================================================
 // ✅ CREATE REVIEW

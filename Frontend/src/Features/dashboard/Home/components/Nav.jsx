@@ -31,11 +31,11 @@ import {
   useDispatch,
 } from "react-redux";
 
-import { useAuth } from "../../../Features/auth/hooks/useAuth";
+import { useAuth } from "../../../auth/hooks/useAuth";
 
 import {
   logout as logoutAction,
-} from "../../auth/auth.slice";
+} from "../../../auth/auth.slice";
 
 export const Nav = () => {
 

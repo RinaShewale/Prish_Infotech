@@ -6,7 +6,7 @@ import {
   Settings, ChevronRight, ShieldCheck, 
   Star, MessageSquareHeart, Zap 
 } from "lucide-react";
-import { ReviewModal } from "../../components/ReviewModal"; 
+import { ReviewModal } from "../../Home/components/ReviewModal"; 
 
 const ProfilePage = () => {
   const user = useSelector((state) => state.auth.user);

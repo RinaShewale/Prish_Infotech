@@ -4,6 +4,7 @@ import Payment from "../models/payment.model.js";
 import Enrollment from "../models/Enrollment.model.js";
 
 // ================= CREATE ORDER =================
+// ================= CREATE ORDER =================
 export const createOrder = async (req, res) => {
   try {
     const {
@@ -19,6 +20,21 @@ export const createOrder = async (req, res) => {
       totalAmount,
     } = req.body;
 
+    // ================= CHECK ALREADY ENROLLED =================
+    const alreadyEnrolled = await Enrollment.findOne({
+      user: req.user._id,
+      course: courseId,
+    });
+
+    if (alreadyEnrolled) {
+      return res.status(200).json({
+        success: true,
+        alreadyEnrolled: true,
+        message: "You are already enrolled in this course",
+      });
+    }
+
+    // ================= CREATE RAZORPAY ORDER =================
     const options = {
       amount: totalAmount * 100,
       currency: "INR",
@@ -27,6 +43,7 @@ export const createOrder = async (req, res) => {
 
     const order = await razorpay.orders.create(options);
 
+    // ================= SAVE PAYMENT =================
     await Payment.create({
       user: req.user._id,
       course: courseId,
@@ -41,19 +58,24 @@ export const createOrder = async (req, res) => {
       gst,
       totalAmount,
       razorpayOrderId: order.id,
+      paymentStatus: "created",
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
+      alreadyEnrolled: false,
       order,
     });
+
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
+
+
 
 // ================= VERIFY PAYMENT =================
 export const verifyPayment = async (req, res) => {

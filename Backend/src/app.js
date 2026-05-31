@@ -16,6 +16,8 @@ import paymentRoutes from "./routes/payment.route.js";
 import certificateRoutes from "./routes/certificate.routes.js";
 import enrollmentRoutes from "./routes/enrollment.routes.js";
 import couponRoutes from "./routes/coupon.route.js";
+import problemRoutes from "./routes/problem.routes.js";
+import lessonProgressRoutes from "./routes/lessonProgress.routes.js";
 
 import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
@@ -73,11 +75,13 @@ app.use("/api/test", testRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/course", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
+app.use("/api/problems", problemRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/certificate", certificateRoutes);
 app.use("/api/enrollment", enrollmentRoutes);
 app.use("/api/coupon", couponRoutes);
+app.use("/api/lesson-progress",lessonProgressRoutes);
 
 // ======================
 // HEALTH CHECK

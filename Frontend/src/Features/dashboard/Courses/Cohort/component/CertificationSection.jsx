@@ -13,7 +13,15 @@ export const CertificationSection = ({ data, userCertificate, user }) => {
 
   const displayCourseName = userCertificate?.course?.title || data.certType;
 
-  const isEnrolled = data?.isEnrolled;
+
+  const isEnrolled =
+    userCertificate ||
+    user?.enrollments?.some(
+      (e) =>
+        (e.course?._id || e.course) === data?._id
+    );
+
+    
   const isCompleted = data?.isCompleted;
 
   const displayDate = userCertificate?.createdAt
@@ -134,10 +142,10 @@ export const CertificationSection = ({ data, userCertificate, user }) => {
               <div className="shrink-0">
                 <p
                   className={`text-xs md:text-lg font-bold mb-0.5 md:mb-1 uppercase ${userCertificate
-                      ? "text-black"
-                      : isEnrolled
-                        ? "text-orange-500"
-                        : "text-blue-500"
+                    ? "text-black"
+                    : isEnrolled
+                      ? "text-orange-500"
+                      : "text-blue-500"
                     }`}
                 >
                   {displayDate}

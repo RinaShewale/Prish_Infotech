@@ -4,27 +4,46 @@ import {
   createLesson,
   getAllLessons,
   getSingleLesson,
+  getLessonsByCourse,
   updateLesson,
   deleteLesson,
 } from "../controllers/lesson.controller.js";
 
-import {
-  protect
-} from "../middleware/auth.middleware.js";
+import { protect } from "../middleware/auth.middleware.js";
 import { adminOnly } from "../middleware/admin.middleware.js";
 
 const router = express.Router();
 
 
 
-// PUBLIC ROUTES
+// ================= PUBLIC ROUTES =================
+
+// GET ALL LESSONS
 router.get("/", getAllLessons);
 
-router.get("/:id", getSingleLesson);
+
+
+// ================= PROTECTED ROUTES =================
+
+// GET LESSONS BY COURSE
+router.get(
+  "/course/:courseId",
+  protect,
+  getLessonsByCourse
+);
+
+// GET SINGLE LESSON
+router.get(
+  "/:id",
+  protect,
+  getSingleLesson
+);
 
 
 
-// ADMIN ROUTES
+// ================= ADMIN ROUTES =================
+
+// CREATE LESSON
 router.post(
   "/create",
   protect,
@@ -32,6 +51,7 @@ router.post(
   createLesson
 );
 
+// UPDATE LESSON
 router.put(
   "/:id",
   protect,
@@ -39,6 +59,7 @@ router.put(
   updateLesson
 );
 
+// DELETE LESSON
 router.delete(
   "/:id",
   protect,

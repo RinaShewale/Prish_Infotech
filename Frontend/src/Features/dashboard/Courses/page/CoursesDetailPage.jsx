@@ -6,9 +6,9 @@ import { Loader2 } from "lucide-react";
 import { useCourse } from "../hooks/useCourse";
 import { CohortPage  } from "../Cohort/pages/CohortPage";
 
-import { Nav } from "../../components/Nav";
-import { Footer } from "../../components/Footer";
-import { FluidBackground } from "../../components/FluidBackground";
+import { Nav } from "../..//Home/components/Nav";
+import { Footer } from "../../Home/components/Footer";
+import { FluidBackground } from "../../Home/components/FluidBackground";
 
 export const CourseDetailPage = () => {
   const { slug } = useParams();

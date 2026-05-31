@@ -6,7 +6,7 @@ import App from "./app/App.jsx";
 import { Provider } from "react-redux";
 import { store } from "./app/store.js";
 
-import { ReviewProvider } from "./Features/dashboard/components/context/ReviewContext.jsx";
+import { ReviewProvider } from "./Features/dashboard/Home/components/context/ReviewContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   

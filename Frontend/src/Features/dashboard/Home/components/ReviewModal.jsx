@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { ReviewContext } from "../../dashboard/components/context/ReviewContext";
+import { ReviewContext } from "../../Home/components/context/ReviewContext";
 
 // --- 1. REVIEW MODAL COMPONENT ---
 export const ReviewModal = ({ isOpen, onClose, courseId }) => {

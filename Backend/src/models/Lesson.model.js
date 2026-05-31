@@ -21,12 +21,25 @@ const lessonSchema = new mongoose.Schema(
       ref: "Course",
       required: true,
     },
+
+    order: {
+      type: Number,
+      default: 0,
+    },
+
+    duration: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Lesson = mongoose.model("Lesson", lessonSchema);
+const Lesson = mongoose.model(
+  "Lesson",
+  lessonSchema
+);
 
 export default Lesson;

@@ -1,7 +1,7 @@
 import React, { useEffect, useContext } from "react";
 import { motion } from "framer-motion"; // Changed to framer-motion for consistency
 import { StudentCard } from "./StudentCard";
-import { ReviewContext } from "../../dashboard/components/context/ReviewContext";
+import { ReviewContext } from "../../Home/components/context/ReviewContext";
 
 export const TestimonialSection = () => {
   const { reviews, handleGetReviews, loading } = useContext(ReviewContext);
