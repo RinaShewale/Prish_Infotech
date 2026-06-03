@@ -22,7 +22,7 @@ export const getMyEnrollments =
       } catch (error) {
         return thunkAPI.rejectWithValue(
           error.response?.data?.message ||
-            "Failed to fetch enrollments"
+          "Failed to fetch enrollments"
         );
       }
     }
@@ -44,7 +44,7 @@ export const enrollCourse =
       } catch (error) {
         return thunkAPI.rejectWithValue(
           error.response?.data?.message ||
-            "Enrollment failed"
+          "Enrollment failed"
         );
       }
     }
@@ -90,12 +90,10 @@ const enrollmentSlice = createSlice({
         getMyEnrollments.fulfilled,
         (state, action) => {
           state.loading = false;
-
           state.enrollments =
-            action.payload.enrollments;
+            action.payload.enrollments || [];
         }
       )
-
       .addCase(
         getMyEnrollments.rejected,
         (state, action) => {

@@ -24,6 +24,15 @@ const certificateSchema = new mongoose.Schema(
   }
 );
 
-const Certificate = mongoose.model("Certificate", certificateSchema);
+// Prevent duplicate certificates
+certificateSchema.index(
+  { user: 1, course: 1 },
+  { unique: true }
+);
+
+const Certificate = mongoose.model(
+  "Certificate",
+  certificateSchema
+);
 
 export default Certificate;

@@ -8,13 +8,24 @@ export const createCertificate = async (req, res) => {
   try {
     const { user, course, certificateUrl } = req.body;
 
+    const existingCertificate = await Certificate.findOne({
+      user,
+      course,
+    });
+
+    if (existingCertificate) {
+      return res.status(400).json({
+        success: false,
+        message: "Certificate already exists",
+      });
+    }
+
     const certificate = await Certificate.create({
       user,
       course,
-      certificateUrl,
+      certificateUrl: certificateUrl || "",
     });
 
-    // populate after create
     const populatedCertificate = await Certificate.findById(
       certificate._id
     )
@@ -26,7 +37,6 @@ export const createCertificate = async (req, res) => {
       message: "Certificate created successfully 🎉",
       certificate: populatedCertificate,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -49,7 +59,6 @@ export const getAllCertificates = async (req, res) => {
       success: true,
       certificates,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -64,7 +73,6 @@ export const getAllCertificates = async (req, res) => {
 
 export const getUserCertificates = async (req, res) => {
   try {
-
     const certificates = await Certificate.find({
       user: req.user._id,
     })
@@ -75,7 +83,6 @@ export const getUserCertificates = async (req, res) => {
       success: true,
       certificates,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -90,7 +97,6 @@ export const getUserCertificates = async (req, res) => {
 
 export const getCertificateById = async (req, res) => {
   try {
-
     const certificate = await Certificate.findById(req.params.id)
       .populate("user", "name email")
       .populate("course", "title");
@@ -106,7 +112,6 @@ export const getCertificateById = async (req, res) => {
       success: true,
       certificate,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -121,7 +126,6 @@ export const getCertificateById = async (req, res) => {
 
 export const deleteCertificate = async (req, res) => {
   try {
-
     const certificate = await Certificate.findById(req.params.id);
 
     if (!certificate) {
@@ -137,7 +141,6 @@ export const deleteCertificate = async (req, res) => {
       success: true,
       message: "Certificate deleted successfully 🗑️",
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,

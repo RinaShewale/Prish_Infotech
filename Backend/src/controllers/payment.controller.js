@@ -4,9 +4,11 @@ import Payment from "../models/payment.model.js";
 import Enrollment from "../models/Enrollment.model.js";
 
 // ================= CREATE ORDER =================
-// ================= CREATE ORDER =================
 export const createOrder = async (req, res) => {
   try {
+    console.log("🔥 CREATE ORDER BODY:", req.body);
+    console.log("👤 USER:", req.user?._id);
+
     const {
       courseId,
       originalPrice,
@@ -20,7 +22,32 @@ export const createOrder = async (req, res) => {
       totalAmount,
     } = req.body;
 
-    // ================= CHECK ALREADY ENROLLED =================
+    // ---------------- AUTH CHECK ----------------
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
+
+    // ---------------- VALIDATION ----------------
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "courseId is required",
+      });
+    }
+
+    const amount = Number(totalAmount);
+
+    if (!amount || isNaN(amount)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid totalAmount",
+      });
+    }
+
+    // ---------------- CHECK ENROLLMENT ----------------
     const alreadyEnrolled = await Enrollment.findOne({
       user: req.user._id,
       course: courseId,
@@ -30,35 +57,58 @@ export const createOrder = async (req, res) => {
       return res.status(200).json({
         success: true,
         alreadyEnrolled: true,
-        message: "You are already enrolled in this course",
+        message: "Already enrolled",
       });
     }
 
     // ================= CREATE RAZORPAY ORDER =================
-    const options = {
-      amount: totalAmount * 100,
-      currency: "INR",
-      receipt: `receipt_${Date.now()}`,
-    };
+    let order;
 
-    const order = await razorpay.orders.create(options);
+    try {
+      const options = {
+        amount: Math.round(amount * 100), // paise conversion
+        currency: "INR",
+        receipt: `rcpt_${Date.now()}`,
+      };
+
+      order = await razorpay.orders.create(options);
+
+      console.log("✅ Razorpay Order Created:", order.id);
+
+    } catch (err) {
+      console.log("❌ Razorpay Order Error:", err);
+
+      return res.status(500).json({
+        success: false,
+        message: "Razorpay order creation failed",
+        error: err.message,
+      });
+    }
+
+    if (!order || !order.id) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create order",
+      });
+    }
 
     // ================= SAVE PAYMENT =================
     await Payment.create({
       user: req.user._id,
       course: courseId,
-      amount: totalAmount,
-      originalPrice,
-      coursePrice,
-      discountAmount,
-      discountPercent,
-      couponCode,
-      couponDiscount,
-      platformFee,
-      gst,
-      totalAmount,
+      amount,
+      originalPrice: originalPrice || 0,
+      coursePrice: coursePrice || 0,
+      discountAmount: discountAmount || 0,
+      discountPercent: discountPercent || 0,
+      couponCode: couponCode || "",
+      couponDiscount: couponDiscount || 0,
+      platformFee: platformFee || 0,
+      gst: gst || 0,
+      totalAmount: amount,
+      currency: "INR",
       razorpayOrderId: order.id,
-      paymentStatus: "created",
+      paymentStatus: "pending",
     });
 
     return res.status(200).json({
@@ -68,14 +118,14 @@ export const createOrder = async (req, res) => {
     });
 
   } catch (error) {
+    console.log("🔥 CREATE ORDER ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
-
 
 // ================= VERIFY PAYMENT =================
 export const verifyPayment = async (req, res) => {
@@ -87,21 +137,29 @@ export const verifyPayment = async (req, res) => {
       courseId,
     } = req.body;
 
-    const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
 
-    const expectedSign = crypto
+    // ---------------- SIGNATURE CHECK ----------------
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(sign.toString())
+      .update(body)
       .digest("hex");
 
-    // ❌ Invalid signature
-    if (expectedSign !== razorpay_signature) {
+    if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
         message: "Invalid payment signature",
       });
     }
 
+    // ---------------- FIND PAYMENT ----------------
     const payment = await Payment.findOne({
       razorpayOrderId: razorpay_order_id,
     });
@@ -113,23 +171,16 @@ export const verifyPayment = async (req, res) => {
       });
     }
 
-    // ================= ALREADY PAID SAFE CHECK =================
+    // ---------------- ALREADY PAID CHECK ----------------
     if (payment.paymentStatus === "paid") {
-      const existingEnrollment = await Enrollment.findOne({
-        user: req.user._id,
-        course: courseId,
-      });
-
       return res.status(200).json({
         success: true,
-        message: "Already processed payment",
         enrolled: true,
-        alreadyEnrolled: true,
-        enrollment: existingEnrollment || null,
+        message: "Already processed",
       });
     }
 
-    // ================= MARK PAYMENT AS PAID =================
+    // ---------------- UPDATE PAYMENT ----------------
     payment.paymentStatus = "paid";
     payment.razorpayPaymentId = razorpay_payment_id;
     payment.razorpaySignature = razorpay_signature;
@@ -137,7 +188,7 @@ export const verifyPayment = async (req, res) => {
 
     await payment.save();
 
-    // ================= CREATE ENROLLMENT SAFELY =================
+    // ---------------- CREATE ENROLLMENT ----------------
     let enrollment = await Enrollment.findOne({
       user: req.user._id,
       course: courseId,
@@ -152,13 +203,14 @@ export const verifyPayment = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Payment verified successfully",
       enrolled: true,
-      alreadyEnrolled: false,
       enrollment,
     });
+
   } catch (error) {
-    res.status(500).json({
+    console.log("🔥 VERIFY ERROR:", error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

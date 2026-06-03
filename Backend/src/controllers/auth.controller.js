@@ -19,15 +19,20 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password,
-      role: email === "prishinfotech@gmail.com" ? "admin" : "student",
+      role:
+        email === "prishinfotech@gmail.com"
+          ? "admin"
+          : "student",
     });
 
     const token = generateToken(user._id.toString());
 
+    // ✅ FIXED COOKIE CONFIG
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
+      secure: false, // localhost
       sameSite: "lax",
+      path: "/", // 🔥 IMPORTANT FIX
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -38,11 +43,14 @@ export const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        avatar: user.avatar, // ✅ FIX IMPORTANT
+        avatar: user.avatar,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -71,10 +79,12 @@ export const loginUser = async (req, res) => {
 
     const token = generateToken(user._id.toString());
 
+    // 🔥 FIXED COOKIE SETTINGS
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
+      secure: false, // localhost
       sameSite: "lax",
+      path: "/", // IMPORTANT
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -85,15 +95,18 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        avatar: user.avatar, // ✅ FIX IMPORTANT
+        avatar: user.avatar,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-/* ================= GET PROFILE (/me) ================= */
+/* ================= GET PROFILE ================= */
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -112,11 +125,14 @@ export const getProfile = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        avatar: user.avatar, // 🔥 FIX
+        avatar: user.avatar,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -126,6 +142,7 @@ export const logoutUser = async (req, res) => {
     res.cookie("token", "", {
       httpOnly: true,
       expires: new Date(0),
+      path: "/", // 🔥 IMPORTANT
     });
 
     return res.status(200).json({
@@ -133,7 +150,10 @@ export const logoutUser = async (req, res) => {
       message: "Logged out successfully",
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -152,6 +172,7 @@ export const googleCallback = (req, res) => {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      path: "/", // 🔥 FIX
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

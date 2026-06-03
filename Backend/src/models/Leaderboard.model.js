@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const enrollmentSchema = new mongoose.Schema(
+const leaderboardSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -14,15 +14,14 @@ const enrollmentSchema = new mongoose.Schema(
       required: true,
     },
 
-    // ✅ ADD PROGRESS FIELD (FIX)
-    progress: {
+    points: {
       type: Number,
       default: 0,
     },
 
-    enrolledAt: {
-      type: Date,
-      default: Date.now,
+    completedLessons: {
+      type: Number,
+      default: 0,
     },
   },
   {
@@ -30,6 +29,7 @@ const enrollmentSchema = new mongoose.Schema(
   }
 );
 
-const Enrollment = mongoose.model("Enrollment", enrollmentSchema);
-
-export default Enrollment;
+export default mongoose.model(
+  "Leaderboard",
+  leaderboardSchema
+);

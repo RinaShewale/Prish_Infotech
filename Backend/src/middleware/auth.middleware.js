@@ -4,6 +4,7 @@ import User from "../models/User.model.js";
 // 🔐 PROTECT ROUTE
 export const protect = async (req, res, next) => {
   try {
+    
     let token;
 
     // Bearer token

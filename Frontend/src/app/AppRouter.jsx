@@ -52,6 +52,7 @@ export const router = createBrowserRouter([
     path: "/cohort/:slug",
     element: <CourseDetailPage />,
   },
+  
 
   // Classroom Routes
   {

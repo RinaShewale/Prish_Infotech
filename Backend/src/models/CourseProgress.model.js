@@ -1,35 +1,37 @@
 import mongoose from "mongoose";
 
-const enrollmentSchema = new mongoose.Schema(
+const courseProgressSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: true,
     },
-
-    // ✅ ADD PROGRESS FIELD (FIX)
     progress: {
       type: Number,
       default: 0,
     },
+    completedLessons: {
+      type: Number,
+      default: 0,
+    },
+    totalLessons: {
+      type: Number,
+      default: 0,
+    },
 
-    enrolledAt: {
+    // ⭐ ADD THIS
+    courseCompletedAt: {
       type: Date,
-      default: Date.now,
+      default: null,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const Enrollment = mongoose.model("Enrollment", enrollmentSchema);
-
-export default Enrollment;
+export default mongoose.model("CourseProgress", courseProgressSchema);
