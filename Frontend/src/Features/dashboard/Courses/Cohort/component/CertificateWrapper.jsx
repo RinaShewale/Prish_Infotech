@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Lock, Award, Download, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { fetchMyCertificates } from '../../certificate.slice';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
@@ -34,42 +34,29 @@ const CertificateWrapper = ({ courseId, isCompleted, progress }) => {
         alert("Wait... Certificate not ready!");
         return;
     }
-    
     setIsDownloading(true);
-
     try {
-      // 1. Convert HTML to Image (PNG)
       const dataUrl = await toPng(pdfRef.current, { 
         quality: 1, 
-        pixelRatio: 2, // Sharpness
+        pixelRatio: 2, 
         backgroundColor: '#FDFDFD' 
       });
-
-      // 2. Create PDF
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [1120, 790]
-      });
-
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1120, 790] });
       pdf.addImage(dataUrl, 'PNG', 0, 0, 1120, 790);
-      
-      // 3. Trigger Download
       pdf.save(`Certificate-${displayUserName.replace(/\s+/g, '_')}.pdf`);
-      
     } catch (err) {
       console.error("Download Error:", err);
-      alert("Failed to generate PDF. Try a different browser.");
     } finally {
       setIsDownloading(false);
     }
   };
 
   return (
-    <div className="h-full bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col backdrop-blur-md overflow-hidden relative">
+    /* h-full and overflow-hidden prevent the container from growing beyond parent */
+    <div className="h-full max-h-full bg-bg2/40 border border-border/50 rounded-[1.5rem] md:rounded-[2rem] flex flex-col backdrop-blur-md overflow-hidden relative">
       
-      {/* HIDDEN CAPTURE AREA: Invisible but exists in DOM for the tool to find it */}
-      <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', opacity: 0 }}>
+      {/* HIDDEN CAPTURE AREA */}
+      <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', opacity: 0, pointerEvents: 'none' }}>
         <CertificateCard 
           ref={pdfRef}
           displayCourseName={displayCourseName}
@@ -80,23 +67,23 @@ const CertificateWrapper = ({ courseId, isCompleted, progress }) => {
         />
       </div>
 
-      {/* Label Header */}
-      <div className="p-6 pb-2 flex justify-between items-center z-10">
+      {/* Label Header - Reduced padding on mobile */}
+      <div className="p-4 md:p-6 pb-2 flex justify-between items-center shrink-0 z-10">
         <div className="flex items-center gap-2">
           <Award size={14} className="text-accent" />
-          <h2 className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-text-secondary">Official Credential</h2>
+          <h2 className="text-[9px] md:text-[10px] font-display font-bold uppercase tracking-[0.2em] text-text-secondary">Official Credential</h2>
         </div>
       </div>
 
-      {/* UI Preview Square */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="relative w-full aspect-square max-w-[340px]">
+      {/* UI Preview Area - flex-1 and min-h-0 allow this section to shrink if space is tight */}
+      <div className="flex-1 min-h-0 flex items-center justify-center p-2 md:p-6 relative">
+        <div className="relative w-full h-full max-w-[340px] max-h-[340px] flex items-center justify-center">
           <motion.div
-            animate={{ filter: isCompleted ? "none" : "blur(12px) grayscale(100%)", opacity: isCompleted ? 1 : 0.4 }}
-            className="w-full h-full rounded-[24px] overflow-hidden border border-border/30 bg-white flex items-center justify-center relative shadow-2xl"
+            animate={{ filter: isCompleted ? "none" : "blur(8px) grayscale(100%)", opacity: isCompleted ? 1 : 0.4 }}
+            className="w-full h-full aspect-square rounded-[18px] md:rounded-[24px] overflow-hidden border border-border/30 bg-white flex items-center justify-center relative shadow-xl md:shadow-2xl"
           >
-            {/* We scale the design down purely for the UI view */}
-            <div className="origin-center transform scale-[0.25]">
+            {/* Dynamic Scale based on screen size to ensure it fits mobile screens without overflow */}
+            <div className="origin-center transform scale-[0.15] xs:scale-[0.20] sm:scale-[0.25]">
                <CertificateCard 
                   displayCourseName={displayCourseName}
                   displayUserName={displayUserName}
@@ -109,25 +96,33 @@ const CertificateWrapper = ({ courseId, isCompleted, progress }) => {
 
           {!isCompleted && (
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <Lock className="text-accent/40" size={32} />
+              <div className="bg-bg/40 p-3 rounded-full backdrop-blur-sm">
+                <Lock className="text-accent/60" size={24} />
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* DOWNLOAD BUTTON */}
-      {isCompleted && issuedCertificate && (
-        <div className="px-8 pb-4">
+      {/* DOWNLOAD BUTTON AREA - Fixed at bottom, no internal scrolling */}
+      <div className="px-4 md:px-8 pb-4 md:pb-6 shrink-0 mt-auto">
+        {isCompleted && issuedCertificate ? (
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className="w-full flex items-center justify-center gap-2 bg-accent text-bg py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 bg-accent text-bg py-3 rounded-xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
           >
             {isDownloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-            {isDownloading ? "Capturing..." : "Download Certificate"}
+            {isDownloading ? "Capturing..." : "Download PDF"}
           </button>
-        </div>
-      )}
+        ) : (
+          <div className="w-full py-3 rounded-xl border border-border/30 bg-white/5 flex items-center justify-center">
+            <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-text-secondary/60 font-medium">
+              {progress < 100 ? `Locked (${progress}%)` : "Validating..."}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

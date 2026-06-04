@@ -19,7 +19,7 @@ export const addBookmark =
       } catch (error) {
         return thunkAPI.rejectWithValue(
           error.response?.data?.message ||
-            "Failed to add bookmark"
+          "Failed to add bookmark"
         );
       }
     }
@@ -35,7 +35,7 @@ export const getBookmarks =
       } catch (error) {
         return thunkAPI.rejectWithValue(
           error.response?.data?.message ||
-            "Failed to fetch bookmarks"
+          "Failed to fetch bookmarks"
         );
       }
     }
@@ -55,7 +55,7 @@ export const removeBookmark =
       } catch (error) {
         return thunkAPI.rejectWithValue(
           error.response?.data?.message ||
-            "Failed to remove bookmark"
+          "Failed to remove bookmark"
         );
       }
     }
@@ -109,17 +109,11 @@ const bookmarkSlice = createSlice({
       )
 
       // REMOVE
-      .addCase(
-        removeBookmark.fulfilled,
-        (state, action) => {
-          state.bookmarks =
-            state.bookmarks.filter(
-              (bookmark) =>
-                bookmark.lesson._id !==
-                action.payload
-            );
-        }
-      );
+      .addCase(removeBookmark.fulfilled, (state, action) => {
+        state.bookmarks = state.bookmarks.filter((bookmark) => {
+          return String(bookmark.lesson?._id) !== String(action.payload);
+        });
+      });
   },
 });
 

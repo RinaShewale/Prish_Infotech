@@ -4,13 +4,21 @@ import { ShieldCheck, Globe, QrCode, Award, CheckCircle } from 'lucide-react';
 import CertificateCard from './CertificateCard';
 
 const CertificationSection = ({ data, userCertificate, user }) => {
-  if (!data) return null;
+  if (!data || !data.mainHeading) return null;
 
   const displayUserName = userCertificate?.user?.name || user?.name || "Alexandria Smith";
   const displayCourseName = userCertificate?.course?.title || data.certType;
-  const displayDate = userCertificate?.createdAt
-    ? new Date(userCertificate.createdAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
-    : "Enroll to Unlock";
+  const isEnrolled = !!userCertificate;
+
+  const displayDate = !isEnrolled
+    ? "Not Enrolled Yet"
+    : userCertificate?.createdAt
+      ? new Date(userCertificate.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      })
+      : "Enroll to Unlock";
 
   const features = [
     { icon: <Award className="w-5 h-5 text-accent" />, title: "ISO CERTIFIED", desc: "Global recognition standards" },
@@ -49,7 +57,7 @@ const CertificationSection = ({ data, userCertificate, user }) => {
         {/* RIGHT CONTENT */}
         <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }} className="relative order-1 lg:order-2">
           <div className="absolute -inset-4 bg-accent/20 blur-[80px] rounded-full opacity-30" />
-          <CertificateCard 
+          <CertificateCard
             displayCourseName={displayCourseName}
             displayUserName={displayUserName}
             displayDate={displayDate}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Box, Megaphone, ArrowUpRight, PlayCircle, FileText, Lock } from 'lucide-react';
+import { ChevronDown, Box, Megaphone, ArrowUpRight, PlayCircle, Lock } from 'lucide-react';
 import { fetchLessons } from '../lesson.slice';
 
 const ModuleList = ({ courseId }) => {
@@ -43,26 +43,26 @@ const ModuleList = ({ courseId }) => {
     : [];
 
   return (
-    <div className="flex-1 bg-bg2 border border-border rounded-xl flex flex-col overflow-hidden shadow-2xl">
+    <div className="flex-1 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
 
-      {/* Tabs */}
-      <div className="flex items-center gap-6 px-6 pt-4 border-b border-border/50 shrink-0">
+      {/* Tabs - Scrollable on mobile */}
+      <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 overflow-x-auto scrollbar-hide">
         <TabButton
           active={activeTab === 'modules'}
           onClick={() => setActiveTab('modules')}
           icon={<Box size={14} />}
-          label="All Modules"
+          label="Modules"
         />
         <TabButton
           active={activeTab === 'announcements'}
           onClick={() => setActiveTab('announcements')}
           icon={<Megaphone size={14} />}
-          label="Announcements"
+          label="Updates"
         />
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8">
         <AnimatePresence mode="wait">
           {activeTab === 'modules' ? (
             <motion.div
@@ -73,37 +73,35 @@ const ModuleList = ({ courseId }) => {
               className="space-y-4"
             >
               {loading ? (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-text-secondary">Loading modules...</p>
-                </div>
+                <div className="flex items-center justify-center py-20 opacity-50 text-xs uppercase tracking-widest">Loading...</div>
               ) : error ? (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-red-500">Error loading modules: {error}</p>
-                </div>
+                <div className="text-red-500 text-xs text-center py-10">Error: {error}</div>
               ) : (
                 <>
-                  {/* Join Live Section */}
-                  <div className="flex items-center justify-between p-4 bg-card/30 rounded-xl border border-border/40 mb-6">
+                  {/* Join Live Section - Responsive Stack */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-accent/5 rounded-2xl border border-accent/10 mb-6 gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                      <span className="text-sm font-medium tracking-tight">Live Class: Introduction to React</span>
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                      <span className="text-xs sm:text-sm font-semibold tracking-tight truncate">Live Class: Introduction to React</span>
                     </div>
-                    <button className="bg-red-900/20 text-red-400 text-[10px] font-black px-4 py-2 rounded-lg uppercase border border-red-900/30 hover:bg-red-900/40 transition-colors">
+                    <button className="w-full sm:w-auto bg-red-900/20 text-red-400 text-[9px] font-black px-4 py-2 rounded-lg uppercase border border-red-900/30 hover:bg-red-900/40 transition-colors">
                       Join Live
                     </button>
                   </div>
 
                   {/* Dynamic Module List */}
-                  {displayModules.map((module) => (
-                    <ModuleItem
-                      key={module.id}
-                      module={module}
-                      isExpanded={expandedId === module.id}
-                      onToggle={() => toggleModule(module.id)}
-                      courseId={courseId}
-                      navigate={navigate}
-                    />
-                  ))}
+                  <div className="space-y-1">
+                    {displayModules.map((module) => (
+                      <ModuleItem
+                        key={module.id}
+                        module={module}
+                        isExpanded={expandedId === module.id}
+                        onToggle={() => toggleModule(module.id)}
+                        courseId={courseId}
+                        navigate={navigate}
+                      />
+                    ))}
+                  </div>
                 </>
               )}
             </motion.div>
@@ -114,22 +112,27 @@ const ModuleList = ({ courseId }) => {
               animate={{ opacity: 1 }}
               className="flex flex-col items-center justify-center py-20 text-text-secondary"
             >
-              <Megaphone size={40} className="mb-4 opacity-20" />
-              <p className="text-xs uppercase tracking-widest font-bold">No new announcements</p>
+              <Megaphone size={32} className="mb-4 opacity-10" />
+              <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-40">No new announcements</p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };
 
-// Sub-Component: Tab Button
 const TabButton = ({ active, onClick, icon, label }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest pb-4 transition-all relative ${active ? 'text-accent' : 'text-text-secondary hover:text-text'
-      }`}
+    className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] pb-4 transition-all relative whitespace-nowrap ${
+      active ? 'text-accent' : 'text-text-secondary hover:text-text'
+    }`}
   >
     {icon} {label}
     {active && (
@@ -141,29 +144,29 @@ const TabButton = ({ active, onClick, icon, label }) => (
   </button>
 );
 
-// Sub-Component: Module Item
 const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
   const isLocked = module.badge === "Locked";
 
   return (
-    <div className={`border-b border-border/30 last:border-0 ${isLocked ? 'opacity-50' : ''}`}>
+    <div className={`border-b border-border/20 last:border-0 ${isLocked ? 'opacity-40' : ''}`}>
       <div
         onClick={onToggle}
-        className="flex items-center justify-between py-4 cursor-pointer group"
+        className="flex items-center justify-between py-5 cursor-pointer group gap-4"
       >
-        <div className="flex items-center gap-4">
-          <span className={`text-sm font-semibold transition-colors ${isExpanded ? 'text-accent' : 'group-hover:text-text'}`}>
+        <div className="flex flex-1 items-center gap-3 min-w-0">
+          <span className={`text-xs sm:text-sm font-bold transition-colors truncate ${isExpanded ? 'text-accent' : 'text-text-secondary group-hover:text-text'}`}>
             {module.title}
           </span>
-          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${module.badgeType === 'green' ? 'bg-green-900/20 text-green-400 border-green-900/30' :
+          <span className={`shrink-0 text-[8px] font-black uppercase px-2 py-0.5 rounded border tracking-tighter ${
+            module.badgeType === 'green' ? 'bg-green-900/20 text-green-400 border-green-900/30' :
             module.badgeType === 'accent' ? 'bg-accent/20 text-accent border-accent/30' :
-              'bg-white/5 text-text-secondary border-white/10'
-            }`}>
+            'bg-white/5 text-text-secondary border-white/10'
+          }`}>
             {module.badge}
           </span>
         </div>
         {!isLocked && (
-          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
+          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} className="shrink-0">
             <ChevronDown size={16} className="text-text-secondary" />
           </motion.div>
         )}
@@ -177,44 +180,35 @@ const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="pl-4 pb-6 space-y-2 pt-2">
+            <div className="pl-2 sm:pl-4 pb-6 space-y-2">
               {module.lessons.map((lesson) => (
                 <div
                   key={lesson.id}
-                  className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-3 rounded-xl transition-all"
+                  className="flex items-center justify-between group p-3 rounded-xl transition-all hover:bg-white/[0.03] border border-transparent hover:border-border/30 gap-4"
                 >
-                  {/* Left Side: Icon and Title */}
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1">
-                      {lesson.type === 'resource' ? (
-                        <ArrowUpRight size={14} className="text-accent" />
-                      ) : (
-                        <PlayCircle size={14} className={lesson.completed ? 'text-green-500' : 'text-text-secondary'} />
-                      )}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="shrink-0">
+                      <PlayCircle size={14} className={lesson.completed ? 'text-green-500' : 'text-accent'} />
                     </div>
-                    <div className="flex-1">
-                      <p className={`text-sm ${lesson.completed ? 'text-text/60' : 'font-medium text-text'}`}>
+                    <div className="min-w-0">
+                      <p className={`text-[11px] sm:text-xs font-semibold truncate ${lesson.completed ? 'text-text-secondary' : 'text-text'}`}>
                         {lesson.title}
                       </p>
-                      {lesson.alert && (
-                        <p className="text-[10px] text-red-500 font-bold mt-1 uppercase tracking-tighter">
-                          {lesson.alert}
-                        </p>
-                      )}
                     </div>
                   </div>
 
-                  {/* Right Side: Resume Button (only for incomplete lessons) */}
                   <button
-                    onClick={() =>
-                      navigate(`/classroom/course/${courseId}/lecture/${lesson.id}`)
-                    }
-                    className={`text-[10px] font-black px-4 py-2 rounded-lg uppercase border transition-all ${lesson.completed
-                        ? "bg-green-900/20 text-green-400 border-green-900/30 hover:bg-green-900/30"
-                        : "bg-white/5 text-text-secondary border-white/10 hover:bg-accent/20 hover:text-accent hover:border-accent/30"
-                      }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/classroom/course/${courseId}/lecture/${lesson.id}`);
+                    }}
+                    className={`shrink-0 text-[9px] font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg uppercase border transition-all ${
+                      lesson.completed
+                        ? "bg-green-900/20 text-green-400 border-green-900/30"
+                        : "bg-accent text-white border-accent shadow-lg shadow-accent/10"
+                    }`}
                   >
-                    {lesson.completed ? "Review" : "Resume"}
+                    {lesson.completed ? "Review" : "Start"}
                   </button>
                 </div>
               ))}

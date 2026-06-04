@@ -10,7 +10,7 @@ import { fetchLessons } from '../lesson.slice';
 import { saveLessonProgress, getLessonProgress } from '../lessonProgress.slice';
 import { fetchTopUsers } from '../leaderboard.slice';
 import { fetchCourseProgress } from '../courseProgress.slice';
-import {addBookmark,getBookmarks} from "../bookmark.slice";
+import { addBookmark, getBookmarks ,removeBookmark } from "../bookmark.slice";
 
 const LecturePage = () => {
   const { courseId, lectureId } = useParams();
@@ -58,7 +58,7 @@ const LecturePage = () => {
   const completedLessons = course?.modules.filter(m => m.completed).length || 0;
   const progressPercent = course ? Math.round((completedLessons / course.modules.length) * 100) : 0;
 
-  const isBookmarked = bookmarks.some((bookmark) => bookmark.lesson?._id === lectureId);
+  const isBookmarked = bookmarks.some((b) => String(b.lesson?._id) === String(lectureId));
 
   // Save progress when video time updates
   const handleVideoTimeUpdate = (e) => {
@@ -102,13 +102,26 @@ const LecturePage = () => {
   };
 
 
-  const handleBookmark = () => {
-    dispatch(
-      addBookmark({
-        lessonId: lectureId,
-      })
+  const handleBookmark = async () => {
+    const isBookmarked = bookmarks.some(
+      (b) => String(b.lesson?._id) === String(lectureId)
     );
+
+    console.log("lectureId:", lectureId);
+    console.log("isBookmarked:", isBookmarked);
+
+    if (isBookmarked) {
+      console.log("REMOVING BOOKMARK...");
+      await dispatch(removeBookmark(lectureId));
+    } else {
+      console.log("ADDING BOOKMARK...");
+      await dispatch(addBookmark({ lessonId: lectureId }));
+    }
+
+    await dispatch(getBookmarks());
   };
+
+
 
   if (!course || !currentModule) return (
     <div className="h-screen bg-bg flex flex-col items-center justify-center space-y-4">

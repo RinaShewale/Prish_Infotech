@@ -7,35 +7,50 @@ export const getCourseProgress = async (req, res) => {
       course: req.params.courseId,
     });
 
-    // If no progress exists yet
+    // ===============================
+    // IF NO PROGRESS FOUND
+    // ===============================
     if (!progress) {
-      return res.json({
+      return res.status(200).json({
         success: true,
         progress: {
           progress: 0,
           completedLessons: 0,
           totalLessons: 0,
-          courseCompletedAt: null, // ⭐ important
+          courseCompletedAt: null,
+          createdAt: null,
+          updatedAt: null,
         },
       });
     }
 
-    res.json({
+    // ===============================
+    // SAFE RESPONSE OBJECT
+    // ===============================
+    const response = {
+      _id: progress._id,
+      user: progress.user,
+      course: progress.course,
+
+      progress: progress.progress || 0,
+      completedLessons: progress.completedLessons || 0,
+      totalLessons: progress.totalLessons || 0,
+
+      // ✅ FIX: proper date handling
+      courseCompletedAt: progress.courseCompletedAt
+        ? new Date(progress.courseCompletedAt)
+        : null,
+
+      createdAt: progress.createdAt,
+      updatedAt: progress.updatedAt,
+    };
+
+    return res.status(200).json({
       success: true,
-      progress: {
-        _id: progress._id,
-        user: progress.user,
-        course: progress.course,
-        progress: progress.progress,
-        completedLessons: progress.completedLessons,
-        totalLessons: progress.totalLessons,
-        courseCompletedAt: progress.courseCompletedAt || null, // ⭐ important
-        createdAt: progress.createdAt,
-        updatedAt: progress.updatedAt,
-      },
+      progress: response,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message,
     });

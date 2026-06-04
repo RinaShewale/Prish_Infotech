@@ -7,198 +7,149 @@ import Certificate from "../models/certificate.model.js";
 // ================= SAVE PROGRESS =================
 export const saveLessonProgress = async (req, res) => {
   try {
-    console.log("SAVE LESSON PROGRESS HIT");
-
-    const {
-      lessonId,
-      watchedSeconds,
-      totalDuration,
-    } = req.body;
-
+    const { lessonId, watchedSeconds, totalDuration } = req.body;
     const userId = req.user._id;
 
-    // Calculate lesson progress %
+    // ================= LESSON PROGRESS =================
     const progressPercentage =
       totalDuration > 0
-        ? Math.min(
-            Math.round(
-              (watchedSeconds / totalDuration) * 100
-            ),
-            100
-          )
+        ? Math.min(Math.round((watchedSeconds / totalDuration) * 100), 100)
         : 0;
 
     const completed = progressPercentage >= 80;
 
-    // Previous progress
-    const existingProgress =
-      await LessonProgress.findOne({
-        user: userId,
-        lesson: lessonId,
-      });
+    const existingLessonProgress = await LessonProgress.findOne({
+      user: userId,
+      lesson: lessonId,
+    });
 
-    const wasCompleted =
-      existingProgress?.completed || false;
+    const wasCompleted = existingLessonProgress?.completed || false;
 
-    // Save lesson progress
-    const progress =
-      await LessonProgress.findOneAndUpdate(
-        {
-          user: userId,
-          lesson: lessonId,
-        },
-        {
-          watchedSeconds,
-          totalDuration,
-          progress: progressPercentage,
-          completed,
-        },
-        {
-          upsert: true,
-          returnDocument: "after",
-        }
-      );
-
-    // Get lesson details
-    const lesson = await Lesson.findById(
-      lessonId
+    const lessonProgress = await LessonProgress.findOneAndUpdate(
+      { user: userId, lesson: lessonId },
+      {
+        watchedSeconds,
+        totalDuration,
+        progress: progressPercentage,
+        completed,
+      },
+      { upsert: true, new: true }
     );
 
-    if (lesson) {
-      // ================= LEADERBOARD =================
-      if (completed && !wasCompleted) {
-        await Leaderboard.findOneAndUpdate(
-          {
-            user: userId,
-            course: lesson.course,
-          },
-          {
-            $inc: {
-              points: 100,
-              completedLessons: 1,
-            },
-          },
-          {
-            upsert: true,
-            returnDocument: "after",
-          }
-        );
-      }
+    // ================= LESSON =================
+    const lesson = await Lesson.findById(lessonId);
 
-      // ================= COURSE PROGRESS =================
-      const lessons = await Lesson.find({
-        course: lesson.course,
+    if (!lesson) {
+      return res.status(404).json({
+        success: false,
+        message: "Lesson not found",
       });
+    }
 
-      const lessonIds = lessons.map(
-        (item) => item._id
-      );
-
-      const totalLessons =
-        lessons.length;
-
-      const completedLessons =
-        await LessonProgress.countDocuments({
-          user: userId,
-          lesson: {
-            $in: lessonIds,
+    // ================= LEADERBOARD =================
+    if (completed && !wasCompleted) {
+      await Leaderboard.findOneAndUpdate(
+        { user: userId, course: lesson.course },
+        {
+          $inc: {
+            points: 100,
+            completedLessons: 1,
           },
-          completed: true,
-        });
-
-      const coursePercentage =
-        totalLessons > 0
-          ? Math.round(
-              (completedLessons /
-                totalLessons) *
-                100
-            )
-          : 0;
-
-      const courseProgress =
-        await CourseProgress.findOneAndUpdate(
-          {
-            user: userId,
-            course: lesson.course,
-          },
-          {
-            progress: coursePercentage,
-            completedLessons,
-            totalLessons,
-          },
-          {
-            upsert: true,
-            returnDocument: "after",
-          }
-        );
-
-      // ================= CERTIFICATE =================
-      if (coursePercentage >= 100) {
-        const existingCertificate =
-          await Certificate.findOne({
-            user: userId,
-            course: lesson.course,
-          });
-
-        if (!existingCertificate) {
-          await Certificate.create({
-            user: userId,
-            course: lesson.course,
-            certificateUrl: "",
-          });
-
-          console.log(
-            "🎓 Certificate generated successfully"
-          );
-        }
-      }
-
-      console.log(
-        "COURSE PROGRESS UPDATED:",
-        courseProgress
+        },
+        { upsert: true, new: true }
       );
     }
 
-    res.status(200).json({
-      success: true,
-      progress,
+    // ================= COURSE PROGRESS =================
+    const lessons = await Lesson.find({ course: lesson.course });
+
+    const lessonIds = lessons.map((l) => l._id);
+    const totalLessons = lessons.length;
+
+    const completedLessons = await LessonProgress.countDocuments({
+      user: userId,
+      lesson: { $in: lessonIds },
+      completed: true,
     });
-  } catch (error) {
-    console.log(
-      "Save Progress Error:",
-      error
+
+    const coursePercentage =
+      totalLessons > 0
+        ? Math.round((completedLessons / totalLessons) * 100)
+        : 0;
+
+    // ================= ⭐ FIXED DATE LOGIC =================
+    let courseProgress = await CourseProgress.findOne({
+      user: userId,
+      course: lesson.course,
+    });
+
+    // ✅ ONLY SET DATE ON FIRST TIME 100%
+    let courseCompletedAt = courseProgress?.courseCompletedAt || null;
+
+    if (coursePercentage >= 100 && !courseCompletedAt) {
+      courseCompletedAt = new Date(); // 🔥 ONLY FIRST TIME
+    }
+
+    courseProgress = await CourseProgress.findOneAndUpdate(
+      { user: userId, course: lesson.course },
+      {
+        progress: coursePercentage,
+        completedLessons,
+        totalLessons,
+        courseCompletedAt,
+      },
+      { upsert: true, new: true }
     );
 
-    res.status(500).json({
+    // ================= CERTIFICATE =================
+    if (coursePercentage >= 100 && totalLessons > 0) {
+      const existingCertificate = await Certificate.findOne({
+        user: userId,
+        course: lesson.course,
+      });
+
+      if (!existingCertificate) {
+        await Certificate.create({
+          user: userId,
+          course: lesson.course,
+          certificateUrl: "",
+        });
+
+        console.log("🎓 Certificate generated");
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      lessonProgress,
+      courseProgress,
+    });
+  } catch (error) {
+    console.log("Save Progress Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-// ================= GET PROGRESS =================
-export const getLessonProgress = async (
-  req,
-  res
-) => {
-  try {
-    const progress =
-      await LessonProgress.findOne({
-        user: req.user._id,
-        lesson: req.params.lessonId,
-      });
 
-    res.status(200).json({
+
+// ================= GET LESSON PROGRESS =================
+export const getLessonProgress = async (req, res) => {
+  try {
+    const progress = await LessonProgress.findOne({
+      user: req.user._id,
+      lesson: req.params.lessonId,
+    });
+
+    return res.status(200).json({
       success: true,
       progress,
     });
   } catch (error) {
-    console.log(
-      "Get Progress Error:",
-      error
-    );
-
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
