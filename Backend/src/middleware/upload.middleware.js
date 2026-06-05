@@ -1,26 +1,17 @@
-// ======================================================
-// 📁 middleware/upload.middleware.js
-// ======================================================
-
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
 
-// ================= IMAGE STORAGE =================
+// IMAGE
 const imageStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "prish-infotech/images",
-    allowed_formats: [
-      "jpg",
-      "jpeg",
-      "png",
-      "webp",
-    ],
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
-// ================= VIDEO STORAGE =================
+// VIDEO
 const videoStorage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -30,11 +21,5 @@ const videoStorage = new CloudinaryStorage({
   },
 });
 
-// ================= EXPORTS =================
-export const uploadImage = multer({
-  storage: imageStorage,
-});
-
-export const uploadVideo = multer({
-  storage: videoStorage,
-});
+export const uploadImage = multer({ storage: imageStorage });
+export const uploadVideo = multer({ storage: videoStorage });

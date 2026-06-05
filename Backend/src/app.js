@@ -89,6 +89,8 @@ app.use("/api/leaderboard",leaderboardRoutes);
 app.use("/api/course-progress", courseProgressRoutes);
 
 app.use("/api/bookmarks",bookmarkRoutes);
+
+
 // ======================
 // HEALTH CHECK
 // ======================
