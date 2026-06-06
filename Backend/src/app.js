@@ -21,6 +21,8 @@ import lessonProgressRoutes from "./routes/lessonProgress.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
 import courseProgressRoutes from "./routes/courseProgress.routes.js";
 import bookmarkRoutes from "./routes/bookmark.route.js";
+import mediaRoutes from "./routes/media.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 
 import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
@@ -84,11 +86,14 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/certificate", certificateRoutes);
 app.use("/api/enrollment", enrollmentRoutes);
 app.use("/api/coupon", couponRoutes);
-app.use("/api/lesson-progress",lessonProgressRoutes);
-app.use("/api/leaderboard",leaderboardRoutes);
+app.use("/api/lesson-progress", lessonProgressRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/course-progress", courseProgressRoutes);
 
-app.use("/api/bookmarks",bookmarkRoutes);
+app.use("/api/bookmarks", bookmarkRoutes);
+
+app.use("/api/media", mediaRoutes);
+app.use("/api/upload", uploadRoutes);
 
 
 // ======================

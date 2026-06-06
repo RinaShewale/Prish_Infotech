@@ -36,13 +36,16 @@ export default function CinematicBootcamp() {
   const gameLayerRef = useRef(null);
   const winnerCardRef = useRef(null);
   const isProcessing = useRef(false);
+  
+  // FIXED: Track state in ref to prevent scrollback glitches
+  const gameStateRef = useRef("portal");
 
   const COUPON_CODE = "BOOTCAMP20";
 
-  // FUNCTIONAL RESET
   const resetGame = () => {
     setIsWinner(false);
     setGameState("playing");
+    gameStateRef.current = "playing";
     setCurrentRound(0);
     setTimeLeft(ROUNDS[0].time);
     setUserInput("");
@@ -70,7 +73,10 @@ export default function CinematicBootcamp() {
     const lenis = new Lenis({ lerp: 0.1 });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
-    return () => lenis.destroy();
+    return () => {
+        gsap.ticker.remove(lenis.raf);
+        lenis.destroy();
+    };
   }, []);
 
   const startRound = useCallback((idx) => {
@@ -89,18 +95,31 @@ export default function CinematicBootcamp() {
         end: "+=120%",
         scrub: 1,
         pin: true,
+        anticipatePin: 1, // FIXED: Prevents layout shift during pinning
         onUpdate: (self) => {
-          if (self.progress > 0.6) {
-            if (gameState !== "playing" && gameState !== "success") setGameState("playing");
+          const progress = self.progress;
+          // FIXED: Use logic that checks ref before triggering state update
+          if (progress > 0.6) {
+            if (gameStateRef.current !== "playing" && gameStateRef.current !== "success") {
+                gameStateRef.current = "playing";
+                setGameState("playing");
+            }
           } else {
-            if (gameState !== "portal") setGameState("portal");
+            if (gameStateRef.current !== "portal") {
+                gameStateRef.current = "portal";
+                setGameState("portal");
+            }
           }
         }
       },
     });
 
     tl.to(portalRef.current, { scale: 3, autoAlpha: 0, filter: "blur(20px)", duration: 1 })
-      .fromTo(gameLayerRef.current, { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.5 }, "-=0.3");
+      .fromTo(gameLayerRef.current, 
+        { autoAlpha: 0, y: 30, visibility: 'hidden' }, 
+        { autoAlpha: 1, y: 0, visibility: 'visible', duration: 0.5 }, 
+        "-=0.3"
+      );
   }, { scope: containerRef });
 
   useEffect(() => {
@@ -126,6 +145,7 @@ export default function CinematicBootcamp() {
           startRound(currentRound + 1);
         } else {
           setGameState("success");
+          gameStateRef.current = "success";
           setFeedback(null);
         }
       }, 1000);
@@ -160,11 +180,10 @@ export default function CinematicBootcamp() {
         <p className="font-display text-[10px] tracking-[0.6em] text-accent uppercase opacity-50 mt-8">Scroll_to_Initialize</p>
       </div>
 
-      {/* GAME LAYER - Removed scrollbar classes */}
+      {/* GAME LAYER */}
       <div ref={gameLayerRef} className="absolute inset-0 z-10 flex flex-col items-center justify-center py-12 px-4 md:px-8 invisible opacity-0 overflow-hidden">
         
         {!isWinner ? (
-          /* PLAY SCREEN */
           <div className="main-card glass w-full max-w-2xl p-6 md:p-12 relative border border-white/5 shadow-2xl">
              <div className="flex justify-between items-start mb-8 md:mb-10">
                 <div className="space-y-1">
@@ -224,7 +243,6 @@ export default function CinematicBootcamp() {
              </div>
           </div>
         ) : (
-          /* WINNER BOARD - Layout Fixes */
           <div 
             ref={winnerCardRef} 
             onMouseMove={handleMouseMove}
@@ -249,7 +267,6 @@ export default function CinematicBootcamp() {
                     </div>
                 </div>
 
-                {/* COUPON SECTION - Fixed badge overlap */}
                 <div className="mb-8 relative group" onClick={() => {navigator.clipboard.writeText(COUPON_CODE); setIsCopied(true)}}>
                     <div className="relative p-6 md:p-8 bg-white/2 border border-white/5 flex flex-col items-center cursor-pointer hover:bg-white/4 transition-colors">
                         <span className="text-[8px] font-display tracking-[0.4em] text-accent/50 uppercase mb-4">Encrypted_Access_Key</span>
@@ -260,7 +277,6 @@ export default function CinematicBootcamp() {
                             </h3>
                         </div>
 
-                        {/* Positioned relative to the box now */}
                         {isCopied && (
                             <div className="mt-4 bg-accent text-bg px-3 py-1 text-[9px] font-display font-black uppercase shadow-lg">
                                 COPIED_TO_CLIPBOARD
@@ -271,7 +287,6 @@ export default function CinematicBootcamp() {
                     </div>
                 </div>
 
-                {/* STATS GRID */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-8">
                     {[
                         { icon: <Zap size={14}/>, label: "RANK", val: "ALPHA_PRIME" },
@@ -303,7 +318,6 @@ export default function CinematicBootcamp() {
           </div>
         )}
 
-        {/* FEEDBACK OVERLAY - Fixed scaling */}
         {!isWinner && feedback && (
           <div className="fixed inset-0 z-100 flex items-center justify-center bg-bg/95 backdrop-blur-2xl animate-in fade-in duration-300 pointer-events-none">
              <div className="text-center px-6">
