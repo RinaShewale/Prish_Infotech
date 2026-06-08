@@ -4,13 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ChevronLeft, Download, Bookmark,
   CheckCircle, FileText, List, Info, Menu, X, Check, Play,
-  MessageCircle
+  MessageCircle,
+  FlaskRoundIcon
 } from 'lucide-react';
 import { fetchLessons } from '../lesson.slice';
 import { saveLessonProgress, getLessonProgress } from '../lessonProgress.slice';
 import { fetchTopUsers } from '../leaderboard.slice';
 import { fetchCourseProgress } from '../courseProgress.slice';
 import { addBookmark, getBookmarks, removeBookmark } from "../bookmark.slice";
+import { FluidBackground } from '../../../Home/components/FluidBackground';
 
 const LecturePage = () => {
   const { courseId, lectureId } = useParams();
@@ -91,6 +93,7 @@ const LecturePage = () => {
 
   return (
     <div className="h-screen w-full bg-bg text-text font-sans flex flex-col overflow-hidden relative">
+       <FluidBackground />
       <div className="noise-bg" />
 
       {/* --- TOP HEADER --- */}
