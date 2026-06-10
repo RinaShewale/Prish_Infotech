@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 
-
 // Existing Pages
 import HomePage from "../Features/dashboard/Home/Pages/HomePage";
 import CoursesPage from "../Features/dashboard/Courses/page/CoursePage";
@@ -10,13 +9,15 @@ import { Login } from "../Features/auth/pages/Login";
 import { Register } from "../Features/auth/pages/Register";
 import { CourseDetailPage } from "../Features/dashboard/Courses/page/CoursesDetailPage";
 import ProfilePage from "../Features/dashboard/Home/Pages/ProfilePage";
+
+// Classroom
 import MainLayout from "../Features/dashboard/Courses/Classroom/Layouts/MainLayout";
 import ClassroomPage from "../Features/dashboard/Courses/Classroom/pages/ClassroomPage";
 import LearningPage from "../Features/dashboard/Courses/Classroom/pages/LearningPage";
 import LecturePage from "../Features/dashboard/Courses/Classroom/pages/LecturePage";
 
-// Classroom Pages
-
+// Protected Route
+import ProtectedRoute from "../Features/auth/components/ProtectedRoute"; // <-- adjust path if needed
 
 export const router = createBrowserRouter([
   // Public Routes
@@ -52,12 +53,15 @@ export const router = createBrowserRouter([
     path: "/cohort/:slug",
     element: <CourseDetailPage />,
   },
-  
 
-  // Classroom Routes
+  // Protected Classroom Routes
   {
     path: "/classroom",
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,

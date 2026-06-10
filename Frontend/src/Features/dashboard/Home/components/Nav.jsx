@@ -169,7 +169,7 @@ export const Nav = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-10 text-[13px] font-medium uppercase tracking-[0.2em] text-text-secondary">
+        <div className="hidden md:flex items-center gap-10 text-[15px] font-medium uppercase tracking-[0.2em] text-text-secondary">
           {navLinks.map((item) => (
             <Link
               key={item.name}
@@ -185,7 +185,7 @@ export const Nav = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-10 h-10 rounded-full bg-accent/20 border border-accent/30 overflow-hidden flex items-center justify-center text-accent font-bold hover:bg-accent/30 transition-all"
+                className="w-12 h-12 rounded-full bg-accent/20 border border-accent/30 overflow-hidden flex items-center justify-center text-accent font-bold hover:bg-accent/30 transition-all"
               >
                 {user?.avatar ? (
                   <img

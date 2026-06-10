@@ -6,14 +6,12 @@ import { router } from "./AppRouter";
 import { getme } from "../Features/auth/services/auth.api";
 import { setUser, setAuthChecked } from "../Features/auth/auth.slice";
 import { useAuthInit } from "../Features/auth/hooks/useAuthInit";
+import { getMyEnrollments } from "../Features/dashboard/Courses/enrollment.slice";
 
 const App = () => {
   useAuthInit();
   const dispatch = useDispatch();
 
-  /* =========================
-     AUTH CHECK ON APP LOAD
-  ========================= */
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -21,13 +19,15 @@ const App = () => {
 
         if (res.data?.user) {
           dispatch(setUser(res.data.user));
+
+          // ✅ FIX: no await (prevents blocking + race issue)
+          dispatch(getMyEnrollments());
         } else {
           dispatch(setUser(null));
         }
       } catch (err) {
         dispatch(setUser(null));
       } finally {
-        // 🔥 VERY IMPORTANT: tells app auth check is done
         dispatch(setAuthChecked(true));
       }
     };
@@ -35,9 +35,6 @@ const App = () => {
     loadUser();
   }, [dispatch]);
 
-  /* =========================
-     SCROLL FIX (UI UX)
-  ========================= */
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
