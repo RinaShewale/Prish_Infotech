@@ -7,7 +7,7 @@ import {
   enrollCourse,
   getMyEnrollments,
   clearEnrollmentState,
-} from "../enrollment.slice";
+} from "../redux/enrollment.slice";
 
 export const useEnrollment = () => {
   const dispatch = useDispatch();

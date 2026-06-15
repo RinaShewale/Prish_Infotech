@@ -35,10 +35,10 @@ import { useAuth } from "../../../auth/hooks/useAuth";
 
 import {
   logout as logoutAction,
-} from "../../../auth/auth.slice";
+} from "../../../auth/redux/auth.slice";
 
 // Import the enrollment action
-import { getMyEnrollments } from "../../../dashboard/Courses/enrollment.slice";
+import { getMyEnrollments } from "../../../dashboard/Courses/redux/enrollment.slice";
 
 export const Nav = () => {
 

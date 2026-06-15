@@ -23,6 +23,9 @@ import courseProgressRoutes from "./routes/courseProgress.routes.js";
 import bookmarkRoutes from "./routes/bookmark.route.js";
 import mediaRoutes from "./routes/media.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
+
+import bootcampRoutes from "./routes/bootcamp.route.js";
 
 import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
@@ -94,6 +97,10 @@ app.use("/api/bookmarks", bookmarkRoutes);
 
 app.use("/api/media", mediaRoutes);
 app.use("/api/upload", uploadRoutes);
+
+app.use("/api/notifications", notificationRoutes);
+
+app.use("/api/bootcamps", bootcampRoutes);
 
 
 // ======================

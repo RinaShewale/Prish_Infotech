@@ -16,7 +16,7 @@ import {
   setError,
   setAuthChecked,
   logout as logoutAction,
-} from "../auth.slice";
+} from "../redux/auth.slice";
 
 export function useAuth() {
   const dispatch = useDispatch();

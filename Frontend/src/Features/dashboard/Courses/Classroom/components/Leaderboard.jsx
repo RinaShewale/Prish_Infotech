@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Trophy, Crown, ArrowUpRight, Medal } from 'lucide-react';
 
 // IMPORTANT: Ensure this path points to your actual slice file
-import { fetchTopUsers } from '../leaderboard.slice'; 
+import { fetchTopUsers } from '../../../Courses/Classroom/redux/leaderboard.slice'; 
 
 const Leaderboard = ({ courseId }) => {
   const dispatch = useDispatch();

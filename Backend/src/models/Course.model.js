@@ -158,6 +158,22 @@ const courseSchema = new mongoose.Schema(
       default: "Lifetime Access",
     },
 
+
+    // ✅ BATCH YEAR
+
+    batchYear: {
+      type: Number,
+      required: true,
+      default: new Date().getFullYear(),
+      min: 2024,
+      max: 2100,
+    },
+
+
+    cohortStartDate: {
+      type: Date,
+      required: false,
+    },
     // ✅ HERO QUOTE
 
     heroQuote: {

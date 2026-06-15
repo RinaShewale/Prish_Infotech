@@ -14,7 +14,7 @@ import {
   addReview,
   updateReviewState,
   removeReview,
-} from "../slice/review.slice";
+} from "../../components/redux/review.slice";
 
 import {
   createReviewApi,

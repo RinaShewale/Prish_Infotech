@@ -9,7 +9,7 @@ import {
   getMyCertificatesApi,
   getCertificateByIdApi,
   deleteCertificateApi,
-} from "../Courses/services/certificat.api";
+} from "../services/certificat.api";
 
 // ================= THUNKS =================
 

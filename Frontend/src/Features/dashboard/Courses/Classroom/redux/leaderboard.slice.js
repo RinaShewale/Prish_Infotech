@@ -6,7 +6,7 @@ import {
 import {
   getLeaderboardAPI,
   getTopUsersAPI,
-} from "../Classroom/service/leaderboard.api";
+} from "../service/leaderboard.api";
 
 
 // ================= FETCH LEADERBOARD =================

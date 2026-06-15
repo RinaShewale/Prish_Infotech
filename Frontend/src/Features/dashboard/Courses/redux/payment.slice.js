@@ -6,7 +6,7 @@ import {
 import {
   createOrderAPI,
   verifyPaymentAPI,
-} from "./services/payment.api";
+} from "../services/payment.api";
 
 /**
  * =========================

@@ -10,7 +10,7 @@ import {
   fetchCertificateById,
   removeCertificate,
   clearCertificateState,
-} from "../certificate.slice";
+} from "../redux/certificate.slice";
 
 export const useCertificate = () => {
   const dispatch = useDispatch();

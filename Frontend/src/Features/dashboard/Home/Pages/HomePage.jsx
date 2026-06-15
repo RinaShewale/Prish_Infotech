@@ -17,10 +17,15 @@ import { FAQSection } from "../../Home/components/FAQSection";
 import { CTASection } from "../../Home/components/CTASection";
 import { TestimonialSection } from "../../Home/components/TestimonialSection";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function HomePage() {
+
+  const { courses } = useSelector((state) => state.course);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
+
+  
 
   const navigate = useNavigate();
 
@@ -86,7 +91,14 @@ export default function HomePage() {
                 >
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/5 border border-accent/20 text-accent text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] mb-10 backdrop-blur-md">
                     <Zap className="w-3 h-3 fill-accent animate-pulse" />
-                    Next Cohort starting May 15
+                    Next Cohort starting {
+                      courses?.[0]?.cohortStartDate
+                        ? new Date(courses[0].cohortStartDate).toLocaleDateString("en-US", {
+                          day: "numeric",
+                          month: "long",
+                        })
+                        : "Coming Soon"
+                    }
                   </div>
 
                   {/* Updated Heading to match scale of other pages */}
@@ -105,7 +117,7 @@ export default function HomePage() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    onClick={() => navigate("/courses")}
+                      onClick={() => navigate("/courses")}
                       className="group relative flex items-center justify-center gap-4 px-10 py-5 md:px-12 md:py-6 rounded-full bg-accent text-bg font-display font-bold text-lg md:text-xl tracking-tight shadow-[0_20px_50px_rgba(230,206,200,0.2)] overflow-hidden"
                     >
                       <span className="relative z-10">Explore Courses</span>
@@ -137,7 +149,7 @@ export default function HomePage() {
               {/* Portal Effect remains cinematic */}
               <ZoomEffect />
 
-              
+
 
               <ScrollReveal y={40}>
                 <section className="relative z-10 py-24">

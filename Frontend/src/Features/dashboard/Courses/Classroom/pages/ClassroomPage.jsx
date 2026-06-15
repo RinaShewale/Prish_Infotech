@@ -5,7 +5,7 @@ import EnrolledCourseCards from '../components/EnrolledCourseCards';
 import NotificationPanel from '../components/NotificationPanel';
 import StatsBento from '../components/StatsBento';
 import { FluidBackground } from '../../../Home/components/FluidBackground';
-import { getMyEnrollments } from '../../enrollment.slice';
+import { getMyEnrollments } from '../../redux/enrollment.slice';
 
 const ClassroomPage = () => {
   const dispatch = useDispatch();

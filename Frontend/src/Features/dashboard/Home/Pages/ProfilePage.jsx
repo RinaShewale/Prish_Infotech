@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { ReviewModal } from "../../Home/components/ReviewModal"; 
-import { getMyEnrollments } from "../../Courses/enrollment.slice";
+import { getMyEnrollments } from "../../Courses/redux/enrollment.slice";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();

@@ -6,7 +6,7 @@ import {
 import {
   saveLessonProgressAPI,
   getLessonProgressAPI,
-} from "../Classroom/service/lessonProgress.api";
+} from "../service/lessonProgress.api";
 
 // ================= SAVE LESSON PROGRESS =================
 export const saveLessonProgress =

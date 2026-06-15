@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder, verifyPayment } from "../payment.slice";
+import { createOrder, verifyPayment } from "../redux/payment.slice";
 
 export const usePayment = () => {
   const dispatch = useDispatch();

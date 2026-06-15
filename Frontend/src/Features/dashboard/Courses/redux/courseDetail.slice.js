@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getCourseDetailAPI, getCourseByIdAPI } from "./services/courseDetail.api";
+import { getCourseDetailAPI, getCourseByIdAPI } from "../services/courseDetail.api";
 
 // ================= FETCH COURSE DETAIL =================
 export const fetchCourseDetail = createAsyncThunk(

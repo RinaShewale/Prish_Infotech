@@ -5,7 +5,7 @@ import {
 
 import {
   validateCouponAPI,
-} from "./services/coupon.api";
+} from "../services/coupon.api";
 
 export const validateCoupon =
   createAsyncThunk(

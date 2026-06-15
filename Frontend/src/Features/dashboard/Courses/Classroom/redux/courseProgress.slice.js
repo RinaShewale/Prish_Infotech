@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getCourseProgressAPI } from "./service/courseProgress.api";
+import { getCourseProgressAPI } from "../service/courseProgress.api";
 
 // ================= FETCH COURSE PROGRESS =================
 export const fetchCourseProgress = createAsyncThunk(

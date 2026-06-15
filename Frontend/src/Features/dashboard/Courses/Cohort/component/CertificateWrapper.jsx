@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Lock, Award, Download, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { fetchMyCertificates } from '../../certificate.slice';
+import { fetchMyCertificates } from '../../redux/certificate.slice';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import CertificateCard from './CertificateCard';

@@ -7,11 +7,11 @@ import {
   MessageCircle,
   FlaskRoundIcon
 } from 'lucide-react';
-import { fetchLessons } from '../lesson.slice';
-import { saveLessonProgress, getLessonProgress } from '../lessonProgress.slice';
-import { fetchTopUsers } from '../leaderboard.slice';
-import { fetchCourseProgress } from '../courseProgress.slice';
-import { addBookmark, getBookmarks, removeBookmark } from "../bookmark.slice";
+import { fetchLessons } from '../../Classroom/redux/lesson.slice';
+import { saveLessonProgress, getLessonProgress } from '../../Classroom/redux/lessonProgress.slice';
+import { fetchTopUsers } from '../../Classroom/redux/leaderboard.slice';
+import { fetchCourseProgress } from '../../Classroom/redux/courseProgress.slice';
+import { addBookmark, getBookmarks, removeBookmark } from "../../Classroom/redux/bookmark.slice";
 import { FluidBackground } from '../../../Home/components/FluidBackground';
 
 const LecturePage = () => {

@@ -24,6 +24,8 @@ export const createCourse = async (
       heroQuote,
       heroHighlight,
       syllabus,
+      batchYear,
+      cohortStartDate
     } = req.body;
 
     // ✅ VALIDATION
@@ -81,8 +83,8 @@ export const createCourse = async (
     const formattedCategory =
       Array.isArray(category)
         ? category.map((c) =>
-            c.trim()
-          )
+          c.trim()
+        )
         : [category.trim()];
 
     // ✅ PARSE SYLLABUS
@@ -107,7 +109,7 @@ export const createCourse = async (
     if (
       finalOldPrice > 0 &&
       finalOldPrice >
-        finalPrice
+      finalPrice
     ) {
 
       discount = Math.round(
@@ -158,6 +160,16 @@ export const createCourse = async (
         heroHighlight:
           heroHighlight ||
           "Become Industry Ready",
+
+
+        batchYear:
+          Number(batchYear) ||
+          new Date().getFullYear(),
+
+
+        cohortStartDate: cohortStartDate
+          ? new Date(cohortStartDate)
+          : null,
 
         syllabus:
           parsedSyllabus,
@@ -298,6 +310,17 @@ export const updateCourse =
           Number(
             req.body.oldPrice
           );
+      }
+
+      if (req.body.batchYear) {
+        req.body.batchYear = Number(
+          req.body.batchYear
+        );
+      }
+
+
+      if (req.body.cohortStartDate) {
+        req.body.cohortStartDate = new Date(req.body.cohortStartDate);
       }
 
       // ✅ CALCULATE DISCOUNT

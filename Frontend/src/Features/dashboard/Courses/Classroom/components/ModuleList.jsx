@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Box, Megaphone, ArrowUpRight, PlayCircle, Lock } from 'lucide-react';
-import { fetchLessons } from '../lesson.slice';
+import { fetchLessons } from '../../../Courses/Classroom/redux/lesson.slice';
 
 const ModuleList = ({ courseId }) => {
   const [activeTab, setActiveTab] = useState('modules');

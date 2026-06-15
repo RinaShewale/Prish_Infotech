@@ -37,6 +37,7 @@ export const router = createBrowserRouter([
     path: "/bootcamp",
     element: <BootcampPage />,
   },
+  
   {
     path: "/callback",
     element: <RequestCallback />,

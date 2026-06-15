@@ -7,8 +7,8 @@ import ModuleList from '../components/ModuleList';
 import Leaderboard from '../components/Leaderboard';
 import NavigationSidebar from '../components/NavigationSidebar';
 import CertificateWrapper from '../../Cohort/component/CertificateWrapper';
-import BookmarkList from "../components/BookmarkList";
-import { fetchCourseProgress } from '../courseProgress.slice';
+import BookmarkList from "../../Classroom/redux/bookmark.slice";
+import { fetchCourseProgress } from '../../Classroom/redux/courseProgress.slice';
 
 const LearningPage = () => {
   const { courseId } = useParams();

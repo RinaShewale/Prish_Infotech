@@ -5,7 +5,7 @@ import {
 
 import {
   getCourseLessonsAPI,
-} from "../Classroom/service/lesson.api";
+} from "../service/lesson.api";
 
 
 

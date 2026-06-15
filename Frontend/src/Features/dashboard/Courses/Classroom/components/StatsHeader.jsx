@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { fetchLessons } from '../lesson.slice';
+import { fetchLessons } from '../redux/lesson.slice';
 
 const StatsHeader = ({ courseId }) => {
   const dispatch = useDispatch();

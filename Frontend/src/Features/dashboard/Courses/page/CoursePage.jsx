@@ -50,6 +50,15 @@ export default function CoursesPage() {
     (state) => state.course
   );
 
+
+
+  const latestYear =
+    courses?.reduce(
+      (max, c) =>
+        Math.max(max, c.batchYear || 0),
+      0
+    ) || new Date().getFullYear();
+
   // Fetch courses
 
   useEffect(() => {
@@ -187,7 +196,7 @@ export default function CoursesPage() {
 
                 <Zap className="w-3 h-3 fill-accent animate-pulse" />
 
-                Enrollment Open for 2025
+                Enrollment Open for {latestYear}
 
               </div>
 
@@ -245,12 +254,12 @@ export default function CoursesPage() {
               !error &&
               courses?.length === 0 && (
 
-              <div className="text-center text-white/50 text-lg">
+                <div className="text-center text-white/50 text-lg">
 
-                No courses found
+                  No courses found
 
-              </div>
-            )}
+                </div>
+              )}
 
             {/* Courses Grid */}
 
@@ -258,69 +267,69 @@ export default function CoursesPage() {
               !error &&
               courses?.length > 0 && (
 
-              <motion.div
-                initial="hidden"
+                <motion.div
+                  initial="hidden"
 
-                animate="visible"
+                  animate="visible"
 
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                  },
-
-                  visible: {
-                    opacity: 1,
-
-                    transition: {
-                      staggerChildren: 0.08,
+                  variants={{
+                    hidden: {
+                      opacity: 0,
                     },
-                  },
-                }}
 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10"
-              >
+                    visible: {
+                      opacity: 1,
 
-                {courses.map(
-                  (course) => (
+                      transition: {
+                        staggerChildren: 0.08,
+                      },
+                    },
+                  }}
 
-                    <motion.div
-                      key={course._id}
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10"
+                >
 
-                      variants={{
-                        hidden: {
-                          opacity: 0,
-                          y: 20,
-                          scale: 0.98,
-                        },
+                  {courses.map(
+                    (course) => (
 
-                        visible: {
-                          opacity: 1,
-                          y: 0,
-                          scale: 1,
-                        },
-                      }}
+                      <motion.div
+                        key={course._id}
 
-                      transition={{
-                        duration: 0.4,
-                      }}
+                        variants={{
+                          hidden: {
+                            opacity: 0,
+                            y: 20,
+                            scale: 0.98,
+                          },
 
-                      className="group will-change-transform"
-                    >
+                          visible: {
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                          },
+                        }}
 
-                      <div className="h-full transition-transform duration-300 group-hover:-translate-y-2">
+                        transition={{
+                          duration: 0.4,
+                        }}
 
-                        <CourseCard
-                          course={course}
-                        />
+                        className="group will-change-transform"
+                      >
 
-                      </div>
+                        <div className="h-full transition-transform duration-300 group-hover:-translate-y-2">
 
-                    </motion.div>
-                  )
-                )}
+                          <CourseCard
+                            course={course}
+                          />
 
-              </motion.div>
-            )}
+                        </div>
+
+                      </motion.div>
+                    )
+                  )}
+
+                </motion.div>
+              )}
 
           </section>
 
@@ -406,11 +415,11 @@ function ScrollReveal({
       animate={
         isInView
           ? {
-              opacity: 1,
-              y: 0,
-              rotateX: 0,
-              scale: 1,
-            }
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            scale: 1,
+          }
           : {}
       }
 

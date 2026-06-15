@@ -11,42 +11,14 @@ import {
   ChevronRight
 } from "lucide-react";
 import { useMedia } from "../../Home/components/hooks/useMedia";
+import { comparisonData } from "../../Courses/data/comparisonData";
 
-const comparisonData = [
-  {
-    title: "System Architecture",
-    description: "Build production-grade distributed systems with Redis, Kafka, and Microservices.",
-    detail: "Move beyond single-server setups. Learn how to handle 100k+ concurrent requests and implement circuit breakers.",
-    icon: <Layers className="w-5 h-5 md:w-6 md:h-6" />,
-    legacy: "Basic CRUD & To-do list tutorials",
-    color: "from-blue-500/20"
-  },
-  {
-    title: "Senior Code Audits",
-    description: "Deep-dive 1-on-1 PR reviews focusing on clean code, patterns, and scalability.",
-    detail: "Industry veterans review your logic, not just your syntax. We focus on SOLID principles and design patterns.",
-    icon: <Terminal className="w-5 h-5 md:w-6 md:h-6" />,
-    legacy: "Automated grading & community forums",
-    color: "from-purple-500/20"
-  },
-  {
-    title: "Cloud-Native Ops",
-    description: "Real CI/CD pipelines, Docker orchestration, and AWS/GCP deployment strategies.",
-    detail: "Stop 'deploying' by dragging files. Build automated pipelines that test, lint, and deploy to Kubernetes.",
-    icon: <Cpu className="w-5 h-5 md:w-6 md:h-6" />,
-    legacy: "Localhost-only 'Resume Filler' projects",
-    color: "from-emerald-500/20"
-  },
-  {
-    title: "The Ecosystem",
-    description: "Direct engineering pipeline to internal Prish projects and partner hiring desks.",
-    detail: "Access a private network of CTOs and lead engineers looking for specialized talent, not generalists.",
-    icon: <Network className="w-5 h-5 md:w-6 md:h-6" />,
-    legacy: "Generic career tips & cold LinkedIn apps",
-    color: "from-amber-500/20"
-  },
-];
-
+const iconMap = {
+  layers: <Layers className="w-5 h-5 md:w-6 md:h-6" />,
+  terminal: <Terminal className="w-5 h-5 md:w-6 md:h-6" />,
+  cpu: <Cpu className="w-5 h-5 md:w-6 md:h-6" />,
+  network: <Network className="w-5 h-5 md:w-6 md:h-6" />,
+};
 
 
 export default function BootcampComparison() {
@@ -140,7 +112,7 @@ export default function BootcampComparison() {
                     animate={activeIndex === idx ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
                     className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-bg border border-white/10 flex items-center justify-center group-hover:border-accent/50 transition-all duration-500"
                   >
-                    <div className="text-accent">{item.icon}</div>
+                    <div className="text-accent"> {iconMap[item.icon] || <Layers className="w-5 h-5" />}</div>
                   </motion.div>
 
                   <div className="block sm:hidden">

@@ -6,7 +6,7 @@ import {
   setLoading,
   setError,
   setSuccess,
-} from "../contact.slice";
+} from "../redux/contact.slice";
 
 export const useContact = () => {
   const dispatch = useDispatch();

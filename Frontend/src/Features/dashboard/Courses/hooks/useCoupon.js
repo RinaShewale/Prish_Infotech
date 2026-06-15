@@ -6,7 +6,7 @@ import {
 import {
   validateCoupon,
   resetCoupon,
-} from "../coupon.slice";
+} from "../redux/coupon.slice";
 
 export const useCoupon = () => {
 

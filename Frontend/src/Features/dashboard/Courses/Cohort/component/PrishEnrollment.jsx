@@ -12,14 +12,18 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { useSelector } from "react-redux";
+
 import { usePayment } from "../../hooks/usePayment";
 import { useEnrollment } from "../../hooks/useEnrollment";
 import { useCoupon } from "../../hooks/useCoupon";
 import { useNavigate } from "react-router-dom";
 import loadRazorpay from "../../utils/loadRazorpay";
 
+
 export const PrishEnrollment = ({ courseData, title }) => {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
 
   // Hooks
   const { enrollments, fetchEnrollments, loading: enrollmentLoading } = useEnrollment();
@@ -74,6 +78,14 @@ export const PrishEnrollment = ({ courseData, title }) => {
   };
 
   const handleCheckout = async () => {
+    if (!user) {
+      navigate("/login", {
+        state: { from: window.location.pathname },
+        replace: true,
+      });
+      return;
+    }
+
     if (isAlreadyEnrolled) {
       setShowPopup(true);
       return;
@@ -142,6 +154,7 @@ export const PrishEnrollment = ({ courseData, title }) => {
       alert("Something went wrong");
     }
   };
+
 
   return (
     <section className="py-24 px-4 bg-bg relative overflow-hidden">

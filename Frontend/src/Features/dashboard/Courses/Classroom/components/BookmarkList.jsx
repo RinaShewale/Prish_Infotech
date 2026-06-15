@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { PlayCircle, Bookmark, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { getBookmarks } from "../bookmark.slice";
+import { getBookmarks } from "../redux/bookmark.slice";
 
 const BookmarkList = () => {
   const dispatch = useDispatch();

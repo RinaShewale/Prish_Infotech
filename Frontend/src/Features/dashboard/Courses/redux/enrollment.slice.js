@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getMyEnrollmentsAPI,
   enrollCourseAPI,
-} from "./services/entrollment.api";
+} from "../services/entrollment.api";
 
 // ======================================================
 // 📚 GET MY ENROLLMENTS

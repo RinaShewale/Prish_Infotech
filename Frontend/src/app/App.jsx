@@ -4,9 +4,9 @@ import { useDispatch } from "react-redux";
 
 import { router } from "./AppRouter";
 import { getme } from "../Features/auth/services/auth.api";
-import { setUser, setAuthChecked } from "../Features/auth/auth.slice";
+import { setUser, setAuthChecked } from "../Features/auth/redux/auth.slice";
 import { useAuthInit } from "../Features/auth/hooks/useAuthInit";
-import { getMyEnrollments } from "../Features/dashboard/Courses/enrollment.slice";
+import { getMyEnrollments } from "../Features/dashboard/Courses/redux/enrollment.slice";
 
 const App = () => {
   useAuthInit();

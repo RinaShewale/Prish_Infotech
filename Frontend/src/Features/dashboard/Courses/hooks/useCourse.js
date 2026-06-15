@@ -23,7 +23,7 @@ import {
   addCourse,
   removeCourse,
   updateCourseState,
-} from "../course.slice";
+} from "../redux/course.slice";
 
 export function useCourse() {
 

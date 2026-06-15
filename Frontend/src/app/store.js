@@ -1,31 +1,36 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 // ================= AUTH =================
-import authReducer from "../features/auth/auth.slice";
+import authReducer from "../features/auth/redux/auth.slice";
 
 // ================= COURSE =================
-import courseReducer from "../Features/dashboard/Courses/course.slice";
-import courseDetailReducer from "../Features/dashboard/Courses/courseDetail.slice";
+import courseReducer from "../Features/dashboard/Courses/redux/course.slice";
+import courseDetailReducer from "../Features/dashboard/Courses/redux/courseDetail.slice";
 
 // ================= DASHBOARD =================
-import contactReducer from "../Features/auth/contact.slice";
-import reviewReducer from "../Features/dashboard/Home/components/slice/review.slice";
+import contactReducer from "../Features/auth/redux/contact.slice";
+import reviewReducer from "../Features/dashboard/Home/components/redux/review.slice";
 
 // ================= COURSE MODULES =================
-import certificateReducer from "../Features/dashboard/Courses/certificate.slice";
-import enrollmentReducer from "../Features/dashboard/Courses/enrollment.slice";
-import paymentReducer from "../Features/dashboard/Courses/payment.slice";
-import couponReducer from "../Features/dashboard/Courses/coupon.slice";
+import certificateReducer from "../Features/dashboard/Courses/redux/certificate.slice";
+import enrollmentReducer from "../Features/dashboard/Courses/redux/enrollment.slice";
+import paymentReducer from "../Features/dashboard/Courses/redux/payment.slice";
+import couponReducer from "../Features/dashboard/Courses/redux/coupon.slice";
 
 // ================= CLASSROOM =================
-import lessonReducer from "../Features/dashboard/Courses/Classroom/lesson.slice";
-import lessonProgressReducer from "../Features/dashboard/Courses/Classroom/lessonProgress.slice";
-import leaderboardReducer from "../Features/dashboard/Courses/Classroom/leaderboard.slice";
+import lessonReducer from "../Features/dashboard/Courses/Classroom/redux/lesson.slice";
+import lessonProgressReducer from "../Features/dashboard/Courses/Classroom/redux/lessonProgress.slice";
+import leaderboardReducer from "../Features/dashboard/Courses/Classroom/redux/leaderboard.slice";
 
 // 🚨 IMPORTANT: ADD THIS (YOU MISSED THIS)
-import courseProgressReducer from "../Features/dashboard/Courses/Classroom/courseProgress.slice";
+import courseProgressReducer from "../Features/dashboard/Courses/Classroom/redux/courseProgress.slice";
 
-import bookmarkReducer from "../features/dashboard/Courses/Classroom/bookmark.slice";
+import bookmarkReducer from "../Features/dashboard/Courses/Classroom/redux/bookmark.slice";
+
+import notificationReducer from "../Features/dashboard/Courses/Classroom/redux/notification.slice";
+
+
+import bootcampReducer from "../Features/dashboard/Courses/redux/bootcampSlice";
 
 export const store = configureStore({
   reducer: {
@@ -48,8 +53,9 @@ export const store = configureStore({
 
     // ✅ FIX: COURSE PROGRESS STATE
     courseProgress: courseProgressReducer,
-
-
     bookmark: bookmarkReducer,
+    notification: notificationReducer,
+
+     bootcamp: bootcampReducer,
   },
 });

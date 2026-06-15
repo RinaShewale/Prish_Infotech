@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import { getme } from "../services/auth.api";
-import { setUser, setAuthChecked } from "../auth.slice";
+import { setUser, setAuthChecked } from "../redux/auth.slice";
 
 export const useAuthInit = () => {
   const dispatch = useDispatch();

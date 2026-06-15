@@ -7,7 +7,7 @@ import {
   addBookmarkAPI,
   getBookmarksAPI,
   removeBookmarkAPI,
-} from "../Classroom/service/bookmark.api";
+} from "../service/bookmark.api";
 
 // ================= ADD BOOKMARK =================
 export const addBookmark =
