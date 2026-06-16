@@ -13,7 +13,6 @@ import { Footer } from "../../Home/components/Footer";
 import BootcampComparison from "../Component/BootcampComparison";
 import BootcampCards from "../Component/BootcampCards";
 import BootcampVideo from "../Component/BootcampVideo";
-import CinematicBootcamp from "../Component/CinematicBootcamp";
 import AdmissionForm from "../Component/AdmissionForm";
 import { BootcampPricing } from "../Component/BootcampPricing";
 import { BootcampCertification } from "../Component/BootcampCertification";
@@ -211,12 +210,7 @@ export default function BootcampPage() {
         <BootcampCertification />
         <BootcampPricing />
 
-        <section className="relative mt-20 md:mt-32">
-          <div className="absolute top-0 left-0 w-full h-32 md:h-64 bg-gradient-to-b from-bg to-transparent z-10" />
-          <CinematicBootcamp />
-          <div className="absolute bottom-0 left-0 w-full h-32 md:h-64 bg-gradient-to-t from-bg to-transparent z-10" />
-        </section>
-
+     
         <section id="apply" className="relative mt-20 md:mt-32">
           <AdmissionForm />
         </section>
