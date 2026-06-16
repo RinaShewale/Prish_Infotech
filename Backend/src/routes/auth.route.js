@@ -6,6 +6,10 @@ import {
   getProfile,
   googleCallback,
   logoutUser,
+  updateProfile,
+  updatePassword,
+  resetPassword,
+  forgotPassword,
 } from "../controllers/auth.controller.js";
 
 import { protect } from "../middleware/auth.middleware.js";
@@ -20,6 +24,15 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/me", protect, getProfile);
 router.post("/logout", logoutUser);
+
+router.patch("/profile",protect,updateProfile);
+
+
+router.post("/forgot-password",forgotPassword);
+
+router.post("/reset-password/:token",resetPassword);
+
+router.put("/update-password",protect,updatePassword);
 
 // ======================
 // GOOGLE OAUTH ROUTES
@@ -48,5 +61,9 @@ router.get(
   }),
   googleCallback
 );
+
+
+
+
 
 export default router;

@@ -6,6 +6,9 @@ import {
   register,
   getme,
   updateProfile,
+  updatePassword,
+  forgotPassword,
+  resetPassword,
   logout as logoutApi,
   googleLogin,
 } from "../services/auth.api";
@@ -22,7 +25,7 @@ export function useAuth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  /* ================= REGISTER ================= */
+  // ================= REGISTER =================
   const handleRegister = async (data) => {
     try {
       dispatch(setLoading(true));
@@ -30,27 +33,32 @@ export function useAuth() {
 
       const res = await register(data);
 
-      const user = res?.data?.user;
-
-      if (user) {
-        dispatch(setUser(user));
-        dispatch(setAuthChecked(true)); // 🔥 FIX
+      if (res?.data?.user) {
+        dispatch(setUser(res.data.user));
+        dispatch(setAuthChecked(true));
       }
 
-      return { success: true, data: res?.data };
+      return {
+        success: true,
+        data: res.data,
+      };
     } catch (err) {
       const message =
-        err?.response?.data?.message || "Registration failed";
+        err?.response?.data?.message ||
+        "Registration failed";
 
       dispatch(setError(message));
 
-      return { success: false, message };
+      return {
+        success: false,
+        message,
+      };
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  /* ================= LOGIN ================= */
+  // ================= LOGIN =================
   const handleLogin = async (data) => {
     try {
       dispatch(setLoading(true));
@@ -58,88 +66,223 @@ export function useAuth() {
 
       const res = await login(data);
 
-      const user = res?.data?.user;
-
-      if (user) {
-        dispatch(setUser(user));          // 🔥 instant UI update
-        dispatch(setAuthChecked(true));   // 🔥 CRITICAL FIX
-      }
-
-      if (res?.data?.token) {
-        localStorage.setItem("token", res.data.token);
+      if (res?.data?.user) {
+        dispatch(setUser(res.data.user));
+        dispatch(setAuthChecked(true));
       }
 
       navigate("/");
 
-      return { success: true, user };
+      return {
+        success: true,
+        user: res?.data?.user,
+      };
     } catch (err) {
       const message =
-        err?.response?.data?.message || "Login failed";
+        err?.response?.data?.message ||
+        "Login failed";
 
       dispatch(setError(message));
 
-      return { success: false, message };
+      return {
+        success: false,
+        message,
+      };
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  /* ================= GET CURRENT USER ================= */
+  // ================= GET CURRENT USER =================
   const handleGetMe = async () => {
     try {
       dispatch(setLoading(true));
 
       const res = await getme();
 
-      dispatch(setUser(res?.data?.user || null));
+      dispatch(
+        setUser(res?.data?.user || null)
+      );
 
-      return { success: true };
+      return {
+        success: true,
+        user: res?.data?.user,
+      };
     } catch (err) {
       dispatch(setUser(null));
 
-      return { success: false };
+      return {
+        success: false,
+      };
     } finally {
       dispatch(setLoading(false));
-      dispatch(setAuthChecked(true)); // 🔥 IMPORTANT
+      dispatch(setAuthChecked(true));
     }
   };
 
-  /* ================= UPDATE PROFILE ================= */
-  const handleUpdateProfile = async (data) => {
+  // ================= UPDATE PROFILE =================
+  const handleUpdateProfile = async (
+    profileData
+  ) => {
     try {
       dispatch(setLoading(true));
+      dispatch(setError(null));
 
-      const res = await updateProfile(data);
+      const res =
+        await updateProfile(
+          profileData
+        );
 
-      dispatch(setUser(res?.data?.user));
+      if (res?.data?.user) {
+        dispatch(
+          setUser(res.data.user)
+        );
+      }
 
-      return { success: true };
+      return {
+        success: true,
+        user: res?.data?.user,
+        message:
+          res?.data?.message ||
+          "Profile updated successfully",
+      };
     } catch (err) {
       const message =
-        err?.response?.data?.message || "Update failed";
+        err?.response?.data?.message ||
+        "Profile update failed";
 
       dispatch(setError(message));
 
-      return { success: false, message };
+      return {
+        success: false,
+        message,
+      };
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  /* ================= LOGOUT ================= */
+
+
+  // ================= UPDATE PASSWORD =================
+  const handleUpdatePassword = async (
+    currentPassword,
+    newPassword
+  ) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+
+      const res = await updatePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      return {
+        success: true,
+        message: res.data.message,
+      };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        "Password update failed";
+
+      dispatch(setError(message));
+
+      return {
+        success: false,
+        message,
+      };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  // ================= FORGOT PASSWORD =================
+  const handleForgotPassword = async (
+    email
+  ) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+
+      const res =
+        await forgotPassword(email);
+
+      return {
+        success: true,
+        message: res.data.message,
+      };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        "Failed to send reset email";
+
+      dispatch(setError(message));
+
+      return {
+        success: false,
+        message,
+      };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  // ================= RESET PASSWORD =================
+  const handleResetPassword = async (
+    token,
+    password
+  ) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+
+      const res =
+        await resetPassword(
+          token,
+          password
+        );
+
+      return {
+        success: true,
+        message: res.data.message,
+      };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        "Password reset failed";
+
+      dispatch(setError(message));
+
+      return {
+        success: false,
+        message,
+      };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+
+
+
+  // ================= LOGOUT =================
   const handleLogout = async () => {
     try {
       await logoutApi();
     } catch (err) {
-      console.log("Logout API error ignored");
+      console.log(err);
     } finally {
-      localStorage.removeItem("token");
       dispatch(logoutAction());
       navigate("/login");
     }
   };
 
-  /* ================= GOOGLE LOGIN ================= */
+
+
+
+  // ================= GOOGLE LOGIN =================
   const handleGoogleLogin = () => {
     googleLogin();
   };
@@ -149,6 +292,9 @@ export function useAuth() {
     handleLogin,
     handleGetMe,
     handleUpdateProfile,
+    handleUpdatePassword,
+    handleForgotPassword,
+    handleResetPassword,
     handleLogout,
     handleGoogleLogin,
   };

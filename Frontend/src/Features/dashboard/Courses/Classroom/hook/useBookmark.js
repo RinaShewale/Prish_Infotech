@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import {
   addBookmark,
   removeBookmark,
-} from "../bookmark.slice";
+} from "../redux/bookmark.slice";
 
 const useBookmark = () => {
   const dispatch = useDispatch();

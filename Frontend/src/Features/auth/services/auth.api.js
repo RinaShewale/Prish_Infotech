@@ -1,26 +1,51 @@
 import API from "./api";
 
-// AUTH
-export const register = (data) => API.post("/auth/register", data);
-export const login = (data) => API.post("/auth/login", data);
-export const getme = () => API.get("/auth/me");
-export const logout = () => API.post("/auth/logout");
+// ================= AUTH =================
 
-// PROFILE
+export const register = (data) =>
+  API.post("/auth/register", data);
+
+export const login = (data) =>
+  API.post("/auth/login", data);
+
+export const getme = () =>
+  API.get("/auth/me");
+
+export const logout = () =>
+  API.post("/auth/logout");
+
+// ================= PROFILE =================
+
 export const updateProfile = (data) =>
-  API.put("/auth/profile", data);
+  API.patch("/auth/profile", data);
 
-// PASSWORD
+// ================= PASSWORD =================
+
+// Change password (logged in user)
 export const updatePassword = (data) =>
   API.put("/auth/update-password", data);
 
+// Forgot password
 export const forgotPassword = (email) =>
-  API.post("/auth/forgot-password", { email });
+  API.post("/auth/forgot-password", {
+    email,
+  });
 
-export const resetPassword = (token, password) =>
-  API.post(`/auth/reset-password/${token}`, { password });
+// Reset password
+export const resetPassword = (
+  token,
+  password
+) =>
+  API.post(
+    `/auth/reset-password/${token}`,
+    {
+      password,
+    }
+  );
 
-// GOOGLE LOGIN
+// ================= GOOGLE =================
+
 export const googleLogin = () => {
-  window.location.href = "http://localhost:3000/api/auth/google";
+  window.location.href =
+    "http://localhost:3000/api/auth/google";
 };

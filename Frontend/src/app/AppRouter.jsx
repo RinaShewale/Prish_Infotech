@@ -18,6 +18,8 @@ import LecturePage from "../Features/dashboard/Courses/Classroom/pages/LecturePa
 
 // Protected Route
 import ProtectedRoute from "../Features/auth/components/ProtectedRoute"; // <-- adjust path if needed
+import ForgotPassword from "../Features/auth/pages/ForgotPassword";
+import ResetPassword from "../Features/auth/pages/ResetPassword";
 
 export const router = createBrowserRouter([
   // Public Routes
@@ -37,7 +39,7 @@ export const router = createBrowserRouter([
     path: "/bootcamp",
     element: <BootcampPage />,
   },
-  
+
   {
     path: "/callback",
     element: <RequestCallback />,
@@ -49,6 +51,15 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />,
+  },
+
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password/:token",
+    element: <ResetPassword />,
   },
   {
     path: "/cohort/:slug",

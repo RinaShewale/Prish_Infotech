@@ -26,6 +26,7 @@ import uploadRoutes from "./routes/upload.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 
 import bootcampRoutes from "./routes/bootcamp.route.js";
+import applicationRoutes from "./routes/application.route.js";
 
 import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
@@ -101,6 +102,8 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 app.use("/api/bootcamps", bootcampRoutes);
+
+app.use("/api/applications", applicationRoutes);
 
 
 // ======================

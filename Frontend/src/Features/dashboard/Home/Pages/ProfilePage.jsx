@@ -1,26 +1,58 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  User, Mail, BookOpen, Calendar, 
-  Settings, ChevronRight, ShieldCheck, 
-  MessageSquareHeart, Zap, X, Phone, 
+import {
+  User, Mail, BookOpen, Calendar,
+  Settings, ChevronRight, ShieldCheck,
+  MessageSquareHeart, Zap, X, Phone,
   MapPin, Briefcase, Pencil, Star
 } from "lucide-react";
 
-import { ReviewModal } from "../../Home/components/ReviewModal"; 
+import { ReviewModal } from "../../Home/components/ReviewModal";
 import { getMyEnrollments } from "../../Courses/redux/enrollment.slice";
+import { useAuth } from "../../../auth/hooks/useAuth";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const user = useSelector((state) => state.auth.user);
   const { enrollments = [] } = useSelector((state) => state.enrollment);
 
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const { handleUpdateProfile } = useAuth();
+
+  const [profileData, setProfileData] = useState({
+    name: "",
+    contactNumber: "",
+    dateOfBirth: "",
+    bio: "",
+    city: "",
+    state: "",
+    pincode: "",
+    country: "India",
+  });
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || "",
+        contactNumber: user.contactNumber || "",
+        dateOfBirth: user.dateOfBirth
+          ? user.dateOfBirth.split("T")[0]
+          : "",
+        bio: user.bio || "",
+        city: user.city || "",
+        state: user.state || "",
+        pincode: user.pincode || "",
+        country: user.country || "India",
+      });
+    }
+  }, [user]);
+
+
 
   useEffect(() => {
     if (user) { dispatch(getMyEnrollments()); }
@@ -40,10 +72,21 @@ const ProfilePage = () => {
     avgProgress: courses.length ? Math.round(courses.reduce((a, c) => a + c.progress, 0) / courses.length) : 0
   }), [courses]);
 
+
+  const handleSave = async () => {
+    const res = await handleUpdateProfile(
+      profileData
+    );
+
+    if (res.success) {
+      setIsEditOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-32 pb-20 px-4 md:px-8 font-sans">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* --- HEADER --- */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col md:flex-row items-center gap-8 mb-16 pb-12 border-b border-white/5">
           <div className="relative group">
@@ -56,11 +99,11 @@ const ProfilePage = () => {
             <h1 className="text-4xl md:text-6xl font-medium tracking-tight mb-2">{user?.name}</h1>
             <div className="flex flex-wrap justify-center md:justify-start gap-6 text-white/40 text-sm">
               <span className="flex items-center gap-2"><Mail size={16} className="text-accent" /> {user?.email}</span>
-              <span className="flex items-center gap-2"><Calendar size={16} className="text-accent" /> Joined 2024</span>
+
             </div>
           </div>
 
-          <button 
+          <button
             onClick={() => setIsEditOpen(true)}
             className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center gap-3"
           >
@@ -75,12 +118,12 @@ const ProfilePage = () => {
               <h3 className="text-accent text-[10px] font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><Zap size={14} /> Stats</h3>
               <div className="space-y-6">
                 <div className="flex justify-between items-end pb-4 border-b border-white/5">
-                    <span className="text-white/40 text-sm">Enrolled</span>
-                    <span className="text-2xl font-light">{stats.total}</span>
+                  <span className="text-white/40 text-sm">Enrolled</span>
+                  <span className="text-2xl font-light">{stats.total}</span>
                 </div>
                 <div className="flex justify-between items-end">
-                    <span className="text-white/40 text-sm">Progress</span>
-                    <span className="text-2xl font-light text-accent">{stats.avgProgress}%</span>
+                  <span className="text-white/40 text-sm">Progress</span>
+                  <span className="text-2xl font-light text-accent">{stats.avgProgress}%</span>
                 </div>
               </div>
             </div>
@@ -97,8 +140,8 @@ const ProfilePage = () => {
               <h3 className="text-2xl font-medium flex items-center gap-4 mb-12"><BookOpen size={24} className="text-accent" /> Active Pipeline</h3>
               <div className="space-y-4">
                 {courses.map((course) => (
-                  <motion.div 
-                    key={course.id} 
+                  <motion.div
+                    key={course.id}
                     whileHover={{ x: 10 }}
                     onClick={() => navigate(`/classroom/course/${course.id}`)}
                     className="p-6 md:p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-accent/30 cursor-pointer transition-all"
@@ -110,7 +153,7 @@ const ProfilePage = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-light text-accent">{course.progress}%</p>
-                        <ChevronRight className="ml-auto mt-2 text-white/20" size={20}/>
+                        <ChevronRight className="ml-auto mt-2 text-white/20" size={20} />
                       </div>
                     </div>
                   </motion.div>
@@ -126,9 +169,9 @@ const ProfilePage = () => {
         {isEditOpen && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsEditOpen(false)} className="absolute inset-0 bg-black/95 backdrop-blur-md" />
-            
+
             {/* The Modal Container */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -147,17 +190,58 @@ const ProfilePage = () => {
 
               <div className="space-y-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FormInput label="First Name" placeholder="Rina" icon={<User size={14}/>}/>
-                  <FormInput label="Last Name" placeholder="Shewale" icon={<User size={14}/>}/>
-                  <FormInput label="Email" placeholder="user@gmail.com" icon={<Mail size={14}/>}/>
-                  <FormInput label="Contact" placeholder="90497xxxxx" icon={<Phone size={14}/>}/>
+                  <FormInput
+                    label="Full Name"
+                    icon={<User size={14} />}
+                    value={profileData.name}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        name: e.target.value,
+                      })
+                    }
+                  />
+                  <FormInput
+                    label="Contact"
+                    icon={<Phone size={14} />}
+                    value={profileData.contactNumber}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        contactNumber: e.target.value,
+                      })
+                    }
+                  />
+                  <FormInput label="Email" placeholder="user@gmail.com" icon={<Mail size={14} />} />
+                  <FormInput label="Contact" placeholder="90497xxxxx" icon={<Phone size={14} />} />
                 </div>
 
                 <div className="space-y-8">
-                  <FormInput label="Date of Birth" type="date" icon={<Calendar size={14}/>}/>
+                  <FormInput
+                    label="Date of Birth"
+                    type="date"
+                    icon={<Calendar size={14} />}
+                    value={profileData.dateOfBirth}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        dateOfBirth: e.target.value,
+                      })
+                    }
+                  />
                   <div className="space-y-3">
-                    <label className="text-[11px] uppercase tracking-widest text-white/30 flex items-center gap-2"><Pencil size={14}/> Bio</label>
-                    <textarea placeholder="Tell us a little about yourself..." className="w-full bg-[#111] border border-white/5 rounded-2xl p-6 h-32 outline-none focus:border-accent/40 text-sm" />
+                    <label className="text-[11px] uppercase tracking-widest text-white/30 flex items-center gap-2"><Pencil size={14} /> Bio</label>
+                    <textarea
+                      value={profileData.bio}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          bio: e.target.value,
+                        })
+                      }
+                      placeholder="Tell us a little about yourself..."
+                      className="w-full bg-[#111] border border-white/5 rounded-2xl p-6 h-32 outline-none focus:border-accent/40 text-sm"
+                    />
                   </div>
                 </div>
 
@@ -167,14 +251,54 @@ const ProfilePage = () => {
                     <h2 className="text-2xl font-medium tracking-tight">Location & Professional</h2>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <FormInput label="City" placeholder="City" icon={<MapPin size={14}/>}/>
-                    <FormInput label="State" placeholder="State" icon={<MapPin size={14}/>}/>
-                    <FormInput label="Pincode" placeholder="Pincode" icon={<MapPin size={14}/>}/>
-                    <FormInput label="Country" placeholder="India" icon={<Briefcase size={14}/>}/>
+                    <FormInput
+                      label="City"
+                      icon={<MapPin size={14} />}
+                      value={profileData.city}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          city: e.target.value,
+                        })
+                      }
+                    />
+                    <FormInput
+                      label="State"
+                      icon={<MapPin size={14} />}
+                      value={profileData.state}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          state: e.target.value,
+                        })
+                      }
+                    />
+                    <FormInput
+                      label="Pincode"
+                      icon={<MapPin size={14} />}
+                      value={profileData.pincode}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          pincode: e.target.value,
+                        })
+                      }
+                    />
+                    <FormInput
+                      label="Country"
+                      icon={<Briefcase size={14} />}
+                      value={profileData.country}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          country: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                 </div>
 
-                <button className="w-full py-5 bg-accent text-black rounded-2xl text-xs font-black uppercase tracking-widest mt-6">Save Changes</button>
+                <button onClick={handleSave} className="w-full py-5 bg-accent text-black rounded-2xl text-xs font-black uppercase tracking-widest mt-6">Save Changes</button>
               </div>
             </motion.div>
           </div>
@@ -186,10 +310,20 @@ const ProfilePage = () => {
   );
 };
 
-const FormInput = ({ label, placeholder, type = "text", icon }) => (
+const FormInput = ({
+  label,
+  placeholder,
+  type = "text",
+  icon,
+  value,
+  onChange,
+}) => (
   <div className="space-y-3">
     <label className="text-[11px] uppercase tracking-widest text-white/30 flex items-center gap-2 ml-1">{icon} {label}</label>
-    <input type={type} placeholder={placeholder} className="w-full bg-[#111] border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-accent/40 text-sm placeholder:text-white/10" />
+    <input type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder} className="w-full bg-[#111] border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-accent/40 text-sm placeholder:text-white/10" />
   </div>
 );
 

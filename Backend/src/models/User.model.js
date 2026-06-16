@@ -3,7 +3,14 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
+    // ======================
+    // BASIC INFO
+    // ======================
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     email: {
       type: String,
@@ -22,7 +29,18 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    googleId: { type: String, default: null },
+    passwordResetToken: {
+      type: String,
+    },
+
+    passwordResetExpires: {
+      type: Date,
+    },
+
+    googleId: {
+      type: String,
+      default: null,
+    },
 
     avatar: {
       type: String,
@@ -35,6 +53,48 @@ const userSchema = new mongoose.Schema(
       default: "student",
     },
 
+    // ======================
+    // PROFILE INFO
+    // ======================
+    contactNumber: {
+      type: String,
+      default: "",
+    },
+
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
+
+    bio: {
+      type: String,
+      default: "",
+      maxlength: 500,
+    },
+
+    city: {
+      type: String,
+      default: "",
+    },
+
+    state: {
+      type: String,
+      default: "",
+    },
+
+    pincode: {
+      type: String,
+      default: "",
+    },
+
+    country: {
+      type: String,
+      default: "India",
+    },
+
+    // ======================
+    // COURSES
+    // ======================
     enrolledCourses: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -42,23 +102,41 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
+// ======================
 // HASH PASSWORD
+// ======================
 userSchema.pre("save", async function () {
-  if (!this.isModified("password") || !this.password) return;
+  if (!this.isModified("password") || !this.password) {
+    return;
+  }
 
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  this.password = await bcrypt.hash(
+    this.password,
+    salt
+  );
 });
 
+// ======================
 // COMPARE PASSWORD
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  if (!this.password) return false;
-  return bcrypt.compare(candidatePassword, this.password);
-};
+// ======================
+userSchema.methods.comparePassword =
+  async function (candidatePassword) {
+    if (!this.password) return false;
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+    return bcrypt.compare(
+      candidatePassword,
+      this.password
+    );
+  };
+
+const User =
+  mongoose.models.User ||
+  mongoose.model("User", userSchema);
 
 export default User;
