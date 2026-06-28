@@ -2,7 +2,9 @@ import React, { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { CheckCircle2, ShieldCheck, Award, QrCode, Globe } from "lucide-react";
 
-export const BootcampCertification = () => {
+export const BootcampCertification = ({
+  certificate,
+}) => {
   // 3D Tilt Effect logic
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -13,6 +15,29 @@ export const BootcampCertification = () => {
   // Slightly increased rotation range for better depth perception
   const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["15deg", "-15deg"]);
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
+const studentName =
+  certificate?.user?.name || "Student Name";
+
+  
+  const bootcampTitle =
+    certificate?.course?.title ||
+    "Bootcamp";
+  const issueDate =
+    certificate?.createdAt
+      ? new Date(
+        certificate.createdAt
+      ).toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+      : "Issue Date";
+
+  const certificateId =
+    certificate?._id
+      ?.slice(-10)
+      .toUpperCase() ||
+    "XXXX";
 
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -39,10 +64,10 @@ export const BootcampCertification = () => {
 
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-20 items-center">
-          
+
           {/* LEFT: Content & Value Proposition */}
           <div className="space-y-10">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/5 border border-accent/20"
@@ -51,7 +76,7 @@ export const BootcampCertification = () => {
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent">Industry Verified</span>
             </motion.div>
 
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               className="text-6xl md:text-7xl font-display leading-[0.95] tracking-tighter"
@@ -71,7 +96,7 @@ export const BootcampCertification = () => {
                 { icon: <QrCode />, title: "Verifiable", desc: "Unique QR for authenticity" },
                 { icon: <CheckCircle2 />, title: "LIFETIME", desc: "Permanent digital credential" },
               ].map((item, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -87,12 +112,12 @@ export const BootcampCertification = () => {
           </div>
 
           {/* RIGHT: The 3D Interactive Certificate */}
-          <motion.div 
-            style={{ 
-              rotateX, 
-              rotateY, 
+          <motion.div
+            style={{
+              rotateX,
+              rotateY,
               perspective: 1200,
-              transformStyle: "preserve-3d" 
+              transformStyle: "preserve-3d"
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
@@ -102,17 +127,17 @@ export const BootcampCertification = () => {
             <div className="absolute inset-0 bg-gradient-to-tr from-accent/20 via-white/5 to-accent/20 rounded-[40px] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
             {/* MAIN CERTIFICATE CARD */}
-            <div 
+            <div
               style={{ transformStyle: "preserve-3d" }}
               className="relative z-10 bg-[#fbfbfb] rounded-[40px] p-8 md:p-14 text-[#000] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden border-[12px] border-white/50"
             >
-              
+
               {/* Subtle Texture/Pattern Overlay */}
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-              
+
               {/* Decorative Holographic Shine */}
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" 
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none"
               />
 
               {/* Certificate Header */}
@@ -130,9 +155,9 @@ export const BootcampCertification = () => {
                 {/* The Ribbon Element - Highest Depth */}
                 <div className="relative transform translate-y-[-20px]" style={{ transform: "translateZ(100px)" }}>
                   <div className="w-14 h-24 bg-[#6366f1] rounded-b-xl flex flex-col items-center pt-5 shadow-2xl">
-                     <div className="w-10 h-10 bg-[#ffd700] rounded-full border-4 border-white/30 flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6 text-white stroke-[3px]" />
-                     </div>
+                    <div className="w-10 h-10 bg-[#ffd700] rounded-full border-4 border-white/30 flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6 text-white stroke-[3px]" />
+                    </div>
                   </div>
                   <div className="absolute bottom-[-12px] left-0 w-0 h-0 border-l-[28px] border-l-transparent border-r-[28px] border-r-transparent border-t-[12px] border-t-[#6366f1]" />
                 </div>
@@ -141,21 +166,25 @@ export const BootcampCertification = () => {
               {/* Certificate Body */}
               <div className="space-y-6 mb-16" style={{ transform: "translateZ(50px)" }}>
                 <div className="space-y-1">
-                    <h3 className="text-sm font-bold uppercase tracking-[0.4em] text-gray-400">Certificate of Completion</h3>
-                    <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter text-black">Mastery</h1>
+                  <h3 className="text-sm font-bold uppercase tracking-[0.4em] text-gray-400">Certificate of Completion</h3>
+                  <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter text-black">Mastery</h1>
                 </div>
 
                 <div className="space-y-2" style={{ transform: "translateZ(30px)" }}>
-                    <p className="text-xs uppercase tracking-widest font-bold text-gray-400">This honor is presented to</p>
-                    <div className="relative">
-                        <h2 className="text-3xl md:text-5xl font-serif italic font-medium text-black border-b-2 border-gray-100 pb-3">
-                           Alexandria Smith
-                        </h2>
-                    </div>
+                  <p className="text-xs uppercase tracking-widest font-bold text-gray-400">This honor is presented to</p>
+                  <div className="relative">
+                    <h2 className="text-3xl md:text-5xl font-serif italic font-medium text-black border-b-2 border-gray-100 pb-3">
+                      {studentName}
+                    </h2>
+                  </div>
                 </div>
 
                 <p className="text-sm md:text-base leading-relaxed text-gray-600 font-medium max-w-xl">
-                  For successfully demonstrating expert-level proficiency in <span className="text-black font-bold">MERN Architecture, DevOps Automation, and Generative AI Integration</span> during the 2025 Prish Incubator program.
+                  For successfully completing the{" "}
+                  <span className="text-black font-bold">
+                    {bootcampTitle}
+                  </span>{" "}
+                  bootcamp and demonstrating exceptional commitment and practical skills throughout the program.
                 </p>
               </div>
 
@@ -163,17 +192,17 @@ export const BootcampCertification = () => {
               <div className="flex justify-between items-end" style={{ transform: "translateZ(40px)" }}>
                 <div className="space-y-4">
                   <div className="text-left">
-                    <p className="text-lg font-bold text-black leading-none">OCT 24, 2025</p>
+                    <p className="text-lg font-bold text-black leading-none"> {issueDate}</p>
                     <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Issue Date</p>
                   </div>
                   <div className="px-3 py-1 bg-gray-100 rounded text-[9px] font-mono text-gray-500">
-                    ID: PR-9920-X12
+                    ID: PR-{certificateId}
                   </div>
                 </div>
 
                 <div className="text-right">
                   <div className="mb-2">
-                     <span className="font-serif italic text-2xl text-black/80">Adarsh Gupta</span>
+                    <span className="font-serif italic text-2xl text-black/80">Adarsh Gupta</span>
                   </div>
                   <div className="h-[2px] w-40 bg-gray-200 ml-auto mb-2" />
                   <p className="text-xs font-bold uppercase tracking-tighter">Program Director</p>

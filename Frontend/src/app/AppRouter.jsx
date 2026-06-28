@@ -20,6 +20,25 @@ import LecturePage from "../Features/dashboard/Courses/Classroom/pages/LecturePa
 import ProtectedRoute from "../Features/auth/components/ProtectedRoute"; // <-- adjust path if needed
 import ForgotPassword from "../Features/auth/pages/ForgotPassword";
 import ResetPassword from "../Features/auth/pages/ResetPassword";
+import AboutUs from "../Features/dashboard/Home/layout/AboutUs";
+import PrivacyPolicy from "../Features/dashboard/Home/layout/PrivacyPolicy";
+import TermsCondition from "../Features/dashboard/Home/layout/TermsCondition";
+import PricingRefund from "../Features/dashboard/Home/layout/PricingRefund";
+import { Hiring } from "../Features/dashboard/Home/layout/Hiring";
+import { Support } from "../Features/dashboard/Home/layout/Support";
+
+import AdminDashboard from "../Features/dashboard/adminPanel/pages/AdminDashboard";
+import AdminLayout from "../Features/dashboard/adminPanel/layout/AdminLayout";
+import AdminCourses from "../Features/dashboard/adminPanel/pages/AdminCourses";
+import GetUsers from "../Features/dashboard/adminPanel/pages/GetUsers";
+import MediaLibrary from "../Features/dashboard/adminPanel/pages/MediaLibrary";
+import Enrollments from "../Features/dashboard/adminPanel/pages/Enrollments";
+import Analytics from "../Features/dashboard/adminPanel/components/Analytics";
+import AdminCreateCourse from "../Features/dashboard/adminPanel/pages/AdminCreateCourse";
+
+
+
+//footer links
 
 export const router = createBrowserRouter([
   // Public Routes
@@ -64,6 +83,63 @@ export const router = createBrowserRouter([
   {
     path: "/cohort/:slug",
     element: <CourseDetailPage />,
+  },
+
+
+
+  { path: "/about-us", element: <AboutUs /> },
+  { path: "/privacy-policy", element: <PrivacyPolicy /> },
+  { path: "/terms-and-condition", element: <TermsCondition /> },
+  { path: "/pricing-and-refund", element: <PricingRefund /> },
+  { path: "/hire-from-us", element: <Hiring /> },
+  { path: "/support", element: <Support /> },
+
+
+  {
+    path: "/admin",
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />,
+      },
+      {
+        path: "courses",
+        element: <AdminCourses />,
+      },
+      {
+        path: "courses/create",
+        element: <AdminCreateCourse />,
+      },
+      {
+        path: "users",
+        element: <GetUsers />,
+      },
+      {
+        path: "enrollments",
+        element: <Enrollments />,
+      },
+      {
+        path: "media",
+        element: <MediaLibrary />,
+      },
+      {
+        path: "analytics",
+        element: <Analytics />,
+      },
+      {
+        path: "settings",
+        element: (
+          <div className="p-10 text-text-secondary italic">
+            Global school settings coming soon...
+          </div>
+        ),
+      },
+    ],
   },
 
   // Protected Classroom Routes

@@ -22,13 +22,13 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      minlength: 6,
-      select: false,
       required: function () {
-        return !this.googleId;
+        return this.provider === "local" && !this.googleId;
       },
+      minlength: 6,
     },
 
+    
     passwordResetToken: {
       type: String,
     },

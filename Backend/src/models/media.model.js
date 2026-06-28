@@ -13,6 +13,15 @@ const mediaSchema = new mongoose.Schema(
     studentImg2: String,
     studentImg3: String,
     studentImg4: String,
+
+    customAssets: [
+      {
+        key: String,
+        label: String,
+        type: String,
+        url: String
+      }
+    ]
   },
   { timestamps: true }
 );

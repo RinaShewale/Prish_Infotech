@@ -34,6 +34,8 @@ import bootcampReducer from "../Features/dashboard/Courses/redux/bootcampSlice";
 
 import applicationReducer from"../Features/dashboard/Courses/redux/application.slice";
 
+import adminReducer from "../Features/dashboard/adminPanel/redux/admin.slice";
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -61,5 +63,7 @@ export const store = configureStore({
      bootcamp: bootcampReducer,
 
      application: applicationReducer,
+
+     admin: adminReducer,
   },
 });

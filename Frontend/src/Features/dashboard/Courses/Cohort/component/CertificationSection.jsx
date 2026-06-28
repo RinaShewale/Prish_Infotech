@@ -6,8 +6,14 @@ import CertificateCard from './CertificateCard';
 const CertificationSection = ({ data, userCertificate, user }) => {
   if (!data || !data.mainHeading) return null;
 
-  const displayUserName = userCertificate?.user?.name || user?.name || "Alexandria Smith";
-  const displayCourseName = userCertificate?.course?.title || data.certType;
+  // FIX: Look for bootcamp title if course title doesn't exist
+  const displayUserName = userCertificate?.user?.name || user?.name || "Student Name";
+  
+  const displayCourseName = 
+    userCertificate?.course?.title || 
+    userCertificate?.bootcamp?.title || // Added check for bootcamp title
+    data.certType;
+
   const isEnrolled = !!userCertificate;
 
   const displayDate = !isEnrolled

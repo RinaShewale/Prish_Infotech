@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, authChecked } = useSelector((state) => state.auth);
   const { enrollments, loaded } = useSelector((state) => state.enrollment);
 
@@ -24,8 +24,24 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // ==============================
-  // 3. WAIT UNTIL ENROLLMENT API FINISHES
+  // 3. ADMIN ROLE CHECK
   // ==============================
+  // If the route is admin-only and user is NOT an admin, kick them to home
+  if (adminOnly && user.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
+  // IMPORTANT: If user is an Admin, they bypass all enrollment checks 
+  // so they can access both Admin Dashboard AND Classroom freely.
+  if (user.role === "admin") {
+    return children;
+  }
+
+  // ==============================
+  // 4. STUDENT ENROLLMENT CHECKS
+  // (Only runs for non-admin users)
+  // ==============================
+  
   if (!loaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg">
@@ -34,19 +50,14 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // ==============================
-  // 4. SAFE CHECK (NOW RELIABLE)
-  // ==============================
-  const safeEnrollments = Array.isArray(enrollments)
-    ? enrollments
-    : [];
+  const safeEnrollments = Array.isArray(enrollments) ? enrollments : [];
 
   if (safeEnrollments.length === 0) {
     return <Navigate to="/courses" replace />;
   }
 
   // ==============================
-  // 5. ALLOW ACCESS
+  // 5. ALLOW ACCESS (STUDENT WITH ENROLLMENTS)
   // ==============================
   return children;
 };

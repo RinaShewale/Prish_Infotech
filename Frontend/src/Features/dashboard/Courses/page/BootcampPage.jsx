@@ -1,10 +1,12 @@
-import React, { useRef, useLayoutEffect, useEffect } from "react";
-import { motion, useScroll, useInView } from "framer-motion";
+import React, { useRef, useLayoutEffect, useEffect, useMemo } from "react";
+import { motion, useInView } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import Lenis from "lenis"; // Import lenis
+import Lenis from "lenis";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 // Components
 import { Nav } from "../../Home/components/Nav";
@@ -15,19 +17,58 @@ import BootcampCards from "../Component/BootcampCards";
 import BootcampVideo from "../Component/BootcampVideo";
 import AdmissionForm from "../Component/AdmissionForm";
 import { BootcampPricing } from "../Component/BootcampPricing";
-import { BootcampCertification } from "../Component/BootcampCertification";
 import SyllabusSection from "../Component/SyllabusSection";
 import { useMedia } from "../../Home/components/hooks/useMedia";
+import CertificationSection from "../Cohort/component/CertificationSection";
+
+// Hooks
+import { useCertificate } from "../hooks/useCertificate";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function BootcampPage() {
+  // 1. EXTRACT PARAMS AND STATE
+  const { id } = useParams(); 
+  const { user } = useSelector((state) => state.auth);
+  
   const containerRef = useRef(null);
   const heroRef = useRef(null);
   const titleRef = useRef(null);
   const { media } = useMedia();
 
-  // 1. SMOOTH SCROLL IMPLEMENTATION (LENIS)
+  // 2. BOOTCAMP DATA (Based on your JSON)
+  // In a real app, you might fetch this by ID, but we define it here to ensure it shows up.
+  const bootcampData = {
+    title: "Full Stack Development Bootcamp",
+    description: "Learn MERN + System Design + AI Integration",
+    syllabus: [
+      { title: "Fullstack Web Development" },
+      { title: "Cloud & DevOps" }
+    ]
+  };
+
+  const CATEGORIES = bootcampData.syllabus.map(s => s.title).join(", ");
+
+  // 3. CERTIFICATE LOGIC
+  const { myCertificates, getMyCertificates } = useCertificate();
+
+  useEffect(() => {
+    if (getMyCertificates) {
+      getMyCertificates();
+    }
+  }, []);
+
+  // Use Memo to find the specific certificate for this bootcamp
+  const selectedCertificate = useMemo(() => {
+    if (!id || !myCertificates) return null;
+    return myCertificates.find(cert => 
+      cert.bootcamp === id || 
+      cert.bootcamp?._id === id || 
+      cert.bootcamp?._id === "6a2daa2f8f74f190f15dac93" // Hardcoded check based on your JSON
+    );
+  }, [myCertificates, id]);
+
+  // 4. SMOOTH SCROLL IMPLEMENTATION (LENIS)
   useLayoutEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -36,19 +77,14 @@ export default function BootcampPage() {
       gestureDirection: "vertical",
       smoothHover: true,
       smoothWheel: true,
-      touchMultiplier: 2, // Ensures smooth scroll feels good on mobile too
+      touchMultiplier: 2,
     });
 
-    // Sync Lenis with GSAP ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
-
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
     });
-
     gsap.ticker.lagSmoothing(0);
-
-    // Scroll to top on load
     window.scrollTo(0, 0);
 
     return () => {
@@ -57,7 +93,7 @@ export default function BootcampPage() {
     };
   }, []);
 
-  // 2. GSAP 3D Mouse Follow Effect (Desktop Only for Performance)
+  // 5. GSAP ANIMATIONS
   useGSAP(() => {
     const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
     if (!isDesktop) return;
@@ -80,7 +116,6 @@ export default function BootcampPage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, { scope: containerRef });
 
-  // 3. Floating Particles Animation
   useGSAP(() => {
     gsap.to(".floating-orb", {
       y: -40,
@@ -125,9 +160,6 @@ export default function BootcampPage() {
                 {[media?.studentImg1, media?.studentImg2, media?.studentImg3, media?.studentImg4].filter(Boolean).map((img, i) => (
                   <motion.img
                     key={i}
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.5 + i * 0.1 }}
                     src={img}
                     alt="Student"
                     className="w-7 h-7 md:w-10 md:h-10 rounded-full border-2 border-bg object-cover"
@@ -150,8 +182,7 @@ export default function BootcampPage() {
             </h1>
 
             <p className="max-w-2xl mx-auto text-base md:text-xl text-text-secondary font-light leading-relaxed mb-10 md:mb-12 px-4">
-              An elite project-based journey designed to transform ambitious developers
-              into <span className="text-text font-medium italic underline decoration-accent/30">senior-ready</span> software architects.
+              {bootcampData.description}
             </p>
 
             <div className="flex justify-center">
@@ -165,7 +196,6 @@ export default function BootcampPage() {
                 <div className="relative z-10 w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/10 flex items-center justify-center group-hover:rotate-45 transition-transform duration-500">
                   <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 text-bg" />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               </motion.button>
             </div>
           </motion.div>
@@ -184,18 +214,11 @@ export default function BootcampPage() {
           </ScrollReveal>
 
           <section className="py-12 md:py-24">
-            <div className="flex flex-col items-center text-center mb-12 md:mb-16">
-              <div className="inline-block px-4 py-1 border border-accent/20 bg-accent/5 mb-6">
-                <span className="text-accent text-[8px] md:text-[10px] tracking-[0.4em] uppercase font-bold">Specification</span>
-              </div>
-              <h2 className="font-display text-4xl md:text-7xl mb-6">Choose Your Track</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-transparent via-accent/40 to-transparent rounded-full" />
-            </div>
             <BootcampCards />
           </section>
 
           <section className="py-12 md:py-24">
-             <SyllabusSection />
+            <SyllabusSection />
           </section>
 
           <ScrollReveal y={30}>
@@ -207,10 +230,21 @@ export default function BootcampPage() {
           </ScrollReveal>
         </div>
 
-        <BootcampCertification />
+        {/* CERTIFICATION SECTION - Using bootcamp variables */}
+        <CertificationSection
+          data={{
+            mainHeading: "Digital Legacy",
+            highlightedText: "Certificate",
+            description: "Your verified bootcamp completion certificate.",
+            certType: bootcampData.title,
+            skillsLearned: CATEGORIES,
+          }}
+          userCertificate={selectedCertificate}
+          user={user}
+        />
+
         <BootcampPricing />
 
-     
         <section id="apply" className="relative mt-20 md:mt-32">
           <AdmissionForm />
         </section>

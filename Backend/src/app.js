@@ -28,6 +28,8 @@ import notificationRoutes from "./routes/notification.routes.js";
 import bootcampRoutes from "./routes/bootcamp.route.js";
 import applicationRoutes from "./routes/application.route.js";
 
+import adminRoutes from "./routes/admin.routes.js";
+
 import { createAdminIfNotExists } from "./utils/initAdmin.js";
 
 const app = express();
@@ -99,11 +101,14 @@ app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/upload", uploadRoutes);
 
+
 app.use("/api/notifications", notificationRoutes);
 
 app.use("/api/bootcamps", bootcampRoutes);
 
 app.use("/api/applications", applicationRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 
 // ======================

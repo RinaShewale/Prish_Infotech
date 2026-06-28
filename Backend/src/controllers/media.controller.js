@@ -3,34 +3,29 @@ import Media from "../models/Media.model.js";
 // 📥 CREATE / UPDATE SINGLE MEDIA DOC
 export const createMedia = async (req, res) => {
   try {
-    const {
-      reelVideo,
-      courseInfoVideo,
+    const updateFields = {};
+    const allowedFields = [
+      "reelVideo",
+      "courseInfoVideo",
+      "img1",
+      "img2",
+      "studentImg1",
+      "studentImg2",
+      "studentImg3",
+      "studentImg4",
+      "customAssets",
+    ];
 
-      img1,
-      img2,
-
-      studentImg1,
-      studentImg2,
-      studentImg3,
-      studentImg4,
-    } = req.body;
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updateFields[field] = req.body[field];
+      }
+    }
 
     const media = await Media.findOneAndUpdate(
       {},
       {
-        $set: {
-          reelVideo: reelVideo || "",
-          courseInfoVideo: courseInfoVideo || "",
-
-          img1: img1 || "",
-          img2: img2 || "",
-
-          studentImg1: studentImg1 || "",
-          studentImg2: studentImg2 || "",
-          studentImg3: studentImg3 || "",
-          studentImg4: studentImg4 || "",
-        },
+        $set: updateFields,
       },
       {
         new: true,
