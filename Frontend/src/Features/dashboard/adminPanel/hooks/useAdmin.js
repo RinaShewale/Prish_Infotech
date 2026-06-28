@@ -5,7 +5,6 @@ import {
   setUsers,
   setCourses,
   setEnrollments,
-  setMedia,
   setSelectedCourse,
 } from "../redux/admin.slice";
 
@@ -16,8 +15,6 @@ import {
   getEnrollments,
   deleteCourse as deleteCourseAPI,
   updateCourse as updateCourseAPI,
-  getMedia as getMediaAPI,
-  saveMedia as saveMediaAPI,
 } from "../services/admin.api";
 
 import toast from "react-hot-toast";
@@ -120,25 +117,6 @@ export const useAdmin = () => {
     }
   };
 
-  // ── MEDIA ────────────────────────────────────────────────────
-  const fetchMedia = async () => {
-    try {
-      const { data } = await getMediaAPI();
-      dispatch(setMedia(data.media || {}));
-    } catch (err) {
-      toast.error("Failed to load media");
-    }
-  };
-
-  const saveMedia = async (mediaData) => {
-    try {
-      const { data } = await saveMediaAPI(mediaData);
-      dispatch(setMedia(data.media));
-      toast.success("Media saved successfully");
-    } catch (err) {
-      toast.error("Failed to save media");
-    }
-  };
 
   return {
     ...state,
@@ -149,7 +127,5 @@ export const useAdmin = () => {
     editCourse,
     selectCourse,
     fetchEnrollments,
-    fetchMedia,
-    saveMedia,
   };
 };

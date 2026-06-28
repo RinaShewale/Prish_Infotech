@@ -21,7 +21,10 @@ const mediaSchema = new mongoose.Schema(
         type: String,
         url: String
       }
-    ]
+    ],
+
+    // Gallery images to select from
+    images: [String]
   },
   { timestamps: true }
 );

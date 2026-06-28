@@ -26,10 +26,6 @@ export const getEnrollments = () => API.get("/admin/enrollments");
 export const getCourseStudents = (courseId) =>
   API.get(`/admin/courses/${courseId}/students`);
 
-// ================= MEDIA =================
-export const getMedia = () => API.get("/media");
-
-export const saveMedia = (data) => API.post("/media/create", data);
 
 // ================= UPLOAD =================
 export const uploadImage = (formData) =>

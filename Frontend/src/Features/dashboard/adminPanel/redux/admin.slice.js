@@ -5,7 +5,6 @@ const initialState = {
   users: [],
   courses: [],
   enrollments: [],
-  media: null,
   selectedCourse: null,
   loading: false,
 };
@@ -29,9 +28,6 @@ const adminSlice = createSlice({
     setEnrollments: (state, action) => {
       state.enrollments = action.payload;
     },
-    setMedia: (state, action) => {
-      state.media = action.payload;
-    },
     setSelectedCourse: (state, action) => {
       state.selectedCourse = action.payload;
     },
@@ -44,7 +40,6 @@ export const {
   setUsers,
   setCourses,
   setEnrollments,
-  setMedia,
   setSelectedCourse,
 } = adminSlice.actions;
 

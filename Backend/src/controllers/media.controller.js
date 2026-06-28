@@ -14,6 +14,7 @@ export const createMedia = async (req, res) => {
       "studentImg3",
       "studentImg4",
       "customAssets",
+      "images",
     ];
 
     for (const field of allowedFields) {
