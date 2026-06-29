@@ -216,3 +216,26 @@ export const verifyPayment = async (req, res) => {
     });
   }
 };
+
+
+
+
+export const getAllPayments = async (req, res) => {
+  try {
+    const payments = await Payment.find()
+      .populate("user", "name email")    // 🔥 This fetches student name/email from User model
+      .populate("course", "title price") // 🔥 This fetches course title from Course model
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      payments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch transactions",
+      error: error.message
+    });
+  }
+};

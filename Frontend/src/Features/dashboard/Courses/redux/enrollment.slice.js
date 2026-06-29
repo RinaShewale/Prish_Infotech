@@ -1,6 +1,11 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+} from "@reduxjs/toolkit";
+
 import {
   getMyEnrollmentsAPI,
+  getAllEnrollmentsAPI,
   enrollCourseAPI,
 } from "../services/entrollment.api";
 
@@ -14,11 +19,30 @@ export const getMyEnrollments = createAsyncThunk(
       return await getMyEnrollmentsAPI();
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch enrollments"
+        error.response?.data?.message ||
+          "Failed to fetch enrollments"
       );
     }
   }
 );
+
+// ======================================================
+// 📚 GET ALL ENROLLMENTS (ADMIN)
+// ======================================================
+export const getAllEnrollments =
+  createAsyncThunk(
+    "enrollment/getAllEnrollments",
+    async (_, thunkAPI) => {
+      try {
+        return await getAllEnrollmentsAPI();
+      } catch (error) {
+        return thunkAPI.rejectWithValue(
+          error.response?.data?.message ||
+            "Failed to fetch enrollments"
+        );
+      }
+    }
+  );
 
 // ======================================================
 // 🎓 ENROLL COURSE
@@ -30,7 +54,8 @@ export const enrollCourse = createAsyncThunk(
       return await enrollCourseAPI(courseId);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Enrollment failed"
+        error.response?.data?.message ||
+          "Enrollment failed"
       );
     }
   }
@@ -47,8 +72,6 @@ const enrollmentSlice = createSlice({
     loading: false,
     error: null,
     success: false,
-
-    // ⭐ IMPORTANT FIX
     loaded: false,
   },
 
@@ -62,55 +85,99 @@ const enrollmentSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      // ======================================================
-      // 📚 GET ENROLLMENTS
-      // ======================================================
-      .addCase(getMyEnrollments.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-
-      .addCase(getMyEnrollments.fulfilled, (state, action) => {
-        state.loading = false;
-        state.enrollments = action.payload.enrollments || [];
-        state.loaded = true; // ⭐ KEY FIX
-      })
-
-      .addCase(getMyEnrollments.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-
-        // ⭐ IMPORTANT: still mark loaded to avoid infinite loading
-        state.loaded = true;
-      })
-
-      // ======================================================
-      // 🎓 ENROLL COURSE
-      // ======================================================
-      .addCase(enrollCourse.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-
-      .addCase(enrollCourse.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-
-        if (action.payload?.enrollment) {
-          state.enrollments.push(action.payload.enrollment);
+      // ==========================
+      // GET MY ENROLLMENTS
+      // ==========================
+      .addCase(
+        getMyEnrollments.pending,
+        (state) => {
+          state.loading = true;
+          state.error = null;
         }
-      })
+      )
+      .addCase(
+        getMyEnrollments.fulfilled,
+        (state, action) => {
+          state.loading = false;
+          state.loaded = true;
+          state.enrollments =
+            action.payload.enrollments || [];
+        }
+      )
+      .addCase(
+        getMyEnrollments.rejected,
+        (state, action) => {
+          state.loading = false;
+          state.loaded = true;
+          state.error = action.payload;
+        }
+      )
 
-      .addCase(enrollCourse.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+      // ==========================
+      // GET ALL ENROLLMENTS
+      // ==========================
+      .addCase(
+        getAllEnrollments.pending,
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        }
+      )
+      .addCase(
+        getAllEnrollments.fulfilled,
+        (state, action) => {
+          state.loading = false;
+          state.loaded = true;
+          state.enrollments =
+            action.payload.enrollments || [];
+        }
+      )
+      .addCase(
+        getAllEnrollments.rejected,
+        (state, action) => {
+          state.loading = false;
+          state.loaded = true;
+          state.error = action.payload;
+        }
+      )
+
+      // ==========================
+      // ENROLL COURSE
+      // ==========================
+      .addCase(
+        enrollCourse.pending,
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        }
+      )
+      .addCase(
+        enrollCourse.fulfilled,
+        (state, action) => {
+          state.loading = false;
+          state.success = true;
+
+          if (
+            action.payload?.enrollment
+          ) {
+            state.enrollments.push(
+              action.payload.enrollment
+            );
+          }
+        }
+      )
+      .addCase(
+        enrollCourse.rejected,
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      );
   },
 });
 
-// ======================================================
-// ✅ EXPORTS
-// ======================================================
-export const { clearEnrollmentState } = enrollmentSlice.actions;
+export const {
+  clearEnrollmentState,
+} = enrollmentSlice.actions;
 
 export default enrollmentSlice.reducer;

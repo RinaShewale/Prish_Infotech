@@ -1,56 +1,90 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+} from "@reduxjs/toolkit";
+
 import { getCourseProgressAPI } from "../service/courseProgress.api";
 
 // ================= FETCH COURSE PROGRESS =================
-export const fetchCourseProgress = createAsyncThunk(
-  "courseProgress/fetchCourseProgress",
-  async (courseId, thunkAPI) => {
-    try {
-      const res = await getCourseProgressAPI(courseId);
+export const fetchCourseProgress =
+  createAsyncThunk(
+    "courseProgress/fetchCourseProgress",
+    async (courseId, thunkAPI) => {
+      try {
+        const res =
+          await getCourseProgressAPI(courseId);
 
-      // ✅ SAFE PARSING (backend structure fixed)
-      const progressObj = res?.progress || res?.data?.progress || res;
+        // backend returns: { success: true, progress: {...} }
+        const data = res?.progress;
 
-      return progressObj; // FULL OBJECT RETURN करतोय आता
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch course progress"
-      );
+        return data;
+      } catch (error) {
+        return thunkAPI.rejectWithValue(
+          error.response?.data?.message ||
+            "Failed to fetch course progress"
+        );
+      }
     }
-  }
-);
+  );
 
 // ================= SLICE =================
 const courseProgressSlice = createSlice({
   name: "courseProgress",
+
   initialState: {
     progress: 0,
-    courseProgressData: null, // ⭐ NEW (important)
+    courseProgressData: null,
     loading: false,
     error: null,
   },
 
-  reducers: {},
+  reducers: {
+    clearCourseProgress: (state) => {
+      state.progress = 0;
+      state.courseProgressData = null;
+      state.error = null;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCourseProgress.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchCourseProgress.fulfilled, (state, action) => {
-        state.loading = false;
 
-        // ✅ store full object
-        state.courseProgressData = action.payload;
+      // ================= LOADING =================
+      .addCase(
+        fetchCourseProgress.pending,
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        }
+      )
 
-        // also store percentage separately
-        state.progress = action.payload?.progress || 0;
-      })
-      .addCase(fetchCourseProgress.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+      // ================= SUCCESS =================
+      .addCase(
+        fetchCourseProgress.fulfilled,
+        (state, action) => {
+          state.loading = false;
+
+          state.courseProgressData =
+            action.payload;
+
+          state.progress =
+            action.payload?.progress || 0;
+        }
+      )
+
+      // ================= ERROR =================
+      .addCase(
+        fetchCourseProgress.rejected,
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      );
   },
 });
+
+export const {
+  clearCourseProgress,
+} = courseProgressSlice.actions;
 
 export default courseProgressSlice.reducer;

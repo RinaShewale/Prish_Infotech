@@ -30,11 +30,14 @@ import { Support } from "../Features/dashboard/Home/layout/Support";
 import AdminDashboard from "../Features/dashboard/adminPanel/pages/AdminDashboard";
 import AdminLayout from "../Features/dashboard/adminPanel/layout/AdminLayout";
 import AdminCourses from "../Features/dashboard/adminPanel/pages/AdminCourses";
-import GetUsers from "../Features/dashboard/adminPanel/pages/GetUsers";
 import MediaLibrary from "../Features/dashboard/adminPanel/pages/MediaLibrary";
 import Enrollments from "../Features/dashboard/adminPanel/pages/Enrollments";
 import Analytics from "../Features/dashboard/adminPanel/components/Analytics";
 import AdminCreateCourse from "../Features/dashboard/adminPanel/pages/AdminCreateCourse";
+import UserCourseProgress from "../Features/dashboard/adminPanel/components/UserCourseProgress";
+import GetContacts from "../Features/dashboard/adminPanel/pages/GetContacts";
+import AdminInstructors from "../Features/dashboard/adminPanel/pages/AdminInstructors";
+import AdminPayments from "../Features/dashboard/adminPanel/pages/AdminPayments";
 
 
 
@@ -117,12 +120,29 @@ export const router = createBrowserRouter([
       },
       {
         path: "users",
-        element: <GetUsers />,
+        element: <GetContacts />,
       },
       {
         path: "enrollments",
         element: <Enrollments />,
       },
+      {
+        path: "course-progress/:courseId",
+        element: <UserCourseProgress />,
+      },
+
+       {
+        path: "instructors",
+        element: <AdminInstructors />,
+      },
+
+
+       {
+        path: "payments",
+        element: <AdminPayments />,
+      },
+
+      
       {
         path: "media",
         element: <MediaLibrary />,

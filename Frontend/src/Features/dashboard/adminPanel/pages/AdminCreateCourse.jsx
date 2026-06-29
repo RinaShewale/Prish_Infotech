@@ -1,18 +1,24 @@
 import React, { useState, useRef } from 'react';
 import { GlassCard } from '../Shared/GlassCard';
 import { Save, Plus, Trash2, Video, Image as ImageIcon, Loader2 } from 'lucide-react';
-import { createCourse, uploadImage, uploadVideo } from '../services/admin.api';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useCourse } from '../../Courses/hooks/useCourse'; // Using your new hook
 
 const LEVELS = ['beginner', 'intermediate', 'advanced'];
 const TYPES = ['recorded', 'live'];
 
 const AdminCreateCourse = () => {
   const navigate = useNavigate();
-  const [saving, setSaving] = useState(false);
+  const { handleCreateCourse } = useCourse();
+  
+  // Get loading state from Redux via the hook's slice logic
+  const { loading: isSaving } = useSelector((state) => state.course);
+
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  
   const thumbnailRef = useRef(null);
   const videoRef = useRef(null);
   
@@ -35,7 +41,6 @@ const AdminCreateCourse = () => {
 
   const set = (key) => (e) => setCourse((prev) => ({ ...prev, [key]: e.target.value }));
 
-  // Auto-generate slug from title
   const handleTitleChange = (e) => {
     const title = e.target.value;
     setCourse((prev) => ({
@@ -68,38 +73,12 @@ const AdminCreateCourse = () => {
       ),
     }));
 
-  const handleUploadThumbnail = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingThumbnail(true);
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const { data } = await uploadImage(formData);
-      setCourse((prev) => ({ ...prev, thumbnail: data.url }));
-      toast.success('Thumbnail uploaded!');
-    } catch (err) {
-      toast.error('Thumbnail upload failed');
-    } finally {
-      setUploadingThumbnail(false);
-    }
-  };
-
-  const handleUploadVideo = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingVideo(true);
-    try {
-      const formData = new FormData();
-      formData.append('video', file);
-      const { data } = await uploadVideo(formData);
-      setCourse((prev) => ({ ...prev, video: data.url }));
-      toast.success('Video uploaded!');
-    } catch (err) {
-      toast.error('Video upload failed');
-    } finally {
-      setUploadingVideo(false);
-    }
+  // Note: handleUploadCourseVideo in your hook requires an ID. 
+  // For a "Create" page, we usually upload to a generic cloud storage or 
+  // provide the URL. If your backend requires an ID for video, 
+  // you would usually upload the video AFTER the course is created.
+  const handleThumbnailUploadPlaceholder = async (e) => {
+    toast.error("Image upload service not found in course hook. Please paste a URL.");
   };
 
   const handleSave = async () => {
@@ -107,26 +86,28 @@ const AdminCreateCourse = () => {
       toast.error('Please fill in all required fields (title, description, price, thumbnail)');
       return;
     }
-    setSaving(true);
-    try {
-      const payload = {
-        ...course,
-        price: Number(course.price),
-        oldPrice: Number(course.oldPrice) || 0,
-        category: course.category.split(',').map((c) => c.trim()).filter(Boolean),
-        syllabus: course.syllabus.map((s) => ({
-          ...s,
-          topics: typeof s.topics === 'string' ? s.topics.split(',').map((t) => t.trim()).filter(Boolean) : s.topics,
-          tools:  typeof s.tools  === 'string' ? s.tools.split(',').map((t) => t.trim()).filter(Boolean)  : s.tools,
-        })),
-      };
-      await createCourse(payload);
+
+    const payload = {
+      ...course,
+      price: Number(course.price),
+      oldPrice: Number(course.oldPrice) || 0,
+      category: typeof course.category === 'string' 
+        ? course.category.split(',').map((c) => c.trim()).filter(Boolean) 
+        : course.category,
+      syllabus: course.syllabus.map((s) => ({
+        ...s,
+        topics: typeof s.topics === 'string' ? s.topics.split(',').map((t) => t.trim()).filter(Boolean) : s.topics,
+        tools:  typeof s.tools  === 'string' ? s.tools.split(',').map((t) => t.trim()).filter(Boolean)  : s.tools,
+      })),
+    };
+
+    const result = await handleCreateCourse(payload);
+    
+    if (result.success) {
       toast.success('Course created successfully!');
       navigate('/admin/courses');
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to create course');
-    } finally {
-      setSaving(false);
+    } else {
+      toast.error(result.message || 'Failed to create course');
     }
   };
 
@@ -142,18 +123,16 @@ const AdminCreateCourse = () => {
         </div>
         <button
           onClick={handleSave}
-          disabled={saving}
+          disabled={isSaving}
           className="flex items-center gap-2 px-8 py-4 bg-accent text-bg rounded-full font-bold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Save className="w-5 h-5" />
-          {saving ? 'Publishing...' : 'Publish Cohort'}
+          {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+          {isSaving ? 'Publishing...' : 'Publish Cohort'}
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT COLUMN */}
         <div className="lg:col-span-2 space-y-8">
-
           {/* General Info */}
           <GlassCard className="p-8 space-y-5">
             <h3 className="text-lg font-bold text-accent">General Information</h3>
@@ -262,7 +241,6 @@ const AdminCreateCourse = () => {
           </GlassCard>
         </div>
 
-        {/* RIGHT COLUMN */}
         <div className="space-y-8">
           {/* Pricing */}
           <GlassCard className="p-8 space-y-5">
@@ -297,82 +275,41 @@ const AdminCreateCourse = () => {
           <GlassCard className="p-8 space-y-5">
             <h3 className="text-lg font-bold text-accent">Media Assets</h3>
             
-            {/* Thumbnail Upload */}
             <div>
-              <label className={labelCls}>Thumbnail *</label>
+              <label className={labelCls}>Thumbnail URL *</label>
               <div 
-                onClick={() => !uploadingThumbnail && thumbnailRef.current?.click()}
+                onClick={() => thumbnailRef.current?.click()}
                 className="mt-2 aspect-video bg-white/5 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-text-secondary cursor-pointer hover:border-accent/50 transition-colors relative overflow-hidden group"
               >
                 {course.thumbnail ? (
-                  <>
-                    <img src={course.thumbnail} alt="Preview" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-sm font-bold">
-                      Click to Change
-                    </div>
-                  </>
-                ) : uploadingThumbnail ? (
-                  <div className="flex flex-col items-center text-accent">
-                    <Loader2 className="w-8 h-8 mb-2 animate-spin" />
-                    <span className="text-xs">Uploading...</span>
-                  </div>
+                  <img src={course.thumbnail} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <>
                     <ImageIcon className="w-8 h-8 mb-2" />
-                    <span className="text-xs font-medium">Click to Upload Thumbnail</span>
-                    <span className="text-[10px] mt-1 opacity-50">JPG, PNG, WEBP</span>
+                    <span className="text-xs font-medium">Click to change Thumbnail</span>
                   </>
                 )}
-                <input 
-                  type="file" 
-                  ref={thumbnailRef} 
-                  onChange={handleUploadThumbnail} 
-                  accept="image/*" 
-                  className="hidden" 
-                />
+                <input type="file" ref={thumbnailRef} onChange={handleThumbnailUploadPlaceholder} accept="image/*" className="hidden" />
               </div>
-              {course.thumbnail && (
-                <input value={course.thumbnail} onChange={set('thumbnail')} placeholder="https://..." className={`${inputCls} mt-2 text-xs`} />
-              )}
+              <input value={course.thumbnail} onChange={set('thumbnail')} placeholder="Paste image URL here" className={`${inputCls} mt-2 text-xs`} />
             </div>
 
-            {/* Video Upload */}
             <div>
-              <label className={labelCls}>Intro Video</label>
+              <label className={labelCls}>Intro Video URL</label>
               <div 
-                onClick={() => !uploadingVideo && videoRef.current?.click()}
+                onClick={() => videoRef.current?.click()}
                 className="mt-2 aspect-video bg-white/5 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-text-secondary cursor-pointer hover:border-accent/50 transition-colors relative overflow-hidden group"
               >
                 {course.video ? (
-                  <>
-                    <video src={course.video} className="w-full h-full object-cover" controls />
-                    <div className="absolute top-2 right-2 bg-black/70 px-3 py-1 rounded text-[10px] text-white">
-                      Click anywhere to change
-                    </div>
-                  </>
-                ) : uploadingVideo ? (
-                  <div className="flex flex-col items-center text-accent">
-                    <Loader2 className="w-8 h-8 mb-2 animate-spin" />
-                    <span className="text-xs">Uploading...</span>
-                  </div>
+                  <video src={course.video} className="w-full h-full object-cover" controls />
                 ) : (
                   <>
                     <Video className="w-8 h-8 mb-2" />
-                    <span className="text-xs font-medium">Click to Upload Intro Video</span>
-                    <span className="text-[10px] mt-1 opacity-50">MP4, MOV, AVI</span>
+                    <span className="text-xs font-medium">Video Upload requires existing ID</span>
                   </>
                 )}
-                <input 
-                  type="file" 
-                  ref={videoRef} 
-                  onChange={handleUploadVideo} 
-                  accept="video/*" 
-                  className="hidden" 
-                />
               </div>
-              {course.video && (
-                <input value={course.video} onChange={set('video')} placeholder="https://..." className={`${inputCls} mt-2 text-xs`} />
-              )}
+              <input value={course.video} onChange={set('video')} placeholder="Paste video URL here" className={`${inputCls} mt-2 text-xs`} />
             </div>
           </GlassCard>
         </div>
@@ -381,4 +318,4 @@ const AdminCreateCourse = () => {
   );
 };
 
-export default AdminCreateCourse;
+export default AdminCreateCourse;

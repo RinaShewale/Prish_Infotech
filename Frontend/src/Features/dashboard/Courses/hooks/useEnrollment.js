@@ -4,8 +4,9 @@ import {
 } from "react-redux";
 
 import {
-  enrollCourse,
   getMyEnrollments,
+  getAllEnrollments,
+  enrollCourse,
   clearEnrollmentState,
 } from "../redux/enrollment.slice";
 
@@ -17,13 +18,19 @@ export const useEnrollment = () => {
     loading,
     error,
     success,
+    loaded,
   } = useSelector(
     (state) => state.enrollment
   );
 
-  // GET ENROLLMENTS
-  const fetchEnrollments = () => {
+  // USER ENROLLMENTS
+  const fetchMyEnrollments = () => {
     dispatch(getMyEnrollments());
+  };
+
+  // ADMIN ENROLLMENTS
+  const fetchEnrollments = () => {
+    dispatch(getAllEnrollments());
   };
 
   // ENROLL COURSE
@@ -43,7 +50,9 @@ export const useEnrollment = () => {
     loading,
     error,
     success,
+    loaded,
 
+    fetchMyEnrollments,
     fetchEnrollments,
     handleEnroll,
     clearState,

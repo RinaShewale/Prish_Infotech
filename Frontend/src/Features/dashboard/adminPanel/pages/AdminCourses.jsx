@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useAdmin } from '../hooks/useAdmin';
+import { useCourse } from '../../Courses/hooks/useCourse'; // Using your new hook
+import { useSelector } from 'react-redux'; // To get courses from Redux state
 import { GlassCard } from '../Shared/GlassCard';
 import { TableSkeleton } from '../Shared/TableSkeleton';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +32,8 @@ const EditModal = ({ course, onClose, onSave }) => {
       'w-full bg-white/5 border border-white/10 rounded-xl p-3 outline-none focus:border-accent transition-colors text-sm',
   });
 
+  const labelCls = "text-[10px] text-text-secondary uppercase font-bold block mb-1 tracking-widest";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
       <GlassCard className="w-full max-w-2xl p-8 space-y-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -43,23 +46,23 @@ const EditModal = ({ course, onClose, onSave }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="label-xs">Title</label>
+            <label className={labelCls}>Title</label>
             <input {...field('title')} />
           </div>
           <div className="md:col-span-2">
-            <label className="label-xs">Description</label>
+            <label className={labelCls}>Description</label>
             <textarea rows={3} {...field('description')} className={field('description').className} />
           </div>
           <div>
-            <label className="label-xs">Price (INR)</label>
+            <label className={labelCls}>Price (INR)</label>
             <input type="number" {...field('price')} />
           </div>
           <div>
-            <label className="label-xs">Old Price (INR)</label>
+            <label className={labelCls}>Old Price (INR)</label>
             <input type="number" {...field('oldPrice')} />
           </div>
           <div>
-            <label className="label-xs">Level</label>
+            <label className={labelCls}>Level</label>
             <select {...field('level')}>
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
@@ -67,30 +70,30 @@ const EditModal = ({ course, onClose, onSave }) => {
             </select>
           </div>
           <div>
-            <label className="label-xs">Type</label>
+            <label className={labelCls}>Type</label>
             <select {...field('type')}>
               <option value="recorded">Recorded</option>
               <option value="live">Live</option>
             </select>
           </div>
           <div>
-            <label className="label-xs">Access Duration</label>
+            <label className={labelCls}>Access Duration</label>
             <input {...field('accessDuration')} />
           </div>
           <div>
-            <label className="label-xs">Hero Quote</label>
+            <label className={labelCls}>Hero Quote</label>
             <input {...field('heroQuote')} />
           </div>
           <div className="md:col-span-2">
-            <label className="label-xs">Hero Highlight</label>
+            <label className={labelCls}>Hero Highlight</label>
             <input {...field('heroHighlight')} />
           </div>
           <div className="md:col-span-2">
-            <label className="label-xs">Thumbnail URL</label>
+            <label className={labelCls}>Thumbnail URL</label>
             <input {...field('thumbnail')} />
           </div>
           <div className="md:col-span-2">
-            <label className="label-xs">Video URL</label>
+            <label className={labelCls}>Video URL</label>
             <input {...field('video')} />
           </div>
         </div>
@@ -116,13 +119,21 @@ const EditModal = ({ course, onClose, onSave }) => {
 
 // ── ADMIN COURSES PAGE ───────────────────────────────────────────────────────
 const AdminCourses = () => {
-  const { courses, loading, fetchCourses, removeCourse, editCourse } = useAdmin();
+  const navigate = useNavigate();
+  
+  // Destructure hook methods
+  const { handleGetCourses, handleDeleteCourse, handleUpdateCourse } = useCourse();
+  
+  // Get data directly from Redux state
+  const { courses, loading } = useSelector((state) => state.course);
+
   const [search, setSearch] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
-  const [editing, setEditing] = useState(null); // course being edited
-  const navigate = useNavigate();
+  const [editing, setEditing] = useState(null);
 
-  useEffect(() => { fetchCourses(); }, []);
+  useEffect(() => { 
+    handleGetCourses(); 
+  }, [handleGetCourses]);
 
   const filtered = courses.filter((c) => {
     const matchSearch =
@@ -134,12 +145,22 @@ const AdminCourses = () => {
 
   const handleDelete = async (id, title) => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    await removeCourse(id);
+    const res = await handleDeleteCourse(id);
+    if (res.success) {
+      toast.success("Course deleted successfully");
+    } else {
+      toast.error(res.message);
+    }
   };
 
   const handleSave = async (form) => {
-    await editCourse(editing._id, form);
-    setEditing(null);
+    const res = await handleUpdateCourse(editing._id, form);
+    if (res.success) {
+      toast.success("Course updated successfully");
+      setEditing(null);
+    } else {
+      toast.error(res.message);
+    }
   };
 
   return (
@@ -176,12 +197,12 @@ const AdminCourses = () => {
         <select
           value={levelFilter}
           onChange={(e) => setLevelFilter(e.target.value)}
-          className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none text-sm"
+          className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none text-sm text-white"
         >
-          <option value="all">All Levels</option>
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
+          <option value="all" className="bg-black">All Levels</option>
+          <option value="beginner" className="bg-black">Beginner</option>
+          <option value="intermediate" className="bg-black">Intermediate</option>
+          <option value="advanced" className="bg-black">Advanced</option>
         </select>
       </GlassCard>
 
@@ -194,16 +215,15 @@ const AdminCourses = () => {
               <th className="p-6 text-[10px] uppercase tracking-widest text-text-secondary font-bold">Level</th>
               <th className="p-6 text-[10px] uppercase tracking-widest text-text-secondary font-bold">Type</th>
               <th className="p-6 text-[10px] uppercase tracking-widest text-text-secondary font-bold">Price</th>
-              <th className="p-6 text-[10px] uppercase tracking-widest text-text-secondary font-bold">Discount</th>
               <th className="p-6 text-[10px] uppercase tracking-widest text-text-secondary font-bold text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <TableSkeleton rows={6} cols={6} />
+              <TableSkeleton rows={6} cols={5} />
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-12 text-center text-text-secondary">
+                <td colSpan={5} className="p-12 text-center text-text-secondary">
                   <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" />
                   <p>No courses found.</p>
                 </td>
@@ -241,11 +261,6 @@ const AdminCourses = () => {
                     </span>
                   </td>
                   <td className="p-6 text-sm font-mono text-accent">₹{course.price?.toLocaleString()}</td>
-                  <td className="p-6 text-sm text-text-secondary">
-                    {course.discount > 0 ? (
-                      <span className="text-green-400 font-bold">{course.discount}% off</span>
-                    ) : '—'}
-                  </td>
                   <td className="p-6 text-right">
                     <div className="flex justify-end gap-2">
                       <button

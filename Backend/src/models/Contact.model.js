@@ -1,23 +1,15 @@
-// ======================================================
-// 📁 models/Contact.model.js
-// ======================================================
-
 import mongoose from "mongoose";
 
 const contactSchema = new mongoose.Schema(
   {
-   
-    // ✅ FULL NAME
- 
+    // 👤 FULL NAME
     name: {
       type: String,
       required: true,
       trim: true,
     },
 
-    
-    // ✅ EMAIL
-   
+    // 📧 EMAIL
     email: {
       type: String,
       required: true,
@@ -25,38 +17,37 @@ const contactSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-   
-    // ✅ PHONE
- 
+    // 📞 PHONE
     phone: {
       type: String,
       required: true,
       trim: true,
     },
 
-   
-    // ✅ PREFERRED DATE
-  
+    // 📅 DATE
     preferredDate: {
       type: String,
       required: true,
     },
 
-   
-    // ✅ PREFERRED TIME
- 
+    // ⏰ TIME
     preferredTime: {
       type: String,
       required: true,
     },
 
-  
-    // ✅ REASON
-  
+    // 💬 REASON
     inquiryReason: {
       type: String,
       required: true,
       trim: true,
+    },
+
+    // 🚀 NEW: STATUS SYSTEM
+    status: {
+      type: String,
+      enum: ["pending", "contacted", "missed"],
+      default: "pending",
     },
   },
   {
@@ -64,9 +55,6 @@ const contactSchema = new mongoose.Schema(
   }
 );
 
-const Contact = mongoose.model(
-  "Contact",
-  contactSchema
-);
+const Contact = mongoose.model("Contact", contactSchema);
 
 export default Contact;

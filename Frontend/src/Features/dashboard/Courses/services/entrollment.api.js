@@ -1,22 +1,24 @@
 import API from "../../../auth/services/api";
 
-// ======================================================
-// 📚 GET MY ENROLLMENTS
-// ======================================================
+// USER ENROLLMENTS
+export const getMyEnrollmentsAPI = async () => {
+  const response = await API.get(
+    "/enrollment/my-enrollments"
+  );
 
-export const getMyEnrollmentsAPI =
-  async () => {
-    const response = await API.get(
-      "/enrollment/my-enrollments"
-    );
+  return response.data;
+};
 
-    return response.data;
-  };
+// ADMIN ENROLLMENTS
+export const getAllEnrollmentsAPI = async () => {
+  const response = await API.get(
+    "/enrollment/admin/enrollments"
+  );
 
-// ======================================================
-// 🎓 ENROLL COURSE
-// ======================================================
+  return response.data;
+};
 
+// ENROLL COURSE
 export const enrollCourseAPI = async (
   courseId
 ) => {

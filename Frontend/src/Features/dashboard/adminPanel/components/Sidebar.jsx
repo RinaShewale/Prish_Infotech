@@ -1,16 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Users, CreditCard, Image, BarChart3, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, CreditCard, Image, BarChart3, PlusCircle, DollarSign, Settings } from 'lucide-react';
 
 const Sidebar = () => {
   const links = [
-    { name: 'Dashboard',    path: '/admin',                 icon: LayoutDashboard },
-    { name: 'Courses',      path: '/admin/courses',         icon: BookOpen },
-    { name: 'Create Course',path: '/admin/courses/create',  icon: PlusCircle },
-    { name: 'Students',     path: '/admin/users',           icon: Users },
-    { name: 'Enrollments',  path: '/admin/enrollments',     icon: CreditCard },
-    { name: 'Analytics',    path: '/admin/analytics',       icon: BarChart3 },
-    { name: 'Media Assets', path: '/admin/media',           icon: Image },
+    { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { name: 'Courses', path: '/admin/courses', icon: BookOpen },
+    { name: 'Instructors', path: '/admin/instructors', icon: Users }, // New
+    { name: 'Requested Calls', path: '/admin/users', icon: Users },
+    { name: 'Enrollments', path: '/admin/enrollments', icon: CreditCard },
+    { name: 'Payments', path: '/admin/payments', icon: DollarSign }, // New
+    { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
+    { name: 'Media Assets', path: '/admin/media', icon: Image },
+    { name: 'Settings', path: '/admin/settings', icon: Settings }, // New
   ];
 
   return (
