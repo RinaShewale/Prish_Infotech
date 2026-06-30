@@ -36,8 +36,9 @@ import Analytics from "../Features/dashboard/adminPanel/components/Analytics";
 import AdminCreateCourse from "../Features/dashboard/adminPanel/pages/AdminCreateCourse";
 import UserCourseProgress from "../Features/dashboard/adminPanel/components/UserCourseProgress";
 import GetContacts from "../Features/dashboard/adminPanel/pages/GetContacts";
-import AdminInstructors from "../Features/dashboard/adminPanel/pages/AdminInstructors";
 import AdminPayments from "../Features/dashboard/adminPanel/pages/AdminPayments";
+import AdminCourseDetail from "../Features/dashboard/adminPanel/pages/AdminCourseDetail";
+import AdminCreateLesson from "../Features/dashboard/adminPanel/pages/AdminCreateLesson";
 
 
 
@@ -114,6 +115,16 @@ export const router = createBrowserRouter([
         path: "courses",
         element: <AdminCourses />,
       },
+
+      {
+        path: "courses/:slug/add-lesson",
+        element: <AdminCreateLesson />
+      },
+
+      {
+        path: "courses/:slug",
+        element: <AdminCourseDetail />,
+      },
       {
         path: "courses/create",
         element: <AdminCreateCourse />,
@@ -131,18 +142,13 @@ export const router = createBrowserRouter([
         element: <UserCourseProgress />,
       },
 
-       {
-        path: "instructors",
-        element: <AdminInstructors />,
-      },
-
-
-       {
+  
+      {
         path: "payments",
         element: <AdminPayments />,
       },
 
-      
+
       {
         path: "media",
         element: <MediaLibrary />,

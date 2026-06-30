@@ -2,7 +2,7 @@ import { useDispatch, useSelector }
 from "react-redux";
 
 import { fetchLessons }
-from "../lesson.slice";
+from "../../Classroom/redux/lesson.slice";
 
 
 

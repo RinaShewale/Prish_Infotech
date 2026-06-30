@@ -120,10 +120,10 @@ const EditModal = ({ course, onClose, onSave }) => {
 // ── ADMIN COURSES PAGE ───────────────────────────────────────────────────────
 const AdminCourses = () => {
   const navigate = useNavigate();
-  
+
   // Destructure hook methods
   const { handleGetCourses, handleDeleteCourse, handleUpdateCourse } = useCourse();
-  
+
   // Get data directly from Redux state
   const { courses, loading } = useSelector((state) => state.course);
 
@@ -131,8 +131,8 @@ const AdminCourses = () => {
   const [levelFilter, setLevelFilter] = useState('all');
   const [editing, setEditing] = useState(null);
 
-  useEffect(() => { 
-    handleGetCourses(); 
+  useEffect(() => {
+    handleGetCourses();
   }, [handleGetCourses]);
 
   const filtered = courses.filter((c) => {
@@ -230,7 +230,11 @@ const AdminCourses = () => {
               </tr>
             ) : (
               filtered.map((course) => (
-                <tr key={course._id} className="border-b border-white/5 hover:bg-white/[0.015] transition-colors group">
+                <tr
+                  key={course._id}
+                  onClick={() => navigate(`/admin/courses/${course.slug}`)}
+                  className="border-b border-white/5 hover:bg-white/[0.015] transition-colors group cursor-pointer"
+                >
                   <td className="p-6">
                     <div className="flex items-center gap-4">
                       {course.thumbnail ? (
@@ -252,11 +256,10 @@ const AdminCourses = () => {
                     </span>
                   </td>
                   <td className="p-6">
-                    <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase border ${
-                      course.type === 'live'
-                        ? 'border-accent/30 bg-accent/10 text-accent'
-                        : 'border-white/10 bg-white/5 text-text-secondary'
-                    }`}>
+                    <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase border ${course.type === 'live'
+                      ? 'border-accent/30 bg-accent/10 text-accent'
+                      : 'border-white/10 bg-white/5 text-text-secondary'
+                      }`}>
                       {course.type}
                     </span>
                   </td>
@@ -264,7 +267,10 @@ const AdminCourses = () => {
                   <td className="p-6 text-right">
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => setEditing(course)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditing(course);
+                        }}
                         className="p-2 hover:bg-white/5 rounded-lg text-text-secondary hover:text-accent transition-colors"
                         title="Edit"
                       >

@@ -6,7 +6,6 @@ const Sidebar = () => {
   const links = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Courses', path: '/admin/courses', icon: BookOpen },
-    { name: 'Instructors', path: '/admin/instructors', icon: Users }, // New
     { name: 'Requested Calls', path: '/admin/users', icon: Users },
     { name: 'Enrollments', path: '/admin/enrollments', icon: CreditCard },
     { name: 'Payments', path: '/admin/payments', icon: DollarSign }, // New
