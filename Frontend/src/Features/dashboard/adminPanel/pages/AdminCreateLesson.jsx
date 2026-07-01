@@ -93,13 +93,20 @@ const AdminCreateLesson = () => {
         const normalizedResources = Array.isArray(lesson.resources)
           ? lesson.resources
               .filter((item) => item?.url?.trim())
-              .map((item) => ({
-                title: item.title?.trim() || "Resource",
-                type: item.type || item.resourceType || "link",
-                url: item.url.trim(),
-                description: item.description || "",
-                resourceType: item.resourceType || item.type || "link",
-              }))
+              .map((item) => {
+                const url = item.url.trim();
+                const lowerUrl = url.toLowerCase();
+                const isPdfLink = lowerUrl.endsWith(".pdf") || lowerUrl.includes("/pdf?") || lowerUrl.includes("/pdf#");
+                const normalizedType = item.type || item.resourceType || (isPdfLink ? "pdf" : "link");
+
+                return {
+                  title: item.title?.trim() || "Resource",
+                  type: normalizedType,
+                  url,
+                  description: item.description || "",
+                  resourceType: item.resourceType || item.type || normalizedType,
+                };
+              })
           : [];
 
         const notesPdf = (lesson.resourceUrL || "").trim();

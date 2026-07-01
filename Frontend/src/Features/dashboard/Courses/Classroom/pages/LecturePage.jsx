@@ -80,20 +80,39 @@ const LecturePage = () => {
     }
   };
 
-  const notesPdfUrl = currentModule?.resourceUrL ||
-    (Array.isArray(currentModule?.resources)
-      ? currentModule.resources.find((resource) => {
-          const type = (resource.resourceType || resource.type || "").toLowerCase();
-          return type === "pdf" || type === "notes";
-        })?.url
-      : "") || "";
+  const getPdfUrl = (module) => {
+    if (!module) return "";
+
+    if (module.resourceUrL?.trim()) {
+      return module.resourceUrL.trim();
+    }
+
+    if (!Array.isArray(module.resources)) {
+      return "";
+    }
+
+    const pdfResource = module.resources.find((resource) => {
+      const type = (resource.resourceType || resource.type || "").toLowerCase();
+      const url = (resource.url || "").trim().toLowerCase();
+
+      return (
+        type === "pdf" ||
+        type === "notes" ||
+        url.endsWith(".pdf") ||
+        url.includes("/pdf?") ||
+        url.includes("/pdf#")
+      );
+    });
+
+    return pdfResource?.url || "";
+  };
+
+  const notesPdfUrl = getPdfUrl(currentModule);
 
   // --- UPDATED RENDERING LOGIC ---
   const renderMainDisplay = () => {
     // 1. PDF VIEW MODE
     if (viewMode === 'pdf' && notesPdfUrl) {
-      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(notesPdfUrl)}&embedded=true`;
-
       return (
         <div className="relative w-full h-full bg-white">
           <div className="absolute top-4 right-4 z-50 flex gap-2">
@@ -116,10 +135,19 @@ const LecturePage = () => {
           </div>
 
           <iframe
-            src={viewerUrl}
+            src={notesPdfUrl}
             title="Lesson PDF"
             className="w-full h-full border-0"
-          />
+          >
+            <div className="w-full h-full flex items-center justify-center p-6 text-center">
+              <p className="text-sm text-zinc-600">
+                Unable to preview the PDF inline.
+                <a href={notesPdfUrl} target="_blank" rel="noopener noreferrer" className="ml-1 text-accent underline">
+                  Open in a new tab
+                </a>
+              </p>
+            </div>
+          </iframe>
         </div>
       );
     }
