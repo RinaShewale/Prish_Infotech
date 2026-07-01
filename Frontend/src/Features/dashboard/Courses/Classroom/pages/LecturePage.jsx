@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ChevronLeft, Download, Bookmark,
   CheckCircle, FileText, List, Info, Check, Play,
-  MessageCircle, Globe, MonitorPlay, X
+  MessageCircle, Globe, MonitorPlay, X, ExternalLink,
+  BookOpen, FolderOpen, Image as ImageIcon
 } from 'lucide-react';
 import { fetchLessons } from '../../Classroom/redux/lesson.slice';
 import { saveLessonProgress, getLessonProgress } from '../../Classroom/redux/lessonProgress.slice';
@@ -20,8 +21,9 @@ const LecturePage = () => {
   const videoRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState('content');
-  const [viewMode, setViewMode] = useState('video'); // 'video' or 'pdf'
+  const [viewMode, setViewMode] = useState('video');
   const [videoProgress, setVideoProgress] = useState(0);
+  const [activeResource, setActiveResource] = useState(null);
 
   const { lessons = [] } = useSelector((state) => state.lesson);
   const { bookmarks = [] } = useSelector((state) => state.bookmark);
@@ -238,20 +240,48 @@ const LecturePage = () => {
             )}
 
             {activeTab === 'resources' && (
-              <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2">
+              <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
                 {currentModule.resourceUrL ? (
-                   <button 
-                    onClick={() => setViewMode('pdf')} 
-                    className="w-full text-left"
-                   >
-                      <ResourceItem 
-                        title="Open Lesson PDF" 
-                        size="View in Workspace" 
-                        isPDF={true}
-                      />
-                   </button>
+                  <button onClick={() => { setActiveResource(null); setViewMode('pdf'); }} className="w-full text-left">
+                    <ResourceItem title="Open Lesson PDF" size="View in Workspace" isPDF={true} />
+                  </button>
+                ) : null}
+
+                {(currentModule.resources && currentModule.resources.length > 0) ? (
+                  currentModule.resources.map((resource, index) => (
+                    <div key={index} className="rounded-2xl border border-border bg-card/10 p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-bg text-accent border border-border">
+                            {resource.resourceType === 'pdf' ? <FileText size={14} /> : resource.resourceType === 'image' ? <ImageIcon size={14} /> : resource.resourceType === 'zip' || resource.resourceType === 'code' ? <FolderOpen size={14} /> : resource.resourceType === 'slides' ? <BookOpen size={14} /> : <Globe size={14} />}
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-bold">{resource.title || 'Untitled Resource'}</p>
+                            <p className="text-[9px] uppercase tracking-widest text-text-secondary/70">{resource.resourceType || 'link'}</p>
+                            {resource.description ? <p className="text-[10px] text-text-secondary mt-1">{resource.description}</p> : null}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {resource.url ? (
+                          <>
+                            <a href={resource.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-accent">
+                              <ExternalLink size={12} /> Open
+                            </a>
+                            {resource.resourceType === 'pdf' ? (
+                              <a href={resource.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white">
+                                <Download size={12} /> Download
+                              </a>
+                            ) : null}
+                          </>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <p className="text-[10px] text-text-secondary text-center py-20 italic font-medium">No files attached to this module.</p>
+                  <div className="rounded-2xl border border-dashed border-white/10 px-4 py-12 text-center text-[10px] uppercase tracking-widest text-text-secondary">
+                    No lesson resources yet.
+                  </div>
                 )}
               </div>
             )}

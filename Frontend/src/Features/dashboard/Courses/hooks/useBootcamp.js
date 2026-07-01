@@ -1,9 +1,12 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBootcamps,
+  fetchAdminBootcamps,
   fetchBootcampById,
-  createBootcamp,
+  createBootcamp as createBootcampAction,
+  updateBootcamp as updateBootcampAction,
+  deleteBootcamp as deleteBootcampAction,
 } from "../redux/bootcampSlice";
 
 export const useBootcamp = (autoFetch = true) => {
@@ -16,21 +19,51 @@ export const useBootcamp = (autoFetch = true) => {
     error = null,
   } = useSelector((state) => state.bootcamp || {});
 
-  // ======================
-  // ACTIONS
-  // ======================
-  const loadBootcamps = () => dispatch(fetchBootcamps());
-  const loadBootcamp = (id) => dispatch(fetchBootcampById(id));
-  const addBootcamp = (data) => dispatch(createBootcamp(data));
+  const loadBootcamps = useCallback(() => dispatch(fetchBootcamps()), [dispatch]);
+  const loadAdminBootcamps = useCallback(() => dispatch(fetchAdminBootcamps()), [dispatch]);
+  const loadBootcamp = useCallback((id) => dispatch(fetchBootcampById(id)), [dispatch]);
 
-  // ======================
-  // AUTO FETCH (SAFE)
-  // ======================
+  const createBootcamp = useCallback(
+    async (data) => {
+      try {
+        const result = await dispatch(createBootcampAction(data)).unwrap();
+        return { success: true, data: result };
+      } catch (err) {
+        return { success: false, message: err?.message || "Failed to create bootcamp" };
+      }
+    },
+    [dispatch]
+  );
+
+  const updateBootcamp = useCallback(
+    async (id, data) => {
+      try {
+        const result = await dispatch(updateBootcampAction({ id, payload: data })).unwrap();
+        return { success: true, data: result };
+      } catch (err) {
+        return { success: false, message: err?.message || "Failed to update bootcamp" };
+      }
+    },
+    [dispatch]
+  );
+
+  const deleteBootcamp = useCallback(
+    async (id) => {
+      try {
+        const result = await dispatch(deleteBootcampAction(id)).unwrap();
+        return { success: true, id: result };
+      } catch (err) {
+        return { success: false, message: err?.message || "Failed to delete bootcamp" };
+      }
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     if (autoFetch) {
       loadBootcamps();
     }
-  }, [autoFetch, dispatch]);
+  }, [autoFetch, loadBootcamps]);
 
   return {
     bootcamps,
@@ -39,7 +72,10 @@ export const useBootcamp = (autoFetch = true) => {
     error,
 
     loadBootcamps,
+    loadAdminBootcamps,
     loadBootcamp,
-    addBootcamp,
+    createBootcamp,
+    updateBootcamp,
+    deleteBootcamp,
   };
 };

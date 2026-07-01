@@ -1,17 +1,19 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Users, CreditCard, Image, BarChart3, PlusCircle, DollarSign, Settings } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, CreditCard, Image, BarChart3, DollarSign, Settings, GraduationCap, Ticket } from 'lucide-react';
 
 const Sidebar = () => {
   const links = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Courses', path: '/admin/courses', icon: BookOpen },
+    { name: 'Bootcamps', path: '/admin/bootcamps', icon: GraduationCap },
+    { name: 'Coupons', path: '/admin/coupons', icon: Ticket },
     { name: 'Requested Calls', path: '/admin/users', icon: Users },
     { name: 'Enrollments', path: '/admin/enrollments', icon: CreditCard },
-    { name: 'Payments', path: '/admin/payments', icon: DollarSign }, // New
+    { name: 'Payments', path: '/admin/payments', icon: DollarSign },
     { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
     { name: 'Media Assets', path: '/admin/media', icon: Image },
-    { name: 'Settings', path: '/admin/settings', icon: Settings }, // New
+    { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 
   return (

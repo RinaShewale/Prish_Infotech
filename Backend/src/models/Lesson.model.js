@@ -16,6 +16,21 @@ const lessonSchema = new mongoose.Schema(
       type: String,
     },
 
+    resourceUrL: {
+      type: String,
+      default: "",
+    },
+
+    resources: [
+      {
+        title: { type: String, required: true },
+        type: { type: String, default: "link" },
+        url: { type: String, required: true },
+        description: { type: String, default: "" },
+        resourceType: { type: String, default: "external" },
+      },
+    ],
+
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
@@ -37,9 +52,6 @@ const lessonSchema = new mongoose.Schema(
   }
 );
 
-const Lesson = mongoose.model(
-  "Lesson",
-  lessonSchema
-);
+const Lesson = mongoose.model("Lesson", lessonSchema);
 
 export default Lesson;

@@ -11,12 +11,7 @@ const imageStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "prish-infotech/images",
-    allowed_formats: [
-      "jpg",
-      "jpeg",
-      "png",
-      "webp",
-    ],
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
@@ -30,6 +25,31 @@ const videoStorage = new CloudinaryStorage({
   },
 });
 
+// ================= GENERIC FILE STORAGE =================
+const fileStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "prish-infotech/files",
+    resource_type: "auto",
+    allowed_formats: [
+      "pdf",
+      "zip",
+      "rar",
+      "doc",
+      "docx",
+      "ppt",
+      "pptx",
+      "xls",
+      "xlsx",
+      "csv",
+      "jpg",
+      "jpeg",
+      "png",
+      "webp",
+    ],
+  },
+});
+
 // ================= EXPORTS =================
 export const uploadImage = multer({
   storage: imageStorage,
@@ -37,4 +57,8 @@ export const uploadImage = multer({
 
 export const uploadVideo = multer({
   storage: videoStorage,
+});
+
+export const uploadFile = multer({
+  storage: fileStorage,
 });

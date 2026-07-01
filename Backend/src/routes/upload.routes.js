@@ -1,5 +1,5 @@
 import express from "express";
-import { uploadImage, uploadVideo } from "../middleware/upload.middleware.js";
+import { uploadImage, uploadVideo, uploadFile } from "../middleware/upload.middleware.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { adminOnly } from "../middleware/admin.middleware.js";
 
@@ -29,6 +29,25 @@ router.post(
     res.json({
       success: true,
       url: req.file.path,
+    });
+  }
+);
+
+// 📁 GENERIC FILE UPLOAD (ADMIN ONLY)
+router.post(
+  "/file",
+  protect,
+  adminOnly,
+  uploadFile.single("file"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    res.json({
+      success: true,
+      url: req.file.path,
+      filename: req.file.originalname,
     });
   }
 );

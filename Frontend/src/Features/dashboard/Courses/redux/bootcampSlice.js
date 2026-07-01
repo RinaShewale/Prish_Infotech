@@ -1,8 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   fetchBootcampsAPI,
+  fetchAdminBootcampsAPI,
   fetchBootcampByIdAPI,
   createBootcampAPI,
+  updateBootcampAPI,
+  deleteBootcampAPI,
 } from "../services/bootcamp.api";
 
 // ======================
@@ -17,6 +20,23 @@ export const fetchBootcamps = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(
         err?.response?.data?.message || err.message || "Failed to fetch bootcamps"
+      );
+    }
+  }
+);
+
+// ======================
+// FETCH ADMIN
+// ======================
+export const fetchAdminBootcamps = createAsyncThunk(
+  "bootcamp/fetchAdmin",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await fetchAdminBootcampsAPI();
+      return data?.bootcamps || [];
+    } catch (err) {
+      return rejectWithValue(
+        err?.response?.data?.message || err.message || "Failed to fetch admin bootcamps"
       );
     }
   }
@@ -51,6 +71,40 @@ export const createBootcamp = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(
         err?.response?.data?.message || err.message || "Failed to create bootcamp"
+      );
+    }
+  }
+);
+
+// ======================
+// UPDATE
+// ======================
+export const updateBootcamp = createAsyncThunk(
+  "bootcamp/update",
+  async ({ id, payload }, { rejectWithValue }) => {
+    try {
+      const data = await updateBootcampAPI(id, payload);
+      return data?.bootcamp || null;
+    } catch (err) {
+      return rejectWithValue(
+        err?.response?.data?.message || err.message || "Failed to update bootcamp"
+      );
+    }
+  }
+);
+
+// ======================
+// DELETE
+// ======================
+export const deleteBootcamp = createAsyncThunk(
+  "bootcamp/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await deleteBootcampAPI(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(
+        err?.response?.data?.message || err.message || "Failed to delete bootcamp"
       );
     }
   }
@@ -132,7 +186,6 @@ const bootcampSlice = createSlice({
         state.creating = false;
 
         if (action.payload) {
-          // safer than unshift (prevents duplicates in refetch cases)
           const exists = state.bootcamps.some(
             (b) => b._id === action.payload._id
           );
@@ -146,6 +199,46 @@ const bootcampSlice = createSlice({
       })
       .addCase(createBootcamp.rejected, (state, action) => {
         state.creating = false;
+        state.error = action.payload;
+      })
+
+      // ======================
+      // UPDATE
+      // ======================
+      .addCase(updateBootcamp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateBootcamp.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload) {
+          state.bootcamps = state.bootcamps.map((bootcamp) =>
+            bootcamp._id === action.payload._id ? action.payload : bootcamp
+          );
+        }
+        state.error = null;
+      })
+      .addCase(updateBootcamp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ======================
+      // DELETE
+      // ======================
+      .addCase(deleteBootcamp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteBootcamp.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bootcamps = state.bootcamps.filter(
+          (bootcamp) => bootcamp._id !== action.payload
+        );
+        state.error = null;
+      })
+      .addCase(deleteBootcamp.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   },

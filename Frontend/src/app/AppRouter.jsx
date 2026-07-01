@@ -39,7 +39,8 @@ import GetContacts from "../Features/dashboard/adminPanel/pages/GetContacts";
 import AdminPayments from "../Features/dashboard/adminPanel/pages/AdminPayments";
 import AdminCourseDetail from "../Features/dashboard/adminPanel/pages/AdminCourseDetail";
 import AdminCreateLesson from "../Features/dashboard/adminPanel/pages/AdminCreateLesson";
-
+import AdminBootcampManagement from "../Features/dashboard/adminPanel/pages/AdminBootcampManagement";
+import AdminCoupons from "../Features/dashboard/adminPanel/pages/AdminCoupons";
 
 
 //footer links
@@ -156,6 +157,14 @@ export const router = createBrowserRouter([
       {
         path: "analytics",
         element: <Analytics />,
+      },
+      {
+        path: "bootcamps",
+        element: <AdminBootcampManagement />,
+      },
+      {
+        path: "coupons",
+        element: <AdminCoupons />,
       },
       {
         path: "settings",
