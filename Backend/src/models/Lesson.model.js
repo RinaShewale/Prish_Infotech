@@ -1,47 +1,92 @@
 import mongoose from "mongoose";
 
-const lessonSchema = new mongoose.Schema(
+const resourceSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
+      trim: true,
     },
 
+    type: {
+      type: String,
+      enum: ["pdf", "zip", "code", "github", "link"],
+      default: "link",
+    },
+
+    url: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    resourceType: {
+      type: String,
+      default: "external",
+      trim: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const lessonSchema = new mongoose.Schema(
+  {
+    // Lesson Title
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Video URL
     videoUrl: {
       type: String,
       required: true,
+      trim: true,
     },
 
+    // Lesson Content
     content: {
       type: String,
+      default: "",
+      trim: true,
     },
 
+    // Main Notes PDF
     resourceUrL: {
       type: String,
       default: "",
+      trim: true,
     },
 
-    resources: [
-      {
-        title: { type: String, required: true },
-        type: { type: String, default: "link" },
-        url: { type: String, required: true },
-        description: { type: String, default: "" },
-        resourceType: { type: String, default: "external" },
-      },
-    ],
+    // Optional Additional Resources
+    resources: {
+      type: [resourceSchema],
+      default: [],
+    },
 
+    // Course Reference
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: true,
     },
 
+    // Lesson Order
     order: {
       type: Number,
       default: 0,
     },
 
+    // Duration (minutes)
     duration: {
       type: Number,
       default: 0,

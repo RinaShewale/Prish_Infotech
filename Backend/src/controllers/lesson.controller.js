@@ -7,27 +7,56 @@ import Enrollment from "../models/Enrollment.model.js";
 // ================= CREATE LESSON =================
 export const createLesson = async (req, res) => {
   try {
-    const lesson = await Lesson.create(req.body);
+    const lessonData = {
+      ...req.body,
+      title: req.body.title?.trim(),
+      videoUrl: req.body.videoUrl?.trim(),
+      resourceUrL: req.body.resourceUrL?.trim() || "",
+    };
+
+    // ================= SANITIZE RESOURCES =================
+    if (Array.isArray(req.body.resources)) {
+      lessonData.resources = req.body.resources
+        .filter((resource) => resource?.title?.trim() && resource?.url?.trim())
+        .map((resource) => ({
+          title: resource.title.trim(),
+          type: resource.type || resource.resourceType || "link",
+          url: resource.url.trim(),
+          description: resource.description || "",
+          resourceType: resource.resourceType || resource.type || "link",
+        }));
+    } else {
+      lessonData.resources = [];
+    }
+
+    if (!lessonData.resourceUrL) {
+      const pdfResource = lessonData.resources.find((resource) => {
+        const type = (resource.resourceType || resource.type || "").toLowerCase();
+        return type === "pdf" || type === "notes";
+      });
+
+      if (pdfResource?.url) {
+        lessonData.resourceUrL = pdfResource.url;
+      }
+    }
+
+    // ================= CREATE LESSON =================
+    const lesson = await Lesson.create(lessonData);
 
     console.log("👉 LESSON CREATED");
 
-    // 🔥 GET COURSE INFO
+    // ================= GET COURSE =================
     const course = await Course.findById(lesson.course);
 
-    // 👥 GET ENROLLED USERS (FROM ENROLLMENT MODEL)
+    // ================= GET ENROLLED USERS =================
     const enrollments = await Enrollment.find({
       course: lesson.course,
     }).populate("user");
 
     console.log("👉 ENROLLMENTS FOUND:", enrollments.length);
 
-    const users = enrollments.map((e) => e.user);
-
-    console.log("👉 USERS FOUND:", users.length);
-
-    // 🔔 CREATE NOTIFICATIONS
-    const notifications = users.map((u) => ({
-      user: u._id,
+    const notifications = enrollments.map((enrollment) => ({
+      user: enrollment.user._id,
       title: "New Lesson Added 📚",
       message: `${course?.title || "Course"} - ${lesson.title} is now available`,
       type: "info",
@@ -38,16 +67,16 @@ export const createLesson = async (req, res) => {
       console.log("👉 NOTIFICATIONS SAVED ✔");
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Lesson created successfully",
       lesson,
     });
 
   } catch (error) {
-    console.log("ERROR:", error);
+    console.error("CREATE LESSON ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -80,8 +109,8 @@ export const getLessonsByCourse = async (req, res) => {
     const lessons = await Lesson.find({
       course: req.params.courseId,
     })
-      .sort({ order: 1 })
-      .populate("course");
+      .populate("course")
+      .sort({ order: 1 });
 
     if (!req.user) {
       return res.status(200).json({
@@ -108,15 +137,15 @@ export const getLessonsByCourse = async (req, res) => {
         progressMap[lesson._id.toString()]?.progress || 0,
     }));
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       lessons: lessonsWithProgress,
     });
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -126,7 +155,8 @@ export const getLessonsByCourse = async (req, res) => {
 // ================= GET SINGLE LESSON =================
 export const getSingleLesson = async (req, res) => {
   try {
-    const lesson = await Lesson.findById(req.params.id).populate("course");
+    const lesson = await Lesson.findById(req.params.id)
+      .populate("course");
 
     if (!lesson) {
       return res.status(404).json({
@@ -135,13 +165,13 @@ export const getSingleLesson = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       lesson,
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -151,10 +181,42 @@ export const getSingleLesson = async (req, res) => {
 // ================= UPDATE LESSON =================
 export const updateLesson = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+
+    if (Array.isArray(req.body.resources)) {
+      updateData.resources = req.body.resources
+        .filter(
+          (resource) =>
+            resource.title?.trim() &&
+            resource.url?.trim()
+        )
+        .map((resource) => ({
+          title: resource.title.trim(),
+          type: resource.type || resource.resourceType || "link",
+          url: resource.url.trim(),
+          description: resource.description || "",
+          resourceType: resource.resourceType || resource.type || "link",
+        }));
+    }
+
+    if (!updateData.resourceUrL) {
+      const pdfResource = updateData.resources?.find((resource) => {
+        const type = (resource.resourceType || resource.type || "").toLowerCase();
+        return type === "pdf" || type === "notes";
+      });
+
+      if (pdfResource?.url) {
+        updateData.resourceUrL = pdfResource.url;
+      }
+    }
+
     const lesson = await Lesson.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
     if (!lesson) {
@@ -164,14 +226,14 @@ export const updateLesson = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Lesson updated successfully",
       lesson,
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -190,13 +252,13 @@ export const deleteLesson = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Lesson deleted successfully",
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

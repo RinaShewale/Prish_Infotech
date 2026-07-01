@@ -2,30 +2,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  ArrowLeft, Save, FileText, Type, AlignLeft, Globe, Plus, Trash2,
-  Link as LinkIcon, UploadCloud, FileCode2, Presentation, ImageIcon,
-  Database, BookOpen, ExternalLink, Loader2,
+  ArrowLeft, Save, FileText, Type, Plus, Trash2,
+  Link as LinkIcon, UploadCloud, FileCode2, Terminal,
+  Box, Video, X, FileUp, CheckCircle2, FileSearch
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { GlassCard } from "../Shared/GlassCard";
-import API from "../../../auth/services/api";
 import { createLessonAPI } from "../../Courses/Classroom/service/lesson.api";
 import { useCourse } from "../../Courses/hooks/useCourse";
+import { uploadLessonFile } from "../services/media.api"; // Ensure this is imported
 
 const resourceTypeOptions = [
-  { value: "pdf", label: "Notes PDF" },
-  { value: "zip", label: "ZIP / RAR" },
-  { value: "code", label: "Source Code" },
-  { value: "github", label: "GitHub Repo" },
-  { value: "docs", label: "Documentation" },
-  { value: "demo", label: "Live Demo" },
-  { value: "drive", label: "Google Drive" },
-  { value: "figma", label: "Figma" },
-  { value: "slides", label: "Slides" },
-  { value: "dataset", label: "Dataset" },
-  { value: "image", label: "Image" },
-  { value: "assets", label: "Project Assets" },
-  { value: "link", label: "External Link" },
+  { value: "pdf", label: "Notes PDF", icon: <FileText size={14} /> },
+  { value: "zip", label: "ZIP Archive", icon: <Box size={14} /> },
+  { value: "code", label: "Source Code", icon: <FileCode2 size={14} /> },
+  { value: "github", label: "GitHub Repo", icon: <Terminal size={14} /> },
+  { value: "link", label: "External Link", icon: <LinkIcon size={14} /> },
 ];
 
 const AdminCreateLesson = () => {
@@ -37,17 +29,13 @@ const AdminCreateLesson = () => {
   const [loading, setLoading] = useState(false);
   const [uploadState, setUploadState] = useState({});
 
-  const emptyLesson = useMemo(
-    () => ({
-      title: "",
-      description: "",
-      content: "",
-      videoUrl: "",
-      resourceUrL: "",
-      resources: [],
-    }),
-    []
-  );
+  const emptyLesson = useMemo(() => ({
+    title: "",
+    videoUrl: "",
+    resourceUrL: "", // Primary PDF Note
+    resources: [],
+    content: "Lesson Material", // Required by some backends, hidden from UI
+  }), []);
 
   const [lessons, setLessons] = useState([{ ...emptyLesson }]);
 
@@ -55,246 +43,260 @@ const AdminCreateLesson = () => {
     if (!singleCourse || singleCourse.slug !== slug) {
       handleGetSingleCourse(slug);
     }
-  }, [slug, handleGetSingleCourse, singleCourse, emptyLesson]);
+  }, [slug, handleGetSingleCourse, singleCourse]);
 
-  const handleLessonChange = (index, e) => {
-    const { name, value } = e.target;
+  const handleLessonChange = (index, name, value) => {
     const newLessons = [...lessons];
     newLessons[index][name] = value;
     setLessons(newLessons);
   };
 
-  const addLessonRow = () => {
-    setLessons([...lessons, { ...emptyLesson }]);
-  };
-
+  const addLessonRow = () => setLessons([...lessons, { ...emptyLesson }]);
   const removeLessonRow = (index) => {
     if (lessons.length === 1) return;
     setLessons(lessons.filter((_, i) => i !== index));
   };
 
-  const addResource = (lessonIndex) => {
-    const newLessons = [...lessons];
-    newLessons[lessonIndex].resources = [
-      ...(newLessons[lessonIndex].resources || []),
-      { title: "", type: "link", url: "", description: "", resourceType: "link" },
-    ];
-    setLessons(newLessons);
-  };
-
-  const removeResource = (lessonIndex, resourceIndex) => {
-    const newLessons = [...lessons];
-    newLessons[lessonIndex].resources = (newLessons[lessonIndex].resources || []).filter((_, i) => i !== resourceIndex);
-    setLessons(newLessons);
-  };
-
-  const handleResourceChange = (lessonIndex, resourceIndex, field, value) => {
-    const newLessons = [...lessons];
-    const resources = [...(newLessons[lessonIndex].resources || [])];
-    resources[resourceIndex] = { ...resources[resourceIndex], [field]: value };
-    newLessons[lessonIndex].resources = resources;
-    setLessons(newLessons);
-  };
-
-  const handleResourceUpload = async (lessonIndex, resourceIndex, file) => {
+  const handleResourceUpload = async (lessonIndex, field, file, resourceIndex = null) => {
     if (!file) return;
-    const key = `${lessonIndex}-${resourceIndex}`;
-    setUploadState((prev) => ({ ...prev, [key]: { uploading: true, progress: 0 } }));
-
-    const formData = new FormData();
-    formData.append("file", file);
+    const key = resourceIndex !== null ? `${lessonIndex}-res-${resourceIndex}` : `${lessonIndex}-primary`;
+    setUploadState(prev => ({ ...prev, [key]: { uploading: true, progress: 0 } }));
 
     try {
-      const { data } = await API.post("/upload/file", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (event) => {
-          const progress = Math.round((event.loaded * 100) / (event.total || 1));
-          setUploadState((prev) => ({ ...prev, [key]: { uploading: true, progress } }));
-        },
+      const { data } = await uploadLessonFile(file, (event) => {
+        const progress = Math.round((event.loaded * 100) / (event.total || 1));
+        setUploadState(prev => ({ ...prev, [key]: { uploading: true, progress } }));
       });
 
-      handleResourceChange(lessonIndex, resourceIndex, "url", data.url);
-      handleResourceChange(lessonIndex, resourceIndex, "type", "file");
-      toast.success("Resource uploaded successfully");
+      if (resourceIndex !== null) {
+        const newLessons = [...lessons];
+        newLessons[lessonIndex].resources[resourceIndex].url = data.url;
+        setLessons(newLessons);
+      } else {
+        handleLessonChange(lessonIndex, field, data.url);
+      }
+      toast.success("File uploaded successfully");
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Upload failed");
+      toast.error("Upload failed");
     } finally {
-      setUploadState((prev) => ({ ...prev, [key]: { uploading: false, progress: 100 } }));
+      setUploadState(prev => ({ ...prev, [key]: { uploading: false, progress: 100 } }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!singleCourse?._id) return toast.error("Course not loaded.");
-
+    if (!singleCourse?._id) return toast.error("Course context missing.");
     setLoading(true);
 
     try {
       const requests = lessons.map((lesson) => {
+        const normalizedResources = Array.isArray(lesson.resources)
+          ? lesson.resources
+              .filter((item) => item?.url?.trim())
+              .map((item) => ({
+                title: item.title?.trim() || "Resource",
+                type: item.type || item.resourceType || "link",
+                url: item.url.trim(),
+                description: item.description || "",
+                resourceType: item.resourceType || item.type || "link",
+              }))
+          : [];
+
+        const notesPdf = (lesson.resourceUrL || "").trim();
+        const pdfResourceFromAssets = normalizedResources.find((item) => {
+          const normalizedType = (item.resourceType || item.type || "").toLowerCase();
+          return normalizedType === "pdf" || normalizedType === "notes";
+        });
+
         const payload = {
-          title: lesson.title,
-          description: lesson.description,
-          content: lesson.content,
-          videoUrl: lesson.videoUrl,
-          resourceUrL: lesson.resourceUrL,
-          resources: lesson.resources || [],
+          ...lesson,
           course: singleCourse._id,
+          title: lesson.title?.trim(),
+          videoUrl: lesson.videoUrl?.trim(),
+          resourceUrL: notesPdf || pdfResourceFromAssets?.url || "",
+          resources: normalizedResources,
         };
+
         return createLessonAPI(payload);
       });
 
       await Promise.all(requests);
-      toast.success(`${lessons.length} lessons added successfully!`);
+      toast.success(`${lessons.length} Modules Published!`);
       navigate(`/admin/courses/${slug}`);
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Internal Server Error. Please check your data.");
+      toast.error("Error creating curriculum");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="max-w-5xl mx-auto space-y-8 pb-24 px-4 pt-6">
+      {/* STICKY HEADER */}
+      <div className="sticky top-4 z-[100] bg-zinc-950/80 backdrop-blur-xl border border-white/5 p-4 rounded-2xl shadow-2xl flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-3 rounded-xl bg-white/5 border border-white/10 text-text-secondary transition hover:bg-white/10">
-            <ArrowLeft size={20} />
-          </button>
+          <button onClick={() => navigate(-1)} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"><ArrowLeft size={18} /></button>
           <div>
-            <h1 className="text-3xl font-bold italic">Bulk Add Modules</h1>
-            <p className="text-text-secondary text-sm font-medium uppercase tracking-widest">
-              Course: <span className="text-accent">{singleCourse?.title}</span>
-            </p>
+            <h1 className="text-sm font-bold">Curriculum Builder</h1>
+            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">{singleCourse?.title}</p>
           </div>
         </div>
-
         <div className="flex items-center gap-3">
-          <button type="button" onClick={addLessonRow} className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-widest hover:bg-white/10 transition">
-            <Plus size={16} /> Add Lesson
+          <button type="button" onClick={addLessonRow} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/5 text-[11px] font-bold uppercase hover:bg-white/10 transition">
+            <Plus size={14} /> Add Module
           </button>
-          <button form="bulk-form" type="submit" disabled={loading} className="flex items-center gap-2 px-8 py-3 rounded-full bg-accent text-bg font-black uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition shadow-lg shadow-accent/20">
-            {loading ? "Processing..." : <><Save size={18} /> Publish All</>}
+          <button form="curriculum-form" type="submit" disabled={loading} className="flex items-center gap-2 px-6 py-2 rounded-lg bg-indigo-600 text-white text-[11px] font-bold uppercase hover:bg-indigo-500 disabled:opacity-50 transition shadow-lg shadow-indigo-500/20">
+            {loading ? "Saving..." : <Save size={14} />} {loading ? "" : "Publish Course"}
           </button>
         </div>
       </div>
 
-      <form id="bulk-form" onSubmit={handleSubmit} className="space-y-8">
+      <form id="curriculum-form" onSubmit={handleSubmit} className="space-y-10">
         {lessons.map((lesson, index) => (
-          <div key={index} className="relative group animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {lessons.length > 1 && (
-              <button type="button" onClick={() => removeLessonRow(index)} className="absolute -right-3 -top-3 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all z-10 shadow-lg">
-                <Trash2 size={14} />
-              </button>
-            )}
+          <div key={index} className="relative group">
+            <GlassCard className="relative border-white/5 bg-zinc-900/40 overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-indigo-600" />
+              
+              {lessons.length > 1 && (
+                <button type="button" onClick={() => removeLessonRow(index)} className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-red-500 transition-colors">
+                  <Trash2 size={16} />
+                </button>
+              )}
 
-            <GlassCard className="p-8 border border-white/10 bg-white/[0.01]">
-              <div className="flex items-center gap-3 mb-8 border-b border-white/5 pb-4">
-                <span className="w-8 h-8 rounded-lg bg-accent/20 text-accent flex items-center justify-center font-black text-xs">{String(index + 1).padStart(2, "0")}</span>
-                <h2 className="text-sm font-black uppercase tracking-[0.2em] text-white/40 italic">New Module</h2>
-              </div>
-
-              <div className="grid lg:grid-cols-2 gap-10">
-                <div className="space-y-6">
-                  <Field label="Title" icon={<Type size={14} className="text-accent" />}>
-                    <input required name="title" value={lesson.title} onChange={(e) => handleLessonChange(index, e)} placeholder="Enter lesson title..." className="input" />
-                  </Field>
-
-                  <Field label="Detailed Notes" icon={<FileText size={14} className="text-accent" />}>
-                    <textarea name="content" value={lesson.content} onChange={(e) => handleLessonChange(index, e)} rows="5" placeholder="Write lesson notes or paste text..." className="input min-h-[140px] font-mono text-xs" />
-                  </Field>
+              <div className="p-6 md:p-8 space-y-8">
+                {/* CORE INPUTS */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                      <Type size={12} className="text-indigo-400" /> Module Title
+                    </label>
+                    <input required value={lesson.title} onChange={(e) => handleLessonChange(index, "title", e.target.value)} placeholder="e.g. Introduction to logic" className="admin-input-new" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                      <Video size={12} className="text-indigo-400" /> Video URL
+                    </label>
+                    <input required value={lesson.videoUrl} onChange={(e) => handleLessonChange(index, "videoUrl", e.target.value)} placeholder="YouTube/Vimeo link" className="admin-input-new" />
+                  </div>
                 </div>
 
-                <div className="space-y-6 bg-white/[0.02] p-6 rounded-2xl border border-white/5">
-                  <Field label="Video URL" icon={<Globe size={14} className="text-accent" />}>
-                    <input type="url" name="videoUrl" value={lesson.videoUrl} onChange={(e) => handleLessonChange(index, e)} placeholder="YouTube / Vimeo Link" className="input" />
-                  </Field>
-
-                  <Field label="Primary PDF / Notes Link" icon={<LinkIcon size={14} className="text-accent" />}>
-                    <input type="url" name="resourceUrL" value={lesson.resourceUrL} onChange={(e) => handleLessonChange(index, e)} placeholder="Google Drive / PDF URL" className="input" />
-                  </Field>
-
-                  <div className="space-y-3 rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-widest text-accent font-black">Resources & Notes</p>
-                        <p className="text-[11px] text-text-secondary">Add PDFs, ZIP files, slides, GitHub links, and more.</p>
+                {/* PRIMARY NOTES UPLOAD - ENHANCED UI */}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                    <FileText size={12} className="text-indigo-400" /> Primary Lesson Notes (PDF)
+                  </label>
+                  
+                  <div className={`relative group/drop rounded-2xl border-2 border-dashed transition-all p-8 flex flex-col items-center justify-center text-center ${lesson.resourceUrL ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-white/10 hover:border-indigo-500/50 bg-white/[0.02]'}`}>
+                    {uploadState[`${index}-primary`]?.uploading ? (
+                      <div className="py-4">
+                        <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                        <p className="text-xs font-bold text-indigo-400">{uploadState[`${index}-primary`].progress}% Uploading...</p>
                       </div>
-                      <button type="button" onClick={() => addResource(index)} className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-2 text-[10px] uppercase tracking-widest text-white hover:bg-white/10">
-                        <Plus size={14} /> Add Resource
-                      </button>
-                    </div>
-
-                    {(lesson.resources || []).length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-white/10 p-4 text-center text-[11px] text-text-secondary">
-                        No resources yet. Add one to make notes and assets available to students.
+                    ) : lesson.resourceUrL ? (
+                      <div className="space-y-3">
+                        <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-500">
+                          <CheckCircle2 size={24} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">Notes Uploaded Successfully</p>
+                          <p className="text-[10px] text-zinc-500 mt-1 truncate max-w-xs mx-auto">{lesson.resourceUrL}</p>
+                        </div>
+                        <div className="flex items-center justify-center gap-3">
+                            <button type="button" onClick={() => handleLessonChange(index, "resourceUrL", "")} className="text-[10px] font-bold text-red-400 uppercase hover:underline">Delete</button>
+                            <a href={lesson.resourceUrL} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-indigo-400 uppercase hover:underline">Preview PDF</a>
+                        </div>
                       </div>
                     ) : (
-                      <div className="space-y-3">
-                        {(lesson.resources || []).map((resource, resourceIndex) => {
-                          const uploadKey = `${index}-${resourceIndex}`;
-                          const uploadMeta = uploadState[uploadKey] || { uploading: false, progress: 0 };
-                          return (
-                            <div key={resourceIndex} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-3">
-                              <div className="flex items-center justify-between">
-                                <p className="text-[10px] uppercase tracking-widest text-text-secondary">Resource {resourceIndex + 1}</p>
-                                <button type="button" onClick={() => removeResource(index, resourceIndex)} className="p-1.5 rounded-lg text-text-secondary hover:bg-red-500/20 hover:text-red-400">
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-
-                              <div className="grid gap-3 md:grid-cols-2">
-                                <input value={resource.title} onChange={(e) => handleResourceChange(index, resourceIndex, "title", e.target.value)} placeholder="Title" className="input" />
-                                <select value={resource.resourceType} onChange={(e) => handleResourceChange(index, resourceIndex, "resourceType", e.target.value)} className="input">
-                                  {resourceTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                </select>
-                              </div>
-
-                              <div className="grid gap-3 md:grid-cols-2">
-                                <label className="space-y-2">
-                                  <span className="text-[10px] uppercase tracking-widest text-text-secondary">Upload File</span>
-                                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-black/20 px-3 py-3 text-[11px] text-text-secondary hover:border-accent hover:text-accent">
-                                    <UploadCloud size={14} />
-                                    <span>{resource.url ? "Replace file" : "Upload PDF / ZIP / Image"}</span>
-                                    <input type="file" className="hidden" onChange={(e) => handleResourceUpload(index, resourceIndex, e.target.files?.[0])} />
-                                  </label>
-                                  {uploadMeta.uploading && <p className="text-[10px] text-accent">Uploading {uploadMeta.progress}%</p>}
-                                </label>
-                                <label className="space-y-2">
-                                  <span className="text-[10px] uppercase tracking-widest text-text-secondary">Or URL</span>
-                                  <input value={resource.url} onChange={(e) => handleResourceChange(index, resourceIndex, "url", e.target.value)} placeholder="https://..." className="input" />
-                                </label>
-                              </div>
-
-                              <textarea value={resource.description} onChange={(e) => handleResourceChange(index, resourceIndex, "description", e.target.value)} rows={2} placeholder="Optional description" className="input" />
-                              {resource.url && (
-                                <div className="flex items-center gap-2 text-[11px] text-accent">
-                                  <ExternalLink size={12} />
-                                  <span>Student preview/download will use this link.</span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                      <>
+                        <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover/drop:bg-indigo-500 group-hover/drop:text-white transition-all">
+                          <FileUp size={20} />
+                        </div>
+                        <p className="text-xs font-bold text-white">Click to upload lesson PDF</p>
+                        <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-tighter">or paste a URL in the field below</p>
+                        <input type="file" accept=".pdf" onChange={(e) => handleResourceUpload(index, "resourceUrL", e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
+                      </>
                     )}
                   </div>
+
+                  {!lesson.resourceUrL && (
+                     <div className="relative">
+                        <LinkIcon size={12} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                        <input value={lesson.resourceUrL} onChange={(e) => handleLessonChange(index, "resourceUrL", e.target.value)} placeholder="Alternatively, paste external PDF link here..." className="admin-input-new !pl-10 !text-[11px]" />
+                     </div>
+                  )}
+                </div>
+
+                {/* ADDITIONAL ASSETS */}
+                <div className="pt-4 border-t border-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Secondary Assets</h4>
+                        <button type="button" onClick={() => {
+                            const newRes = [...lesson.resources, { title: "", type: "link", url: "" }];
+                            handleLessonChange(index, "resources", newRes);
+                        }} className="p-1.5 rounded-lg bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600 text-[10px] font-bold flex items-center gap-1">
+                            <Plus size={12} /> ADD ASSET
+                        </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {lesson.resources.map((res, rIdx) => (
+                            <div key={rIdx} className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-3">
+                                <div className="flex items-center justify-between">
+                                    <input value={res.title} onChange={(e) => {
+                                        const newRes = [...lesson.resources];
+                                        newRes[rIdx].title = e.target.value;
+                                        handleLessonChange(index, "resources", newRes);
+                                    }} placeholder="Asset Name" className="bg-transparent text-[11px] font-bold text-white outline-none w-full" />
+                                    <button type="button" onClick={() => {
+                                        const newRes = lesson.resources.filter((_, i) => i !== rIdx);
+                                        handleLessonChange(index, "resources", newRes);
+                                    }} className="text-zinc-600 hover:text-red-500"><X size={14} /></button>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input value={res.url} onChange={(e) => {
+                                        const newRes = [...lesson.resources];
+                                        newRes[rIdx].url = e.target.value;
+                                        handleLessonChange(index, "resources", newRes);
+                                    }} placeholder="URL" className="flex-1 bg-white/5 rounded-lg px-3 py-2 text-[10px] outline-none" />
+                                    <label className="cursor-pointer p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
+                                        <UploadCloud size={14} className="text-zinc-400" />
+                                        <input type="file" className="hidden" onChange={(e) => handleResourceUpload(index, "resources", e.target.files[0], rIdx)} />
+                                    </label>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
               </div>
             </GlassCard>
           </div>
         ))}
+        
+        <button type="button" onClick={addLessonRow} className="w-full py-8 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-2 text-zinc-500 hover:border-indigo-500/40 hover:text-indigo-400 transition-all">
+            <Plus size={24} />
+            <span className="text-xs font-bold uppercase tracking-widest">Add New Module</span>
+        </button>
       </form>
+
+      <style>{`
+        .admin-input-new {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: white;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .admin-input-new:focus {
+            border-color: #4f46e5;
+            background: rgba(255, 255, 255, 0.05);
+        }
+      `}</style>
     </div>
   );
 };
-
-const Field = ({ label, icon, children }) => (
-  <label className="space-y-2 block">
-    <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest flex items-center gap-2">
-      {icon} {label}
-    </span>
-    {children}
-  </label>
-);
 
 export default AdminCreateLesson;

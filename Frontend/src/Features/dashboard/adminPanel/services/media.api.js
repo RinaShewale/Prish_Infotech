@@ -19,3 +19,15 @@ export const uploadMediaImage = (formData) => {
 export const uploadMediaVideo = (formData) => {
   return API.post("/media/video", formData);
 };
+
+// UPLOAD GENERIC LESSON/RESOURCE FILE
+export const uploadLessonFile = (file, onUploadProgress) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return API.post("/upload/file", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress,
+  });
+};
+
