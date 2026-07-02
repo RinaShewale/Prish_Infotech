@@ -1,24 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  ArrowLeft, Save, FileText, Type, Plus, Trash2,
-  Link as LinkIcon, UploadCloud, FileCode2, Terminal,
-  Box, Video, X, FileUp, CheckCircle2, FileSearch
+import { 
+  Plus, Trash2, FileText, FileUp, 
+  X, Save, ArrowLeft, Link, CheckCircle2,
+  Loader2, AlertCircle, FileType
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import { GlassCard } from "../Shared/GlassCard";
+
+// Redux & Services (Assumed paths)
 import { createLessonAPI } from "../../Courses/Classroom/service/lesson.api";
 import { useCourse } from "../../Courses/hooks/useCourse";
-import { uploadLessonFile } from "../services/media.api"; // Ensure this is imported
-
-const resourceTypeOptions = [
-  { value: "pdf", label: "Notes PDF", icon: <FileText size={14} /> },
-  { value: "zip", label: "ZIP Archive", icon: <Box size={14} /> },
-  { value: "code", label: "Source Code", icon: <FileCode2 size={14} /> },
-  { value: "github", label: "GitHub Repo", icon: <Terminal size={14} /> },
-  { value: "link", label: "External Link", icon: <LinkIcon size={14} /> },
-];
+import { uploadLessonFile } from "../services/media.api";
+import { FluidBackground } from "../../Home/components/FluidBackground";
 
 const AdminCreateLesson = () => {
   const { slug } = useParams();
@@ -27,14 +22,13 @@ const AdminCreateLesson = () => {
   const { singleCourse } = useSelector((state) => state.course);
 
   const [loading, setLoading] = useState(false);
-  const [uploadState, setUploadState] = useState({});
+  const [uploadState, setUploadState] = useState({}); // Tracking uploads per lesson
 
   const emptyLesson = useMemo(() => ({
     title: "",
     videoUrl: "",
-    resourceUrL: "", // Primary PDF Note
-    resources: [],
-    content: "Lesson Material", // Required by some backends, hidden from UI
+    resources: [], 
+    content: "Lesson Material",
   }), []);
 
   const [lessons, setLessons] = useState([{ ...emptyLesson }]);
@@ -51,79 +45,67 @@ const AdminCreateLesson = () => {
     setLessons(newLessons);
   };
 
-  const addLessonRow = () => setLessons([...lessons, { ...emptyLesson }]);
+  const addLessonRow = () => {
+    setLessons([...lessons, { ...emptyLesson }]);
+    toast.success("New module container added");
+  };
+
   const removeLessonRow = (index) => {
     if (lessons.length === 1) return;
     setLessons(lessons.filter((_, i) => i !== index));
+    toast.error("Module discarded");
   };
 
-  const handleResourceUpload = async (lessonIndex, field, file, resourceIndex = null) => {
+  const handleAddFileResource = async (lessonIndex, file) => {
     if (!file) return;
-    const key = resourceIndex !== null ? `${lessonIndex}-res-${resourceIndex}` : `${lessonIndex}-primary`;
-    setUploadState(prev => ({ ...prev, [key]: { uploading: true, progress: 0 } }));
+    if (file.type !== "application/pdf") return toast.error("Only PDF files allowed");
+    
+    const fileId = Math.random().toString(36).substring(7);
+    // Initialize progress tracking
+    setUploadState(prev => ({ ...prev, [fileId]: { name: file.name, progress: 0, lessonIndex } }));
 
     try {
       const { data } = await uploadLessonFile(file, (event) => {
         const progress = Math.round((event.loaded * 100) / (event.total || 1));
-        setUploadState(prev => ({ ...prev, [key]: { uploading: true, progress } }));
+        setUploadState(prev => ({ ...prev, [fileId]: { ...prev[fileId], progress } }));
       });
 
-      if (resourceIndex !== null) {
-        const newLessons = [...lessons];
-        newLessons[lessonIndex].resources[resourceIndex].url = data.url;
-        setLessons(newLessons);
-      } else {
-        handleLessonChange(lessonIndex, field, data.url);
-      }
-      toast.success("File uploaded successfully");
+      const newLessons = [...lessons];
+      newLessons[lessonIndex].resources.push({
+        title: file.name,
+        url: data.url,
+        type: "pdf"
+      });
+      setLessons(newLessons);
+      toast.success("Document uploaded successfully");
     } catch (error) {
       toast.error("Upload failed");
     } finally {
-      setUploadState(prev => ({ ...prev, [key]: { uploading: false, progress: 100 } }));
+      setUploadState(prev => {
+        const newState = { ...prev };
+        delete newState[fileId];
+        return newState;
+      });
     }
+  };
+
+  const removeResource = (lessonIndex, resIndex) => {
+    const newLessons = [...lessons];
+    newLessons[lessonIndex].resources = newLessons[lessonIndex].resources.filter((_, i) => i !== resIndex);
+    setLessons(newLessons);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!singleCourse?._id) return toast.error("Course context missing.");
-    setLoading(true);
+    
+    const isValid = lessons.every(l => l.title && l.videoUrl);
+    if(!isValid) return toast.error("Complete all titles and video links first");
 
+    setLoading(true);
     try {
       const requests = lessons.map((lesson) => {
-        const normalizedResources = Array.isArray(lesson.resources)
-          ? lesson.resources
-              .filter((item) => item?.url?.trim())
-              .map((item) => {
-                const url = item.url.trim();
-                const lowerUrl = url.toLowerCase();
-                const isPdfLink = lowerUrl.endsWith(".pdf") || lowerUrl.includes("/pdf?") || lowerUrl.includes("/pdf#");
-                const normalizedType = item.type || item.resourceType || (isPdfLink ? "pdf" : "link");
-
-                return {
-                  title: item.title?.trim() || "Resource",
-                  type: normalizedType,
-                  url,
-                  description: item.description || "",
-                  resourceType: item.resourceType || item.type || normalizedType,
-                };
-              })
-          : [];
-
-        const notesPdf = (lesson.resourceUrL || "").trim();
-        const pdfResourceFromAssets = normalizedResources.find((item) => {
-          const normalizedType = (item.resourceType || item.type || "").toLowerCase();
-          return normalizedType === "pdf" || normalizedType === "notes";
-        });
-
-        const payload = {
-          ...lesson,
-          course: singleCourse._id,
-          title: lesson.title?.trim(),
-          videoUrl: lesson.videoUrl?.trim(),
-          resourceUrL: notesPdf || pdfResourceFromAssets?.url || "",
-          resources: normalizedResources,
-        };
-
+        const payload = { ...lesson, course: singleCourse._id };
         return createLessonAPI(payload);
       });
 
@@ -138,169 +120,221 @@ const AdminCreateLesson = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-24 px-4 pt-6">
-      {/* STICKY HEADER */}
-      <div className="sticky top-4 z-[100] bg-zinc-950/80 backdrop-blur-xl border border-white/5 p-4 rounded-2xl shadow-2xl flex items-center justify-between">
+    <div className="min-h-screen w-full bg-[#050505] text-zinc-100 font-sans flex flex-col relative overflow-x-hidden">
+      <FluidBackground />
+      
+      {/* HEADER */}
+      <nav className="sticky top-0 h-20 lg:h-24 flex-shrink-0 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 lg:px-12 z-[100]">
+        <div className="flex items-center gap-5">
+          <button onClick={() => navigate(-1)} className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/5 group">
+            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          </button>
+          <div className="flex flex-col">
+            <span className="text-[9px] font-black text-accent uppercase tracking-[0.3em]">Curriculum Builder</span>
+            <h1 className="text-base font-bold text-white tracking-tight line-clamp-1">
+                {singleCourse?.title || "New Curriculum"}
+            </h1>
+          </div>
+        </div>
+
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"><ArrowLeft size={18} /></button>
-          <div>
-            <h1 className="text-sm font-bold">Curriculum Builder</h1>
-            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">{singleCourse?.title}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={addLessonRow} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/5 text-[11px] font-bold uppercase hover:bg-white/10 transition">
-            <Plus size={14} /> Add Module
+          <button type="button" onClick={addLessonRow} className="hidden md:flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-white/10 transition-all">
+            <Plus size={14} className="text-accent" /> Add Module
           </button>
-          <button form="curriculum-form" type="submit" disabled={loading} className="flex items-center gap-2 px-6 py-2 rounded-lg bg-indigo-600 text-white text-[11px] font-bold uppercase hover:bg-indigo-500 disabled:opacity-50 transition shadow-lg shadow-indigo-500/20">
-            {loading ? "Saving..." : <Save size={14} />} {loading ? "" : "Publish Course"}
+          <button form="curriculum-form" type="submit" disabled={loading} className="flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-accent text-white text-[10px] font-black uppercase tracking-[0.2em] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.3)] active:scale-95 transition-all disabled:opacity-50">
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <><Save size={14} /> Publish Course</>}
           </button>
         </div>
-      </div>
+      </nav>
 
-      <form id="curriculum-form" onSubmit={handleSubmit} className="space-y-10">
-        {lessons.map((lesson, index) => (
-          <div key={index} className="relative group">
-            <GlassCard className="relative border-white/5 bg-zinc-900/40 overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-indigo-600" />
-              
-              {lessons.length > 1 && (
-                <button type="button" onClick={() => removeLessonRow(index)} className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-red-500 transition-colors">
-                  <Trash2 size={16} />
-                </button>
-              )}
-
-              <div className="p-6 md:p-8 space-y-8">
-                {/* CORE INPUTS */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                      <Type size={12} className="text-indigo-400" /> Module Title
-                    </label>
-                    <input required value={lesson.title} onChange={(e) => handleLessonChange(index, "title", e.target.value)} placeholder="e.g. Introduction to logic" className="admin-input-new" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                      <Video size={12} className="text-indigo-400" /> Video URL
-                    </label>
-                    <input required value={lesson.videoUrl} onChange={(e) => handleLessonChange(index, "videoUrl", e.target.value)} placeholder="YouTube/Vimeo link" className="admin-input-new" />
-                  </div>
-                </div>
-
-                {/* PRIMARY NOTES UPLOAD - ENHANCED UI */}
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                    <FileText size={12} className="text-indigo-400" /> Primary Lesson Notes (PDF)
-                  </label>
+      <main className="flex-1 relative z-10">
+        <div className="max-w-4xl mx-auto py-16 px-6 pb-40">
+          <form id="curriculum-form" onSubmit={handleSubmit} className="space-y-12">
+            <AnimatePresence initial={false}>
+              {lessons.map((lesson, index) => (
+                <motion.div key={index} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}>
                   
-                  <div className={`relative group/drop rounded-2xl border-2 border-dashed transition-all p-8 flex flex-col items-center justify-center text-center ${lesson.resourceUrL ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-white/10 hover:border-indigo-500/50 bg-white/[0.02]'}`}>
-                    {uploadState[`${index}-primary`]?.uploading ? (
-                      <div className="py-4">
-                        <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                        <p className="text-xs font-bold text-indigo-400">{uploadState[`${index}-primary`].progress}% Uploading...</p>
-                      </div>
-                    ) : lesson.resourceUrL ? (
-                      <div className="space-y-3">
-                        <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-500">
-                          <CheckCircle2 size={24} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-white">Notes Uploaded Successfully</p>
-                          <p className="text-[10px] text-zinc-500 mt-1 truncate max-w-xs mx-auto">{lesson.resourceUrL}</p>
-                        </div>
-                        <div className="flex items-center justify-center gap-3">
-                            <button type="button" onClick={() => handleLessonChange(index, "resourceUrL", "")} className="text-[10px] font-bold text-red-400 uppercase hover:underline">Delete</button>
-                            <a href={lesson.resourceUrL} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-indigo-400 uppercase hover:underline">Preview PDF</a>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover/drop:bg-indigo-500 group-hover/drop:text-white transition-all">
-                          <FileUp size={20} />
-                        </div>
-                        <p className="text-xs font-bold text-white">Click to upload lesson PDF</p>
-                        <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-tighter">or paste a URL in the field below</p>
-                        <input type="file" accept=".pdf" onChange={(e) => handleResourceUpload(index, "resourceUrL", e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                      </>
-                    )}
-                  </div>
-
-                  {!lesson.resourceUrL && (
-                     <div className="relative">
-                        <LinkIcon size={12} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-                        <input value={lesson.resourceUrL} onChange={(e) => handleLessonChange(index, "resourceUrL", e.target.value)} placeholder="Alternatively, paste external PDF link here..." className="admin-input-new !pl-10 !text-[11px]" />
-                     </div>
-                  )}
-                </div>
-
-                {/* ADDITIONAL ASSETS */}
-                <div className="pt-4 border-t border-white/5 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Secondary Assets</h4>
-                        <button type="button" onClick={() => {
-                            const newRes = [...lesson.resources, { title: "", type: "link", url: "" }];
-                            handleLessonChange(index, "resources", newRes);
-                        }} className="p-1.5 rounded-lg bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600 text-[10px] font-bold flex items-center gap-1">
-                            <Plus size={12} /> ADD ASSET
-                        </button>
-                    </div>
+                  <div className="bg-[#0a0a0a]/90 backdrop-blur-md border border-white/5 rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:border-accent/30 shadow-2xl">
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {lesson.resources.map((res, rIdx) => (
-                            <div key={rIdx} className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-3">
-                                <div className="flex items-center justify-between">
-                                    <input value={res.title} onChange={(e) => {
-                                        const newRes = [...lesson.resources];
-                                        newRes[rIdx].title = e.target.value;
-                                        handleLessonChange(index, "resources", newRes);
-                                    }} placeholder="Asset Name" className="bg-transparent text-[11px] font-bold text-white outline-none w-full" />
-                                    <button type="button" onClick={() => {
-                                        const newRes = lesson.resources.filter((_, i) => i !== rIdx);
-                                        handleLessonChange(index, "resources", newRes);
-                                    }} className="text-zinc-600 hover:text-red-500"><X size={14} /></button>
-                                </div>
-                                <div className="flex gap-2">
-                                    <input value={res.url} onChange={(e) => {
-                                        const newRes = [...lesson.resources];
-                                        newRes[rIdx].url = e.target.value;
-                                        handleLessonChange(index, "resources", newRes);
-                                    }} placeholder="URL" className="flex-1 bg-white/5 rounded-lg px-3 py-2 text-[10px] outline-none" />
-                                    <label className="cursor-pointer p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
-                                        <UploadCloud size={14} className="text-zinc-400" />
-                                        <input type="file" className="hidden" onChange={(e) => handleResourceUpload(index, "resources", e.target.files[0], rIdx)} />
-                                    </label>
-                                </div>
-                            </div>
-                        ))}
+                    {/* Module Header */}
+                    <div className="px-8 pt-8 flex items-center justify-between">
+                        <div className="flex items-center gap-5">
+                            <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-sm font-black text-accent">{index + 1}</div>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">Module Configuration</h3>
+                        </div>
+                        {lessons.length > 1 && (
+                          <button type="button" onClick={() => removeLessonRow(index)} className="p-3 bg-white/5 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all"><Trash2 size={18} /></button>
+                        )}
                     </div>
-                </div>
+
+                    <div className="p-8 lg:p-10 space-y-10">
+                      {/* Inputs */}
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Lesson Title</label>
+                          <input required value={lesson.title} onChange={(e) => handleLessonChange(index, "title", e.target.value)} placeholder="e.g. Introduction to React" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm text-white outline-none focus:border-accent/50 transition-all" />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Video Link (Vimeo/Youtube)</label>
+                          <input required value={lesson.videoUrl} onChange={(e) => handleLessonChange(index, "videoUrl", e.target.value)} placeholder="https://..." className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm text-white outline-none focus:border-accent/50 transition-all" />
+                        </div>
+                      </div>
+
+                      {/* ENHANCED PDF UPLOAD SECTION */}
+                      <div className="space-y-6">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Study Materials</label>
+                            <p className="text-[9px] text-zinc-600 ml-1 uppercase tracking-tighter">Upload PDF guides, cheatsheets or workbooks</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* The List of Uploaded PDFs */}
+                            <AnimatePresence>
+                                {lesson.resources.filter(r => r.type === "pdf").map((file, fIdx) => (
+                                    <motion.div 
+                                        initial={{ opacity: 0, scale: 0.9 }} 
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
+                                        key={fIdx} 
+                                        className="relative group flex items-center gap-4 p-4 bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 rounded-2xl hover:border-accent/40 transition-all"
+                                    >
+                                        <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
+                                            <FileText size={22} />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[11px] font-bold text-white truncate pr-4">{file.title}</p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-accent/20 text-accent font-black uppercase tracking-widest">PDF</span>
+                                                <CheckCircle2 size={10} className="text-emerald-500" />
+                                            </div>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removeResource(index, lesson.resources.indexOf(file))}
+                                            className="absolute top-3 right-3 p-1.5 bg-black/40 text-zinc-500 hover:text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+
+                            {/* Active Uploading States (Visualized as Cards) */}
+                            {Object.entries(uploadState)
+                              .filter(([_, state]) => state.lessonIndex === index)
+                              .map(([id, state]) => (
+                                <div key={id} className="relative flex items-center gap-4 p-4 bg-white/[0.01] border border-dashed border-accent/30 rounded-2xl overflow-hidden">
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+                                        <Loader2 size={22} className="text-accent animate-spin" />
+                                    </div>
+                                    <div className="flex-1 min-w-0 z-10">
+                                        <p className="text-[11px] font-bold text-zinc-400 truncate">{state.name}</p>
+                                        <p className="text-[9px] font-black text-accent uppercase tracking-widest mt-1">Uploading {state.progress}%</p>
+                                    </div>
+                                    {/* Progress Background Bar */}
+                                    <div 
+                                        className="absolute bottom-0 left-0 h-1 bg-accent/20 transition-all duration-300" 
+                                        style={{ width: `${state.progress}%` }} 
+                                    />
+                                </div>
+                            ))}
+
+                            {/* The Upload Dropzone */}
+                            <motion.div 
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="relative group/upload h-[80px] rounded-2xl border-2 border-dashed border-white/5 bg-white/[0.01] hover:border-accent/40 hover:bg-accent/5 transition-all flex items-center justify-center gap-4 cursor-pointer overflow-hidden"
+                            >
+                                <div className="p-2 rounded-full bg-white/5 group-hover/upload:bg-accent/20 group-hover/upload:rotate-12 transition-all">
+                                    <FileUp size={20} className="text-zinc-600 group-hover/upload:text-accent" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover/upload:text-accent">Add Document</span>
+                                    <span className="text-[8px] font-medium text-zinc-600 uppercase">PDF Max 10MB</span>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    accept=".pdf" 
+                                    onChange={(e) => handleAddFileResource(index, e.target.files[0])} 
+                                    className="absolute inset-0 opacity-0 cursor-pointer" 
+                                />
+                            </motion.div>
+                        </div>
+                      </div>
+
+                      {/* EXTERNAL LINKS SECTION (Smaller, cleaner) */}
+                      <div className="pt-8 border-t border-white/5 space-y-6">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-2">
+                            <Link size={14} className="text-accent" /> Related Assets
+                          </h4>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                                const newLessons = [...lessons];
+                                newLessons[index].resources.push({ title: "", type: "link", url: "" });
+                                setLessons(newLessons);
+                            }} 
+                            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-400 text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                          >
+                            + Add Link
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {lesson.resources.filter(r => r.type === "link").map((res, rIdx) => (
+                            <div key={rIdx} className="p-4 rounded-2xl bg-black border border-white/5 flex items-center gap-4 group/asset hover:border-white/10 transition-all">
+                              <div className="flex-1 space-y-2">
+                                <input 
+                                    value={res.title} 
+                                    onChange={(e) => {
+                                        const actualIndex = lesson.resources.indexOf(res);
+                                        const newLessons = [...lessons];
+                                        newLessons[index].resources[actualIndex].title = e.target.value;
+                                        setLessons(newLessons);
+                                    }} 
+                                    placeholder="Source Title (e.g. GitHub Repository)" 
+                                    className="bg-transparent text-[11px] font-bold text-white outline-none w-full placeholder:text-zinc-800" 
+                                />
+                                <input 
+                                    value={res.url} 
+                                    onChange={(e) => {
+                                        const actualIndex = lesson.resources.indexOf(res);
+                                        const newLessons = [...lessons];
+                                        newLessons[index].resources[actualIndex].url = e.target.value;
+                                        setLessons(newLessons);
+                                    }} 
+                                    placeholder="https://..." 
+                                    className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-[9px] text-zinc-500 outline-none focus:border-accent/30 transition-all font-mono" 
+                                />
+                              </div>
+                              <button type="button" onClick={() => removeResource(index, lesson.resources.indexOf(res))} className="p-2 text-zinc-800 hover:text-red-500 transition-colors"><X size={16} /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} type="button" onClick={addLessonRow} className="w-full py-12 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.01] flex flex-col items-center justify-center gap-4 text-zinc-600 hover:border-accent/40 hover:text-accent transition-all group">
+              <div className="w-14 h-14 rounded-full bg-[#0a0a0a] border border-white/5 flex items-center justify-center group-hover:border-accent/40 transition-all duration-500">
+                <Plus size={24} />
               </div>
-            </GlassCard>
-          </div>
-        ))}
-        
-        <button type="button" onClick={addLessonRow} className="w-full py-8 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-2 text-zinc-500 hover:border-indigo-500/40 hover:text-indigo-400 transition-all">
-            <Plus size={24} />
-            <span className="text-xs font-bold uppercase tracking-widest">Add New Module</span>
-        </button>
-      </form>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em]">Append New Module</span>
+            </motion.button>
+          </form>
+        </div>
+      </main>
 
       <style>{`
-        .admin-input-new {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 0.75rem;
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-            color: white;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .admin-input-new:focus {
-            border-color: #4f46e5;
-            background: rgba(255, 255, 255, 0.05);
-        }
+        :root { --accent-rgb: 124, 58, 237; }
+        input::placeholder { font-weight: 500; letter-spacing: 0.05em; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { bg: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
       `}</style>
     </div>
   );
