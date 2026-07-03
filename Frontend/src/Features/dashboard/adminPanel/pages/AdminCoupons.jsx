@@ -1,31 +1,52 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { GlassCard } from '../Shared/GlassCard';
-import { Search, PlusCircle, Edit2, Trash2, CheckCircle2, XCircle, Sparkles, Loader2 } from 'lucide-react';
+import { 
+  Search, PlusCircle, Edit2, Trash2, CheckCircle2, 
+  XCircle, Sparkles, Loader2, ChevronDown, Check, 
+  Ticket, Calendar, Percent, IndianRupee, Layers, UserCheck
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import API from '../../../auth/services/api';
 
+// --- CUSTOM THEMED DROPDOWN ---
+const ThemedSelect = ({ label, value, options, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+  useEffect(() => {
+    const handleClick = (e) => { if (containerRef.current && !containerRef.current.contains(e.target)) setIsOpen(false); };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+  const selected = options.find(opt => opt.value === value) || options[0];
+
+  return (
+    <div className="space-y-2 relative" ref={containerRef}>
+      <span className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1 font-black">{label}</span>
+      <button type="button" onClick={() => setIsOpen(!isOpen)} className={`w-full flex items-center justify-between bg-white/[0.03] border ${isOpen ? 'border-accent/50' : 'border-white/10'} rounded-xl px-4 py-3 text-xs text-white transition-all`}>
+        <span className="font-bold">{selected.label}</span>
+        <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180 text-accent' : ''}`} />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 2 }} exit={{ opacity: 0, y: 5 }} className="absolute z-[100] w-full bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden shadow-2xl p-1">
+            {options.map((opt) => (
+              <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setIsOpen(false); }} className={`w-full text-left px-4 py-2.5 rounded-lg text-xs flex justify-between items-center ${value === opt.value ? 'bg-accent/10 text-accent font-bold' : 'text-zinc-400 hover:bg-white/5'}`}>
+                {opt.label} {value === opt.value && <Check size={12} />}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const emptyForm = {
-  code: '',
-  name: '',
-  description: '',
-  discountType: 'percent',
-  discountValue: '',
-  maxDiscount: '',
-  minAmount: '',
-  applicableTo: 'all',
-  selectedCourses: [],
-  selectedBootcamps: [],
-  categories: [],
-  usageLimit: '',
-  perUserLimit: '1',
-  startsAt: '',
-  expiresAt: '',
-  active: true,
-  isPublic: true,
-  firstTimeUserOnly: false,
-  stackable: false,
-  adminNotes: '',
+  code: '', name: '', description: '', discountType: 'percent', discountValue: '', maxDiscount: '', minAmount: '',
+  applicableTo: 'all', usageLimit: '', perUserLimit: '1', startsAt: '', expiresAt: '', active: true,
+  isPublic: true, firstTimeUserOnly: false, stackable: false, adminNotes: '',
 };
 
 const AdminCoupons = () => {
@@ -36,187 +57,168 @@ const AdminCoupons = () => {
   const [search, setSearch] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
-  const [preview, setPreview] = useState('');
 
   const fetchCoupons = async () => {
     setLoading(true);
     try {
       const { data } = await API.get('/coupon/admin');
       setCoupons(data.coupons || []);
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Failed to load coupons');
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error('Failed to load coupons'); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { fetchCoupons(); }, []);
 
-  useEffect(() => {
-    const value = Number(form.discountValue || 0);
-    if (form.discountType === 'percent') {
-      setPreview(`${value}% off`);
-    } else {
-      setPreview(`₹${value} fixed`);
-    }
-  }, [form.discountType, form.discountValue]);
-
-  const filtered = useMemo(() => {
-    return coupons.filter((item) => [item.code, item.name, item.description].join(' ').toLowerCase().includes(search.toLowerCase()));
-  }, [coupons, search]);
+  const filtered = useMemo(() => coupons.filter(c => [c.code, c.name].join(' ').toLowerCase().includes(search.toLowerCase())), [coupons, search]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
-      setForm((prev) => ({ ...prev, [name]: checked }));
-      return;
-    }
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = {
-        ...form,
-        discountValue: Number(form.discountValue || 0),
-        maxDiscount: Number(form.maxDiscount || 0),
-        minAmount: Number(form.minAmount || 0),
-        usageLimit: Number(form.usageLimit || 0),
-        perUserLimit: Number(form.perUserLimit || 1),
-      };
-      if (editingId) {
-        await API.put(`/coupon/${editingId}`, payload);
-        toast.success('Coupon updated');
-      } else {
-        await API.post('/coupon/create', payload);
-        toast.success('Coupon created');
-      }
-      resetForm();
-      fetchCoupons();
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Failed to save coupon');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleEdit = (coupon) => {
-    setEditingId(coupon._id);
-    setForm({
-      ...emptyForm,
-      ...coupon,
-      discountValue: coupon.discountValue || '',
-      maxDiscount: coupon.maxDiscount || '',
-      minAmount: coupon.minAmount || '',
-      usageLimit: coupon.usageLimit || '',
-      perUserLimit: coupon.perUserLimit || '1',
-      startsAt: coupon.startsAt ? coupon.startsAt.slice(0, 10) : '',
-      expiresAt: coupon.expiresAt ? coupon.expiresAt.slice(0, 10) : '',
-      selectedCourses: coupon.selectedCourses || [],
-      selectedBootcamps: coupon.selectedBootcamps || [],
-      categories: coupon.categories || [],
-    });
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this coupon?')) return;
-    try {
-      await API.delete(`/coupon/${id}`);
-      toast.success('Coupon deleted');
-      fetchCoupons();
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Delete failed');
-    }
-  };
-
-  const toggleStatus = async (id) => {
-    try {
-      await API.patch(`/coupon/${id}/toggle`);
-      toast.success('Coupon status updated');
-      fetchCoupons();
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Update failed');
-    }
-  };
-
-  const resetForm = () => {
-    setForm(emptyForm);
-    setEditingId(null);
+      const payload = { ...form, discountValue: Number(form.discountValue), usageLimit: Number(form.usageLimit) };
+      if (editingId) await API.put(`/coupon/${editingId}`, payload);
+      else await API.post('/coupon/create', payload);
+      toast.success(editingId ? 'Updated!' : 'Created!');
+      setForm(emptyForm); setEditingId(null); fetchCoupons();
+    } catch (error) { toast.error(error?.response?.data?.message || 'Error'); }
+    finally { setSaving(false); }
   };
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row justify-between gap-4">
+    <div className="space-y-8 pb-20 px-4 md:px-0">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold italic">Coupon Management</h1>
-          <p className="text-text-secondary text-sm">Create and manage discounts with validation, preview, and expiration controls.</p>
+          <h1 className="text-3xl md:text-4xl font-bold italic">Coupons</h1>
+          <p className="text-zinc-500 text-sm mt-1 uppercase tracking-widest text-[10px] font-black">Growth & Retention Engine</p>
         </div>
-        <button onClick={() => navigate('/admin/dashboard')} className="flex items-center gap-2 px-5 py-3 rounded-full bg-accent text-bg font-bold">Back to Dashboard</button>
+        <button onClick={() => navigate('/admin/dashboard')} className="w-full md:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-bold hover:bg-white/10 transition-all uppercase tracking-widest">Dashboard</button>
       </div>
 
-      <GlassCard className="p-6 space-y-6">
-        <div className="flex items-center gap-2 text-accent"><Sparkles size={18}/> Create / Edit Coupon</div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Field label="Coupon Name"><input name="name" value={form.name} onChange={handleChange} className="input" /></Field>
-            <Field label="Coupon Code"><input name="code" value={form.code} onChange={handleChange} className="input uppercase" /></Field>
-            <Field label="Description" className="md:col-span-2"><textarea rows={2} name="description" value={form.description} onChange={handleChange} className="input" /></Field>
-            <Field label="Discount Type"><select name="discountType" value={form.discountType} onChange={handleChange} className="input"><option value="percent">Percentage</option><option value="fixed">Fixed Amount</option></select></Field>
-            <Field label="Discount Value"><input type="number" name="discountValue" value={form.discountValue} onChange={handleChange} className="input" /></Field>
-            <Field label="Maximum Discount"><input type="number" name="maxDiscount" value={form.maxDiscount} onChange={handleChange} className="input" /></Field>
-            <Field label="Minimum Purchase"><input type="number" name="minAmount" value={form.minAmount} onChange={handleChange} className="input" /></Field>
-            <Field label="Applicability"><select name="applicableTo" value={form.applicableTo} onChange={handleChange} className="input"><option value="all">All Courses</option><option value="courses">Selected Courses</option><option value="bootcamps">Bootcamps</option><option value="categories">Categories</option></select></Field>
-            <Field label="Usage Limit"><input type="number" name="usageLimit" value={form.usageLimit} onChange={handleChange} className="input" /></Field>
-            <Field label="Per User Limit"><input type="number" name="perUserLimit" value={form.perUserLimit} onChange={handleChange} className="input" /></Field>
-            <Field label="Start Date"><input type="date" name="startsAt" value={form.startsAt} onChange={handleChange} className="input" /></Field>
-            <Field label="Expiry Date"><input type="date" name="expiresAt" value={form.expiresAt} onChange={handleChange} className="input" /></Field>
-            <Field label="Status"><select name="active" value={form.active ? 'active' : 'inactive'} onChange={(e) => setForm((prev) => ({ ...prev, active: e.target.value === 'active' }))} className="input"><option value="active">Active</option><option value="inactive">Inactive</option></select></Field>
-            <Field label="Visibility"><select name="isPublic" value={form.isPublic ? 'public' : 'private'} onChange={(e) => setForm((prev) => ({ ...prev, isPublic: e.target.value === 'public' }))} className="input"><option value="public">Public</option><option value="private">Private</option></select></Field>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Live Discount Preview</h3>
-              <span className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-[10px] uppercase tracking-widest text-accent">{preview}</span>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* LEFT: FORM SECTION */}
+        <div className="lg:col-span-2 space-y-6">
+          <GlassCard className="p-6 md:p-8 border-white/5 shadow-2xl">
+            <div className="flex items-center gap-3 mb-8">
+               <div className="p-2 bg-accent/10 rounded-lg text-accent"><Sparkles size={20}/></div>
+               <h2 className="text-xl font-bold">{editingId ? 'Edit Campaign' : 'New Coupon Campaign'}</h2>
             </div>
-            <div className="grid md:grid-cols-2 gap-3">
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="firstTimeUserOnly" checked={form.firstTimeUserOnly} onChange={handleChange} /> First time user only</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="stackable" checked={form.stackable} onChange={handleChange} /> Stackable</label>
-            </div>
-          </div>
 
-          <Field label="Admin Notes"><textarea rows={3} name="adminNotes" value={form.adminNotes} onChange={handleChange} className="input" /></Field>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Section 1: Identity */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Field label="Campaign Name"><input name="name" value={form.name} onChange={handleChange} placeholder="Summer Sale 2024" className="input-modern" /></Field>
+                <Field label="Coupon Code"><input name="code" value={form.code} onChange={handleChange} placeholder="SUMMER50" className="input-modern uppercase font-mono tracking-widest" /></Field>
+              </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-bg font-bold">{saving ? <Loader2 className="animate-spin" size={16}/> : <PlusCircle size={16}/>} {editingId ? 'Update Coupon' : 'Create Coupon'}</button>
-            <button type="button" onClick={resetForm} className="px-6 py-3 rounded-full bg-white/5 border border-white/10">Reset</button>
-          </div>
-        </form>
-      </GlassCard>
+              {/* Section 2: Values */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <ThemedSelect label="Type" value={form.discountType} options={[{label:'Percent %', value:'percent'}, {label:'Fixed ₹', value:'fixed'}]} onChange={(v) => setForm(p => ({...p, discountType: v}))} />
+                <Field label="Value"><input type="number" name="discountValue" value={form.discountValue} onChange={handleChange} className="input-modern" /></Field>
+                <Field label="Min Spend"><input type="number" name="minAmount" value={form.minAmount} onChange={handleChange} className="input-modern" /></Field>
+                <Field label="Max Cap"><input type="number" name="maxDiscount" value={form.maxDiscount} onChange={handleChange} className="input-modern" /></Field>
+              </div>
 
-      <GlassCard className="p-6">
-        <div className="flex flex-col md:flex-row justify-between gap-3 mb-4">
-          <div>
-            <h3 className="text-xl font-semibold">Active Coupons</h3>
-            <p className="text-text-secondary text-sm">Search, edit, enable, disable, or remove offers.</p>
-          </div>
-          <div className="relative w-full md:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search coupons" className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-3" />
-          </div>
+              {/* Section 3: Restrictions & Limits */}
+              <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
+                <Field label="Total Usage Limit"><input type="number" name="usageLimit" value={form.usageLimit} onChange={handleChange} className="input-modern" /></Field>
+                <Field label="Starts On"><input type="date" name="startsAt" value={form.startsAt} onChange={handleChange} className="input-modern" /></Field>
+                <Field label="Expires On"><input type="date" name="expiresAt" value={form.expiresAt} onChange={handleChange} className="input-modern" /></Field>
+              </div>
+
+              {/* PREVIEW WIDGET */}
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-accent/20 to-transparent border border-accent/20 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform"><Ticket size={80}/></div>
+                  <div className="relative z-10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-accent mb-1">Live Preview</p>
+                    <h3 className="text-2xl font-black italic">{form.code || 'CODE'}</h3>
+                    <p className="text-xs text-zinc-400 mt-1">{form.discountType === 'percent' ? `${form.discountValue || 0}% OFF` : `₹${form.discountValue || 0} FLAT OFF`} • Min spend ₹{form.minAmount || 0}</p>
+                    
+                    <div className="flex gap-4 mt-4">
+                       <label className="flex items-center gap-2 text-[10px] uppercase font-black tracking-tighter text-zinc-300 cursor-pointer">
+                         <input type="checkbox" name="firstTimeUserOnly" checked={form.firstTimeUserOnly} onChange={handleChange} className="accent-accent w-3 h-3" /> 1st Time Only
+                       </label>
+                       <label className="flex items-center gap-2 text-[10px] uppercase font-black tracking-tighter text-zinc-300 cursor-pointer">
+                         <input type="checkbox" name="stackable" checked={form.stackable} onChange={handleChange} className="accent-accent w-3 h-3" /> Stackable
+                       </label>
+                    </div>
+                  </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button type="submit" disabled={saving} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl bg-accent text-white font-black uppercase tracking-widest hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.3)] transition-all">
+                  {saving ? <Loader2 className="animate-spin" size={18}/> : editingId ? <Edit2 size={18}/> : <PlusCircle size={18}/>}
+                  {editingId ? 'Update Campaign' : 'Launch Campaign'}
+                </button>
+                {editingId && <button type="button" onClick={() => {setEditingId(null); setForm(emptyForm);}} className="px-6 py-4 rounded-xl bg-white/5 border border-white/10 font-bold uppercase text-[10px]">Cancel</button>}
+              </div>
+            </form>
+          </GlassCard>
         </div>
 
-        {loading ? <div className="py-10 text-center text-text-secondary">Loading coupons...</div> : filtered.length === 0 ? <div className="py-10 text-center text-text-secondary">No coupons found.</div> : <div className="overflow-x-auto"><table className="w-full border-collapse text-sm"><thead><tr className="text-left text-text-secondary"><th className="py-3">Code</th><th className="py-3">Name</th><th className="py-3">Value</th><th className="py-3">Usage</th><th className="py-3">Expiry</th><th className="py-3">Status</th><th className="py-3 text-right">Actions</th></tr></thead><tbody>{filtered.map((coupon) => <tr key={coupon._id} className="border-t border-white/10"><td className="py-3 font-semibold">{coupon.code}</td><td className="py-3">{coupon.name}</td><td className="py-3">{coupon.discountType === 'percent' ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`}</td><td className="py-3">{coupon.usageCount || 0}/{coupon.usageLimit || '∞'}</td><td className="py-3">{coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleDateString() : 'No expiry'}</td><td className="py-3">{coupon.active ? <span className="text-emerald-400">Active</span> : <span className="text-red-400">Inactive</span>}</td><td className="py-3 text-right"><div className="flex justify-end gap-2"><button onClick={() => handleEdit(coupon)} className="p-2 rounded-lg hover:bg-white/10"><Edit2 size={16}/></button><button onClick={() => toggleStatus(coupon._id)} className="p-2 rounded-lg hover:bg-white/10">{coupon.active ? <XCircle size={16}/> : <CheckCircle2 size={16}/>}</button><button onClick={() => handleDelete(coupon._id)} className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"><Trash2 size={16}/></button></div></td></tr>)}</tbody></table></div>}
-      </GlassCard>
+        {/* RIGHT: LIST SECTION */}
+        <div className="space-y-6">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-accent transition-colors" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search coupons..." className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm focus:border-accent/50 transition-all outline-none" />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 ml-1">Active Offers ({filtered.length})</h3>
+            {loading ? (
+               <div className="p-12 text-center text-zinc-600 font-bold animate-pulse">Fetching records...</div>
+            ) : filtered.length === 0 ? (
+               <div className="p-12 text-center text-zinc-600 italic border border-dashed border-white/5 rounded-2xl">No campaigns found.</div>
+            ) : (
+              filtered.map((coupon) => (
+                <GlassCard key={coupon._id} className="p-4 border-white/5 hover:border-accent/30 transition-all group overflow-hidden">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black italic tracking-wider">{coupon.code}</span>
+                        {coupon.active ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> : <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>}
+                      </div>
+                      <p className="text-[10px] text-zinc-500 mt-1 font-bold">{coupon.discountType === 'percent' ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`} OFF • {coupon.usageCount || 0}/{coupon.usageLimit || '∞'} Used</p>
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                       <button onClick={() => { setEditingId(coupon._id); setForm({...coupon, startsAt: coupon.startsAt?.slice(0,10), expiresAt: coupon.expiresAt?.slice(0,10)}) }} className="p-2 rounded-lg bg-white/5 hover:bg-accent/20 text-zinc-400 hover:text-accent transition-colors"><Edit2 size={14}/></button>
+                       <button onClick={async () => { if(window.confirm('Delete?')) { await API.delete(`/coupon/${coupon._id}`); fetchCoupons(); } }} className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-zinc-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        :root { --accent-rgb: 124, 58, 237; }
+        .input-modern {
+          width: 100%;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 0.75rem;
+          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+          color: white;
+          outline: none;
+          transition: all 0.3s ease;
+        }
+        .input-modern:focus { border-color: rgba(var(--accent-rgb), 0.5); box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.1); }
+      `}</style>
     </div>
   );
 };
 
 const Field = ({ label, children, className = '' }) => (
-  <label className={`space-y-2 ${className}`}>
-    <span className="text-[10px] uppercase tracking-widest text-text-secondary">{label}</span>
+  <label className={`space-y-2 flex flex-col ${className}`}>
+    <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 ml-1 font-black">{label}</span>
     {children}
   </label>
 );

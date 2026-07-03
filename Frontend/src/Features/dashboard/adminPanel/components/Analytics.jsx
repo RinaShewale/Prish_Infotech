@@ -1,15 +1,14 @@
 import React, { useEffect, useMemo } from "react";
 import { useEnrollment } from "../../Courses/hooks/useEnrollment";
-import { usePayment } from "../../Courses/hooks/usePayment"; // 🔥 Import Payment for accurate revenue
+import { usePayment } from "../../Courses/hooks/usePayment";
 import { GlassCard } from "../Shared/GlassCard";
 import { StatCard } from "../components/StatCard";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, AreaChart, Area 
 } from "recharts";
-import { TrendingUp, Users, Target, Zap, DollarSign, Loader2 } from "lucide-react";
+import { TrendingUp, Users, Target, Zap, DollarSign, Loader2, Calendar } from "lucide-react";
 
-// Professional, muted accent palette
 const COLORS = ["#e6cec8", "#c8b2ac", "#a89691", "#827571", "#4d4240"];
 
 const Analytics = () => {
@@ -21,20 +20,16 @@ const Analytics = () => {
     fetchAllPayments();
   }, []);
 
-  // 📊 CALCULATE ANALYTICS
   const stats = useMemo(() => {
     if (!enrollments?.length && !allPayments?.length) return null;
 
-    // 1. Accuracy: Total Revenue from actual Payment records
     const totalRevenue = allPayments?.reduce((acc, curr) => 
         curr.paymentStatus === 'paid' ? acc + (curr.totalAmount || 0) : acc, 0
     ) || 0;
 
-    // 2. Average Progress from Enrollment records
     const totalProgress = enrollments?.reduce((acc, curr) => acc + (curr.progress || 0), 0) || 0;
     const avgProgress = enrollments?.length ? Math.round(totalProgress / enrollments.length) : 0;
 
-    // 3. Category Distribution
     const catMap = {};
     enrollments?.forEach(en => {
       const cat = en.course?.category?.[0] || "General";
@@ -42,7 +37,6 @@ const Analytics = () => {
     });
     const categoryStats = Object.keys(catMap).map(name => ({ name, value: catMap[name] }));
 
-    // 4. Course Performance (Top 5)
     const courseMap = {};
     enrollments?.forEach(en => {
       const title = en.course?.title || "Unknown";
@@ -50,13 +44,12 @@ const Analytics = () => {
     });
     const courseStats = Object.keys(courseMap)
       .map(title => ({ 
-        title: title.length > 20 ? title.substring(0, 20) + "..." : title, 
+        title: title.length > 15 ? title.substring(0, 15) + "..." : title, 
         students: courseMap[title] 
       }))
       .sort((a, b) => b.students - a.students)
       .slice(0, 5);
 
-    // 5. Growth Timeline (Grouped by Month)
     const growthMap = {};
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     
@@ -69,37 +62,46 @@ const Analytics = () => {
     const revenueGrowth = months.map(m => ({
         name: m,
         revenue: growthMap[m] || 0
-    })).filter((item, index) => index <= new Date().getMonth()); // Show up to current month
+    })).filter((item, index) => index <= new Date().getMonth());
 
     return { avgProgress, categoryStats, courseStats, revenueGrowth, totalRevenue };
   }, [enrollments, allPayments]);
 
   if (enrollLoading || payLoading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center space-y-4">
+      <div className="h-[80vh] flex flex-col items-center justify-center space-y-4">
         <Loader2 className="animate-spin text-accent" size={40} />
-        <p className="text-slate-500 italic animate-pulse">Computing Intelligence...</p>
+        <p className="text-slate-500 italic animate-pulse font-medium">Computing Intelligence...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 pb-20 max-w-[1600px] mx-auto">
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
-        <div>
-          <h1 className="text-5xl font-display font-bold italic tracking-tighter text-white">Intelligence</h1>
-          <p className="text-slate-500 mt-2">Aggregated performance data for the current fiscal year.</p>
+    <div className="px-4 py-6 md:px-8 md:py-10 space-y-8 md:space-y-12 max-w-[1600px] mx-auto overflow-x-hidden">
+      
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+        <div className="space-y-1">
+          <h1 className="text-4xl md:text-6xl font-display font-bold italic tracking-tighter text-white">
+            Intelligence<span className="text-accent">.</span>
+          </h1>
+          <p className="text-slate-500 text-sm md:text-base max-w-md">
+            Aggregated performance and financial metrics for the current fiscal cycle.
+          </p>
         </div>
-        <div className="flex gap-2">
-            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-[10px] font-bold border border-emerald-500/20 uppercase tracking-widest flex items-center gap-1">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> Live Data
+        <div className="flex items-center self-start md:self-auto">
+            <span className="px-4 py-2 bg-emerald-500/5 text-emerald-500 rounded-2xl text-[10px] font-bold border border-emerald-500/10 uppercase tracking-[0.2em] flex items-center gap-2 backdrop-blur-md">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                Live Analytics
             </span>
         </div>
       </div>
 
-      {/* KPI GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* KPI GRID - Fluid columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard title="Active Students" value={enrollments?.length || 0} icon={Users} trend={+8} delay={0.1} />
         <StatCard title="Avg. Progress" value={`${stats?.avgProgress || 0}%`} icon={Target} delay={0.2} />
         <StatCard 
@@ -109,36 +111,41 @@ const Analytics = () => {
             trend={+14} 
             delay={0.3} 
         />
-        <StatCard title="Course Completion" value="68%" icon={Zap} delay={0.4} />
+        <StatCard title="Completion Rate" value="68%" icon={Zap} delay={0.4} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
         
-        {/* REVENUE GROWTH AREA CHART */}
-        <GlassCard className="lg:col-span-2 p-8" delay={0.5}>
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-bold italic text-white flex items-center gap-2">
+        {/* REVENUE GROWTH - 8 Cols on Large */}
+        <GlassCard className="lg:col-span-8 p-5 md:p-8" delay={0.5}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h3 className="text-lg md:text-xl font-bold italic text-white flex items-center gap-2">
                 <TrendingUp size={20} className="text-accent" /> Revenue Timeline
             </h3>
-            <select className="bg-white/5 border border-white/10 rounded-md text-[10px] text-slate-400 p-1 outline-none">
-                <option>Yearly View</option>
-            </select>
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5">
+                <Calendar size={14} className="text-slate-400" />
+                <select className="bg-transparent border-none text-[11px] font-bold uppercase tracking-widest text-slate-400 outline-none cursor-pointer">
+                    <option className="bg-[#050505]">Monthly View</option>
+                    <option className="bg-[#050505]">Yearly View</option>
+                </select>
+            </div>
           </div>
-          <div className="h-[350px]">
+          <div className="h-[300px] md:h-[380px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats?.revenueGrowth}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#e6cec8" stopOpacity={0.3}/>
+                    <stop offset="5%" stopColor="#e6cec8" stopOpacity={0.2}/>
                     <stop offset="95%" stopColor="#e6cec8" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="name" stroke="#ffffff40" fontSize={10} axisLine={false} tickLine={false} dy={10} />
-                <YAxis stroke="#ffffff40" fontSize={10} axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" stroke="#ffffff30" fontSize={10} axisLine={false} tickLine={false} dy={10} />
+                <YAxis stroke="#ffffff30" fontSize={10} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
                 <Tooltip 
                     contentStyle={{ backgroundColor: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", fontSize: "12px" }}
                     itemStyle={{ color: "#e6cec8" }}
+                    cursor={{ stroke: '#e6cec8', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 <Area type="monotone" dataKey="revenue" stroke="#e6cec8" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
               </AreaChart>
@@ -146,18 +153,18 @@ const Analytics = () => {
           </div>
         </GlassCard>
 
-        {/* PIE CHART */}
-        <GlassCard className="p-8 flex flex-col justify-between" delay={0.6}>
-          <div>
-            <h3 className="text-xl font-bold italic text-white mb-8">Sales by Category</h3>
-            <div className="h-[280px]">
+        {/* PIE CHART - 4 Cols on Large */}
+        <GlassCard className="lg:col-span-4 p-5 md:p-8 flex flex-col" delay={0.6}>
+          <h3 className="text-lg md:text-xl font-bold italic text-white mb-6">Sales Category</h3>
+          <div className="flex-1 flex flex-col sm:flex-row lg:flex-col items-center justify-center gap-6">
+            <div className="h-[240px] md:h-[280px] w-full max-w-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
                         data={stats?.categoryStats}
-                        innerRadius={70}
-                        outerRadius={100}
-                        paddingAngle={8}
+                        innerRadius={65}
+                        outerRadius={90}
+                        paddingAngle={10}
                         dataKey="value"
                     >
                         {stats?.categoryStats.map((entry, index) => (
@@ -168,37 +175,46 @@ const Analytics = () => {
                 </PieChart>
                 </ResponsiveContainer>
             </div>
-          </div>
-          <div className="space-y-3 mt-4">
-            {stats?.categoryStats.map((c, i) => (
-              <div key={i} className="flex justify-between items-center bg-white/[0.02] p-2 rounded-lg border border-white/5">
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                    <span className="text-[10px] uppercase font-black text-slate-400 tracking-tighter">{c.name}</span>
+            
+            <div className="w-full space-y-2.5">
+              {stats?.categoryStats.map((c, i) => (
+                <div key={i} className="flex justify-between items-center bg-white/[0.03] p-3 rounded-xl border border-white/5 hover:bg-white/[0.06] transition-colors">
+                  <div className="flex items-center gap-3">
+                      <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{c.name}</span>
+                  </div>
+                  <span className="text-xs font-black text-white">{c.value}</span>
                 </div>
-                <span className="text-xs font-bold text-white">{c.value}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </GlassCard>
 
-        {/* BAR CHART PERFORMANCE */}
-        <GlassCard className="lg:col-span-3 p-8" delay={0.7}>
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-bold italic text-white tracking-tight">Top Performing Courses</h3>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest">Enrollment Volume</p>
+        {/* TOP COURSES BAR CHART - Full Width */}
+        <GlassCard className="lg:col-span-12 p-5 md:p-8" delay={0.7}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-8">
+            <h3 className="text-lg md:text-xl font-bold italic text-white tracking-tight">Top Performance Matrix</h3>
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-[0.2em] bg-white/5 px-3 py-1 rounded-full">Course Enrollment Volume</p>
           </div>
-          <div className="h-[300px]">
+          <div className="h-[300px] md:h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats?.courseStats} layout="vertical">
+              <BarChart data={stats?.courseStats} layout="vertical" margin={{ left: -20, right: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
-                <XAxis type="number" stroke="#ffffff40" fontSize={10} axisLine={false} tickLine={false} />
-                <YAxis dataKey="title" type="category" stroke="#ffffff" fontSize={11} axisLine={false} tickLine={false} width={150} />
+                <XAxis type="number" stroke="#ffffff20" fontSize={10} axisLine={false} tickLine={false} />
+                <YAxis 
+                  dataKey="title" 
+                  type="category" 
+                  stroke="#ffffff" 
+                  fontSize={10} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  width={100} // Reduced width for mobile safety
+                />
                 <Tooltip 
                     cursor={{fill: 'rgba(255,255,255,0.03)'}}
-                    contentStyle={{ backgroundColor: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }} 
+                    contentStyle={{ backgroundColor: "#0f0f0f", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }} 
                 />
-                <Bar dataKey="students" fill="#e6cec8" radius={[0, 10, 10, 0]} barSize={20} />
+                <Bar dataKey="students" fill="#e6cec8" radius={[0, 8, 8, 0]} barSize={18} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -43,6 +43,7 @@ import AdminBootcampManagement from "../Features/dashboard/adminPanel/pages/Admi
 import AdminCoupons from "../Features/dashboard/adminPanel/pages/AdminCoupons";
 import AdminBootcamp from "../Features/dashboard/adminPanel/pages/AdminBootcamp";
 import AdminBootcampUpdate from "../Features/dashboard/adminPanel/components/AdminBootcampUpdate";
+import AdminSettings from "../Features/dashboard/adminPanel/components/AdminSettings";
 
 
 //footer links
@@ -184,11 +185,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "settings",
-        element: (
-          <div className="p-10 text-text-secondary italic">
-            Global school settings coming soon...
-          </div>
-        ),
+        element: <AdminSettings />
       },
     ],
   },

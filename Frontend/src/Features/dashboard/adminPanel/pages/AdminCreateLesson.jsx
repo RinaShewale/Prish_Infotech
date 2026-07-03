@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { 
   Plus, Trash2, FileText, FileUp, 
   X, Save, ArrowLeft, Link, CheckCircle2,
-  Loader2, AlertCircle, FileType
+  Loader2, ChevronDown, Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -15,6 +15,78 @@ import { useCourse } from "../../Courses/hooks/useCourse";
 import { uploadLessonFile } from "../services/media.api";
 import { FluidBackground } from "../../Home/components/FluidBackground";
 
+/**
+ * CUSTOM THEMED SELECT COMPONENT
+ * Replaces the ugly browser-default dropdown
+ */
+const ThemedSelect = ({ label, value, options, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const selectedLabel = options.find(opt => opt.value === value)?.label || value;
+
+  return (
+    <div className="space-y-2 lg:space-y-3 relative" ref={containerRef}>
+      <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+        {label}
+      </label>
+      
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between bg-white/[0.03] border ${
+          isOpen ? 'border-accent/50 shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)]' : 'border-white/10'
+        } rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white transition-all duration-300 outline-none`}
+      >
+        <span className="font-bold tracking-wide">{selectedLabel}</span>
+        <ChevronDown size={16} className={`text-zinc-500 transition-transform duration-500 ${isOpen ? 'rotate-180 text-accent' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 5, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="absolute z-[200] w-full bg-[#0a0a0a]/95 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-1.5"
+          >
+            <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-1">
+              {options.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(option.value);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-[11px] lg:text-xs transition-all group ${
+                    value === option.value 
+                      ? 'bg-accent/10 text-accent font-black uppercase tracking-widest' 
+                      : 'text-zinc-400 hover:bg-white/5 hover:text-white font-bold'
+                  }`}
+                >
+                  {option.label}
+                  {value === option.value && <Check size={14} className="text-accent" />}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const AdminCreateLesson = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -24,9 +96,26 @@ const AdminCreateLesson = () => {
   const [loading, setLoading] = useState(false);
   const [uploadState, setUploadState] = useState({});
 
+  // Options Definitions
+  const levelOptions = [
+    { label: "Beginner", value: "Beginner" },
+    { label: "Intermediate", value: "Intermediate" },
+    { label: "Advanced", value: "Advanced" }
+  ];
+
+  const typeOptions = [
+    { label: "Live Session", value: "Live" },
+    { label: "Recorded Course", value: "Recorded" },
+    { label: "Hybrid Workshop", value: "Hybrid" }
+  ];
+
   const emptyLesson = useMemo(() => ({
     title: "",
     videoUrl: "",
+    level: "Beginner",
+    courseType: "Live",
+    price: 0,
+    oldPrice: 0,
     resources: [], 
     content: "Lesson Material",
   }), []);
@@ -167,8 +256,54 @@ const AdminCreateLesson = () => {
                     </div>
 
                     <div className="p-5 lg:p-10 space-y-8 lg:space-y-10">
-                      {/* Inputs */}
-                      <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
+                      
+                      {/* PRICING & LOGISTICS - IMPROVED SECTION */}
+                      <div className="space-y-6">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/80 flex items-center gap-3">
+                          <span className="w-8 h-[1px] bg-accent/30"></span> Pricing & Logistics
+                        </h4>
+                        
+                        <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
+                          <div className="space-y-2 lg:space-y-3">
+                            <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Price (INR) *</label>
+                            <input 
+                              type="number" 
+                              value={lesson.price} 
+                              onChange={(e) => handleLessonChange(index, "price", e.target.value)}
+                              placeholder="0" 
+                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white outline-none focus:border-accent/50 transition-all" 
+                            />
+                          </div>
+                          <div className="space-y-2 lg:space-y-3">
+                            <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Old Price (INR)</label>
+                            <input 
+                              type="number" 
+                              value={lesson.oldPrice} 
+                              onChange={(e) => handleLessonChange(index, "oldPrice", e.target.value)}
+                              placeholder="0" 
+                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white outline-none focus:border-accent/50 transition-all" 
+                            />
+                          </div>
+
+                          {/* THEMED CUSTOM SELECTS */}
+                          <ThemedSelect 
+                            label="Difficulty Level"
+                            value={lesson.level}
+                            options={levelOptions}
+                            onChange={(val) => handleLessonChange(index, "level", val)}
+                          />
+
+                          <ThemedSelect 
+                            label="Course Type"
+                            value={lesson.courseType}
+                            options={typeOptions}
+                            onChange={(val) => handleLessonChange(index, "courseType", val)}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Content Inputs */}
+                      <div className="pt-6 border-t border-white/5 grid md:grid-cols-2 gap-4 lg:gap-6">
                         <div className="space-y-2 lg:space-y-3">
                           <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Lesson Title</label>
                           <input required value={lesson.title} onChange={(e) => handleLessonChange(index, "title", e.target.value)} placeholder="e.g. Introduction to React" className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white outline-none focus:border-accent/50 transition-all" />
@@ -179,7 +314,7 @@ const AdminCreateLesson = () => {
                         </div>
                       </div>
 
-                      {/* ENHANCED PDF UPLOAD SECTION */}
+                      {/* PDF UPLOAD SECTION */}
                       <div className="space-y-4 lg:space-y-6">
                         <div className="flex flex-col gap-1">
                             <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Study Materials</label>
@@ -249,7 +384,7 @@ const AdminCreateLesson = () => {
                       <div className="pt-6 lg:pt-8 border-t border-white/5 space-y-4 lg:space-y-6">
                         <div className="flex items-center justify-between">
                           <h4 className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-2">
-                            <Link size={14} className="text-accent" /> <span className="hidden xs:inline">Related</span> Assets
+                            <Link size={14} className="text-accent" /> Related Assets
                           </h4>
                           <button type="button" onClick={() => {
                                 const newLessons = [...lessons];
@@ -301,6 +436,16 @@ const AdminCreateLesson = () => {
       <style>{`
         :root { --accent-rgb: 124, 58, 237; }
         input::placeholder { font-weight: 500; letter-spacing: 0.05em; }
+        
+        /* Custom Scrollbar for Dropdowns */
+        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
+          background: rgba(255, 255, 255, 0.1); 
+          border-radius: 10px; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, 0.4); }
+
         ::-webkit-scrollbar { width: 4px; }
         @media (min-width: 768px) { ::-webkit-scrollbar { width: 6px; } }
         ::-webkit-scrollbar-track { background: transparent; }
