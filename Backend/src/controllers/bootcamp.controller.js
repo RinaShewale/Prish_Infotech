@@ -3,17 +3,30 @@ import Bootcamp from "../models/Bootcamp.model.js";
 const normalizeBootcampPayload = (body) => {
   const payload = { ...body };
 
-  if (payload.slug && typeof payload.slug === "string") {
-    payload.slug = payload.slug.trim().toLowerCase().replace(/\s+/g, "-");
+  // 1. Normalize Batch
+  if (payload.batch) {
+    const currentYear = new Date().getFullYear();
+    payload.batch = {
+      year: Number(payload.batch.year) || currentYear,
+      startDate: payload.batch.startDate === "" ? null : payload.batch.startDate,
+      endDate: payload.batch.endDate === "" ? null : payload.batch.endDate,
+      isActive: payload.batch.isActive ?? true,
+      label: payload.batch.label || String(payload.batch.year || currentYear),
+    };
   }
 
-  if (payload.batch) {
-    payload.batch = {
-      year: payload.batch.year || new Date().getFullYear(),
-      startDate: payload.batch.startDate || null,
-      endDate: payload.batch.endDate || null,
-      isActive: payload.batch.isActive ?? true,
-    };
+  // 2. Normalize Numbers
+  payload.price = Number(payload.price) || 0;
+  payload.discountedPrice = Number(payload.discountedPrice) || 0;
+
+  // 3. Clean Syllabus (Mongoose requires subtitle to be present)
+  if (payload.syllabus) {
+    payload.syllabus = payload.syllabus
+      .filter(s => s.title && s.title.trim() !== "")
+      .map(s => ({
+        ...s,
+        content: s.content.filter(c => c.subtitle && c.subtitle.trim() !== "")
+      }));
   }
 
   return payload;
@@ -23,25 +36,31 @@ export const createBootcamp = async (req, res) => {
   try {
     const payload = normalizeBootcampPayload(req.body);
 
-    if (!payload.title || !payload.slug) {
-      return res.status(400).json({ success: false, message: "Title and slug are required" });
+    // Validation
+    if (!payload.title || !payload.description || !payload.duration || payload.price <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, Description, Duration, and Price are required.",
+      });
     }
 
-    const existing = await Bootcamp.findOne({ slug: payload.slug });
-    if (existing) {
-      return res.status(400).json({ success: false, message: "Bootcamp slug already exists" });
-    }
+    const bootcamp = await Bootcamp.create(payload);
 
-    const bootcamp = await Bootcamp.create({
-      ...payload,
-      isActive: payload.status === "published",
+    return res.status(201).json({
+      success: true,
+      message: "Bootcamp created successfully.",
+      bootcamp,
     });
-
-    return res.status(201).json({ success: true, message: "Bootcamp created successfully", bootcamp });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("DB CREATE ERROR:", error); // Check your terminal for this!
+    return res.status(500).json({
+      success: false,
+      message: error.message, // This will tell you exactly which field failed
+    });
   }
 };
+
+
 
 export const getAdminBootcamps = async (req, res) => {
   try {

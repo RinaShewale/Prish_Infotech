@@ -8,9 +8,7 @@ import {
   deleteBootcampAPI,
 } from "../services/bootcamp.api";
 
-// ======================
-// FETCH ALL
-// ======================
+// --- THUNKS ---
 export const fetchBootcamps = createAsyncThunk(
   "bootcamp/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -18,33 +16,23 @@ export const fetchBootcamps = createAsyncThunk(
       const data = await fetchBootcampsAPI();
       return data?.bootcamps || [];
     } catch (err) {
-      return rejectWithValue(
-        err?.response?.data?.message || err.message || "Failed to fetch bootcamps"
-      );
+      return rejectWithValue(err?.response?.data?.message || "Failed to fetch bootcamps");
     }
   }
 );
 
-// ======================
-// FETCH ADMIN
-// ======================
 export const fetchAdminBootcamps = createAsyncThunk(
   "bootcamp/fetchAdmin",
   async (_, { rejectWithValue }) => {
     try {
       const data = await fetchAdminBootcampsAPI();
-      return data?.bootcamps || [];
+      return data?.bootcamps || []; // Extract the array from response
     } catch (err) {
-      return rejectWithValue(
-        err?.response?.data?.message || err.message || "Failed to fetch admin bootcamps"
-      );
+      return rejectWithValue(err?.response?.data?.message || "Failed to fetch admin bootcamps");
     }
   }
 );
 
-// ======================
-// FETCH ONE
-// ======================
 export const fetchBootcampById = createAsyncThunk(
   "bootcamp/fetchOne",
   async (id, { rejectWithValue }) => {
@@ -52,16 +40,11 @@ export const fetchBootcampById = createAsyncThunk(
       const data = await fetchBootcampByIdAPI(id);
       return data?.bootcamp || null;
     } catch (err) {
-      return rejectWithValue(
-        err?.response?.data?.message || err.message || "Failed to fetch bootcamp"
-      );
+      return rejectWithValue(err?.response?.data?.message || "Failed to fetch bootcamp");
     }
   }
 );
 
-// ======================
-// CREATE
-// ======================
 export const createBootcamp = createAsyncThunk(
   "bootcamp/create",
   async (payload, { rejectWithValue }) => {
@@ -69,16 +52,11 @@ export const createBootcamp = createAsyncThunk(
       const data = await createBootcampAPI(payload);
       return data?.bootcamp || null;
     } catch (err) {
-      return rejectWithValue(
-        err?.response?.data?.message || err.message || "Failed to create bootcamp"
-      );
+      return rejectWithValue(err?.response?.data?.message || "Failed to create bootcamp");
     }
   }
 );
 
-// ======================
-// UPDATE
-// ======================
 export const updateBootcamp = createAsyncThunk(
   "bootcamp/update",
   async ({ id, payload }, { rejectWithValue }) => {
@@ -86,16 +64,11 @@ export const updateBootcamp = createAsyncThunk(
       const data = await updateBootcampAPI(id, payload);
       return data?.bootcamp || null;
     } catch (err) {
-      return rejectWithValue(
-        err?.response?.data?.message || err.message || "Failed to update bootcamp"
-      );
+      return rejectWithValue(err?.response?.data?.message || "Failed to update bootcamp");
     }
   }
 );
 
-// ======================
-// DELETE
-// ======================
 export const deleteBootcamp = createAsyncThunk(
   "bootcamp/delete",
   async (id, { rejectWithValue }) => {
@@ -103,143 +76,82 @@ export const deleteBootcamp = createAsyncThunk(
       await deleteBootcampAPI(id);
       return id;
     } catch (err) {
-      return rejectWithValue(
-        err?.response?.data?.message || err.message || "Failed to delete bootcamp"
-      );
+      return rejectWithValue(err?.response?.data?.message || "Failed to delete bootcamp");
     }
   }
 );
 
-// ======================
-// SLICE
-// ======================
+// --- SLICE ---
 const bootcampSlice = createSlice({
   name: "bootcamp",
-
   initialState: {
     bootcamps: [],
     bootcamp: null,
-
     loading: false,
     creating: false,
     fetchingOne: false,
-
     error: null,
   },
-
   reducers: {
     resetBootcampState: (state) => {
       state.bootcamp = null;
       state.error = null;
       state.loading = false;
-      state.fetchingOne = false;
-      state.creating = false;
     },
   },
-
   extraReducers: (builder) => {
     builder
-
-      // ======================
-      // FETCH ALL
-      // ======================
-      .addCase(fetchBootcamps.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
+      // FETCH ALL & FETCH ADMIN (Both update the bootcamps list)
+      .addCase(fetchBootcamps.pending, (state) => { state.loading = true; })
       .addCase(fetchBootcamps.fulfilled, (state, action) => {
         state.loading = false;
         state.bootcamps = action.payload;
-        state.error = null;
       })
       .addCase(fetchBootcamps.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // ======================
-      // FETCH ONE
-      // ======================
-      .addCase(fetchBootcampById.pending, (state) => {
-        state.fetchingOne = true;
-        state.error = null;
-      })
-      .addCase(fetchBootcampById.fulfilled, (state, action) => {
-        
-        state.fetchingOne = false;
-        state.bootcamp = action.payload;
-        state.error = null;
-      })
-      .addCase(fetchBootcampById.rejected, (state, action) => {
-        state.fetchingOne = false;
-        state.error = action.payload;
-      })
-
-      // ======================
-      // CREATE
-      // ======================
-      .addCase(createBootcamp.pending, (state) => {
-        state.creating = true;
-        state.error = null;
-      })
-      .addCase(createBootcamp.fulfilled, (state, action) => {
-        state.creating = false;
-
-        if (action.payload) {
-          const exists = state.bootcamps.some(
-            (b) => b._id === action.payload._id
-          );
-
-          if (!exists) {
-            state.bootcamps = [action.payload, ...state.bootcamps];
-          }
-        }
-
-        state.error = null;
-      })
-      .addCase(createBootcamp.rejected, (state, action) => {
-        state.creating = false;
-        state.error = action.payload;
-      })
-
-      // ======================
-      // UPDATE
-      // ======================
-      .addCase(updateBootcamp.pending, (state) => {
+      // THIS WAS MISSING IN YOUR CODE:
+      .addCase(fetchAdminBootcamps.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+      .addCase(fetchAdminBootcamps.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bootcamps = action.payload; // Now state.bootcamps will populate!
+      })
+      .addCase(fetchAdminBootcamps.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // FETCH ONE
+      .addCase(fetchBootcampById.fulfilled, (state, action) => {
+        state.fetchingOne = false;
+        state.bootcamp = action.payload;
+      })
+
+      // CREATE
+      .addCase(createBootcamp.fulfilled, (state, action) => {
+        state.creating = false;
+        if (action.payload) state.bootcamps.unshift(action.payload);
+      })
+
+      // UPDATE
       .addCase(updateBootcamp.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload) {
-          state.bootcamps = state.bootcamps.map((bootcamp) =>
-            bootcamp._id === action.payload._id ? action.payload : bootcamp
+          state.bootcamps = state.bootcamps.map(b => 
+            b._id === action.payload._id ? action.payload : b
           );
         }
-        state.error = null;
-      })
-      .addCase(updateBootcamp.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
       })
 
-      // ======================
       // DELETE
-      // ======================
-      .addCase(deleteBootcamp.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(deleteBootcamp.fulfilled, (state, action) => {
         state.loading = false;
-        state.bootcamps = state.bootcamps.filter(
-          (bootcamp) => bootcamp._id !== action.payload
-        );
-        state.error = null;
-      })
-      .addCase(deleteBootcamp.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        state.bootcamps = state.bootcamps.filter(b => b._id !== action.payload);
       });
   },
 });

@@ -41,6 +41,8 @@ import AdminCourseDetail from "../Features/dashboard/adminPanel/pages/AdminCours
 import AdminCreateLesson from "../Features/dashboard/adminPanel/pages/AdminCreateLesson";
 import AdminBootcampManagement from "../Features/dashboard/adminPanel/pages/AdminBootcampManagement";
 import AdminCoupons from "../Features/dashboard/adminPanel/pages/AdminCoupons";
+import AdminBootcamp from "../Features/dashboard/adminPanel/pages/AdminBootcamp";
+import AdminBootcampUpdate from "../Features/dashboard/adminPanel/components/AdminBootcampUpdate";
 
 
 //footer links
@@ -63,6 +65,7 @@ export const router = createBrowserRouter([
     path: "/bootcamp",
     element: <BootcampPage />,
   },
+
 
   {
     path: "/callback",
@@ -122,6 +125,7 @@ export const router = createBrowserRouter([
         element: <AdminCreateLesson />
       },
 
+
       {
         path: "courses/:slug",
         element: <AdminCourseDetail />,
@@ -143,7 +147,7 @@ export const router = createBrowserRouter([
         element: <UserCourseProgress />,
       },
 
-  
+
       {
         path: "payments",
         element: <AdminPayments />,
@@ -158,9 +162,21 @@ export const router = createBrowserRouter([
         path: "analytics",
         element: <Analytics />,
       },
+
+
       {
         path: "bootcamps",
+        element: <AdminBootcamp />,
+      },
+
+
+      {
+        path: "bootcamps/manage", // Use this for "Create New"
         element: <AdminBootcampManagement />,
+      },
+      {
+        path: "bootcamps/manage/:id", // Use this for "Edit Existing"
+        element: <AdminBootcampUpdate />,
       },
       {
         path: "coupons",
