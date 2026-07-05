@@ -4,6 +4,7 @@ import Enrollment from "../models/Enrollment.model.js";
 import Payment from "../models/Payment.model.js";
 import LessonProgress from "../models/LessonProgress.model.js";
 import CourseProgress from "../models/CourseProgress.model.js";
+import Contact from "../models/Contact.model.js";
 
 
 
@@ -17,6 +18,7 @@ export const getDashboard = async (req, res) => {
     const users = await User.countDocuments();
     const courses = await Course.countDocuments();
     const enrollments = await Enrollment.countDocuments();
+    const contacts = await Contact.countDocuments();
     const payments = await Payment.find({ paymentStatus: "paid" });
 
     const revenue = payments.reduce(
@@ -35,6 +37,7 @@ export const getDashboard = async (req, res) => {
         users,
         courses,
         enrollments,
+        contacts,
         revenue,
         recentUsers,
       },
