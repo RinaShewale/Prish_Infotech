@@ -72,13 +72,11 @@ app.use(
     },
   })
 );
-
 // ======================
 // PASSPORT
 // ======================
 app.use(passport.initialize());
 app.use(passport.session());
-
 // ======================
 // ROUTES
 // ======================
@@ -95,19 +93,12 @@ app.use("/api/coupon", couponRoutes);
 app.use("/api/lesson-progress", lessonProgressRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/course-progress", courseProgressRoutes);
-
 app.use("/api/bookmarks", bookmarkRoutes);
-
 app.use("/api/media", mediaRoutes);
 app.use("/api/upload", uploadRoutes);
-
-
 app.use("/api/notifications", notificationRoutes);
-
 app.use("/api/bootcamps", bootcampRoutes);
-
 app.use("/api/applications", applicationRoutes);
-
 app.use("/api/admin", adminRoutes);
 
 
