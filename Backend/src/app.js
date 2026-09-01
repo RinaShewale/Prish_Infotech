@@ -117,8 +117,17 @@ app.use("/api/admin", adminRoutes);
 // ======================
 // SERVE STATIC FILES (DIST FOLDER)
 // ======================
+import fs from "fs";
+
 const distPath = path.join(__dirname, "../../Frontend/dist");
-app.use(express.static(distPath));
+
+// Only serve static files if dist folder exists
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  console.log("✅ Serving frontend from dist folder");
+} else {
+  console.log("⚠️  Dist folder not found. Running in API-only mode.");
+}
 
 // ======================
 // HEALTH CHECK (API)
@@ -133,8 +142,10 @@ app.get("/api/health", (req, res) => {
 // ======================
 // SPA ROUTING - SERVE INDEX.HTML FOR ALL NON-API ROUTES
 // ======================
-app.get("*name", (req, res) => {
-  res.sendFile(path.join(distPath, "index.html"));
-});
+if (fs.existsSync(distPath)) {
+  app.get("*name", (req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
+  });
+}
 
 export default app;
