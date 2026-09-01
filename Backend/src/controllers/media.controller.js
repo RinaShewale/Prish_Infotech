@@ -1,5 +1,4 @@
-import MediaModel from "../models/Media.model.js";
-
+import Media from "../models/Media.model.js";
 
 // 📥 CREATE / UPDATE SINGLE MEDIA DOC
 export const createMedia = async (req, res) => {
@@ -24,7 +23,7 @@ export const createMedia = async (req, res) => {
       }
     }
 
-    const media = await MediaModel.findOneAndUpdate(
+    const media = await Media.findOneAndUpdate(
       {},
       {
         $set: updateFields,
@@ -50,7 +49,7 @@ export const createMedia = async (req, res) => {
 // 📤 GET MEDIA
 export const getMedia = async (req, res) => {
   try {
-    const media = await MediaModel.findOne();
+    const media = await Media.findOne();
 
     res.status(200).json({
       success: true,
