@@ -1,4 +1,5 @@
-import Media from "../models/Media.model.js";
+import MediaModel from "../models/Media.model.js";
+
 
 // 📥 CREATE / UPDATE SINGLE MEDIA DOC
 export const createMedia = async (req, res) => {
