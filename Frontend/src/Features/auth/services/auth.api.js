@@ -47,5 +47,5 @@ export const resetPassword = (
 
 export const googleLogin = () => {
   window.location.href =
-    "http://localhost:3000/api/auth/google";
+    "https://prish-infotech.onrender.com/api/auth/google";
 };

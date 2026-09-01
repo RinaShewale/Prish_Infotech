@@ -21,7 +21,7 @@ import axios from "axios";
 // ======================================================
 
 const API = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://prish-infotech.onrender.com/api",
 
   // ✅ Send auth cookies automatically
   withCredentials: true,
@@ -46,7 +46,7 @@ const API = axios.create({
 export const PUBLIC_API =
   axios.create({
     baseURL:
-      "http://localhost:3000/api",
+      "https://prish-infotech.onrender.com/api",
 
     // ✅ No auth required
     withCredentials: false,

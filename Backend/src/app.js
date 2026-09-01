@@ -24,7 +24,7 @@ import enrollmentRoutes from "./routes/enrollment.routes.js";
 import couponRoutes from "./routes/coupon.route.js";
 import lessonProgressRoutes from "./routes/lessonProgress.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
-import courseProgressRoutes from "./routes/courseProgress.routes.js"; 
+import courseProgressRoutes from "./routes/courseProgress.routes.js";
 import bookmarkRoutes from "./routes/bookmark.route.js";
 import mediaRoutes from "./routes/media.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
@@ -51,7 +51,7 @@ const allowedOrigins = [
   "http://localhost:5173", // Development
   "http://localhost:3000",  // Production local
   "http://localhost:5000",  // Production local
-  process.env.FRONTEND_URL  // Environment variable for production
+"https://prish-infotech.onrender.com"  // Environment variable for production
 ].filter(Boolean);
 
 app.use(
