@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Bell, Circle, Clock } from "lucide-react";
 import { useNotification } from "../../Classroom/hook/useNotification";
 
 const NotificationPanel = () => {
   const { notifications, fetchNotifications, loading } = useNotification();
+  const [visible, setVisible] = useState(true);
+  const prevLatestIdRef = useRef(null);
 
   useEffect(() => {
     // Initial fetch
@@ -16,6 +18,23 @@ const NotificationPanel = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // When the latest notification changes, trigger a fade-out → fade-in swap
+  const latestNotification = notifications.length > 0 ? notifications[0] : null;
+
+  useEffect(() => {
+    if (!latestNotification) return;
+    if (prevLatestIdRef.current === latestNotification._id) return;
+
+    // New notification detected — fade out then fade in
+    setVisible(false);
+    const timeout = setTimeout(() => {
+      prevLatestIdRef.current = latestNotification._id;
+      setVisible(true);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [latestNotification]);
 
   // Determine UI states
   const showSkeleton = loading && notifications.length === 0;
@@ -31,7 +50,7 @@ const NotificationPanel = () => {
         </h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex-1 overflow-hidden">
         {/* LOADING STATE (Skeletons) */}
         {showSkeleton ? (
           <div className="space-y-4">
@@ -56,38 +75,38 @@ const NotificationPanel = () => {
               No new updates at the moment.
             </p>
           </div>
-        ) : (
-          /* NOTIFICATION LIST */
-          <div className="space-y-2">
-            {notifications.map((n) => (
-              <div
-                key={n._id}
-                className="group relative p-4 rounded-2xl transition-all duration-200 hover:bg-white/5 active:scale-[0.98] cursor-pointer"
-              >
-                <div className="flex gap-3">
-                  <div className="mt-1">
-                    <Circle size={8} className="fill-primary text-primary" />
-                  </div>
+        ) : latestNotification ? (
+          /* LATEST NOTIFICATION ONLY — no scrollbar, new replaces old */
+          <div
+            style={{
+              opacity: visible ? 1 : 0,
+              transition: "opacity 0.3s ease",
+            }}
+          >
+            <div className="group relative p-4 rounded-2xl transition-all duration-200 hover:bg-white/5 active:scale-[0.98] cursor-pointer">
+              <div className="flex gap-3">
+                <div className="mt-1">
+                  <Circle size={8} className="fill-primary text-primary" />
+                </div>
 
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <p className="font-bold text-[13px] text-text leading-tight">
-                        {n.title}
-                      </p>
-                      <div className="flex items-center gap-1 opacity-30">
-                        <Clock size={10} />
-                        <span className="text-[9px]">Now</span>
-                      </div>
-                    </div>
-                    <p className="text-[12px] text-text/60 leading-relaxed line-clamp-2">
-                      {n.message}
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-1">
+                    <p className="font-bold text-[13px] text-text leading-tight">
+                      {latestNotification.title}
                     </p>
+                    <div className="flex items-center gap-1 opacity-30">
+                      <Clock size={10} />
+                      <span className="text-[9px]">Now</span>
+                    </div>
                   </div>
+                  <p className="text-[12px] text-text/60 leading-relaxed line-clamp-2">
+                    {latestNotification.message}
+                  </p>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

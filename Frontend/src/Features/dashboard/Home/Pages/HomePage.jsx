@@ -19,11 +19,18 @@ import { TestimonialSection } from "../../Home/components/TestimonialSection";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+let hasSeenLoader = false;
+
 export default function HomePage() {
 
   const { courses } = useSelector((state) => state.course);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasSeenLoader);
   const containerRef = useRef(null);
+
+  const handleLoaderComplete = () => {
+    hasSeenLoader = true;
+    setLoading(false);
+  };
 
   
 
@@ -55,7 +62,7 @@ export default function HomePage() {
     <div ref={containerRef} className="bg-bg text-text selection:bg-accent/30 overflow-x-hidden perspective-1000">
       <AnimatePresence mode="wait">
         {loading ? (
-          <InteractiveLoader key="loader" onComplete={() => setLoading(false)} />
+          <InteractiveLoader key="loader" onComplete={handleLoaderComplete} />
         ) : (
           <motion.div
             key="content"

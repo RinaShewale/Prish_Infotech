@@ -1,191 +1,210 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
-// Existing Pages
-import HomePage from "../Features/dashboard/Home/Pages/HomePage";
-import CoursesPage from "../Features/dashboard/Courses/page/CoursePage";
-import BootcampPage from "../Features/dashboard/Courses/page/BootcampPage";
-import { RequestCallback } from "../Features/auth/pages/RequestCallback";
-import { Login } from "../Features/auth/pages/Login";
-import { Register } from "../Features/auth/pages/Register";
-import { CourseDetailPage } from "../Features/dashboard/Courses/page/CoursesDetailPage";
-import ProfilePage from "../Features/dashboard/Home/Pages/ProfilePage";
+// Lazy-loaded Pages
+const HomePage = lazy(() => import("../Features/dashboard/Home/Pages/HomePage"));
+const CoursesPage = lazy(() => import("../Features/dashboard/Courses/page/CoursePage"));
+const BootcampPage = lazy(() => import("../Features/dashboard/Courses/page/BootcampPage"));
+const RequestCallback = lazy(() => import("../Features/auth/pages/RequestCallback").then(m => ({ default: m.RequestCallback })));
+const Login = lazy(() => import("../Features/auth/pages/Login").then(m => ({ default: m.Login })));
+const Register = lazy(() => import("../Features/auth/pages/Register").then(m => ({ default: m.Register })));
+const CourseDetailPage = lazy(() => import("../Features/dashboard/Courses/page/CoursesDetailPage").then(m => ({ default: m.CourseDetailPage })));
+const ProfilePage = lazy(() => import("../Features/dashboard/Home/Pages/ProfilePage"));
+const ForgotPassword = lazy(() => import("../Features/auth/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("../Features/auth/pages/ResetPassword"));
+
+// Footer Pages
+const AboutUs = lazy(() => import("../Features/dashboard/Home/layout/AboutUs"));
+const PrivacyPolicy = lazy(() => import("../Features/dashboard/Home/layout/PrivacyPolicy"));
+const TermsCondition = lazy(() => import("../Features/dashboard/Home/layout/TermsCondition"));
+const PricingRefund = lazy(() => import("../Features/dashboard/Home/layout/PricingRefund"));
+const Hiring = lazy(() => import("../Features/dashboard/Home/layout/Hiring").then(m => ({ default: m.Hiring })));
+const Support = lazy(() => import("../Features/dashboard/Home/layout/Support").then(m => ({ default: m.Support })));
 
 // Classroom
-import MainLayout from "../Features/dashboard/Courses/Classroom/Layouts/MainLayout";
-import ClassroomPage from "../Features/dashboard/Courses/Classroom/pages/ClassroomPage";
-import LearningPage from "../Features/dashboard/Courses/Classroom/pages/LearningPage";
-import LecturePage from "../Features/dashboard/Courses/Classroom/pages/LecturePage";
+const MainLayout = lazy(() => import("../Features/dashboard/Courses/Classroom/Layouts/MainLayout"));
+const ClassroomPage = lazy(() => import("../Features/dashboard/Courses/Classroom/pages/ClassroomPage"));
+const LearningPage = lazy(() => import("../Features/dashboard/Courses/Classroom/pages/LearningPage"));
+const LecturePage = lazy(() => import("../Features/dashboard/Courses/Classroom/pages/LecturePage"));
 
-// Protected Route
-import ProtectedRoute from "../Features/auth/components/ProtectedRoute"; // <-- adjust path if needed
-import ForgotPassword from "../Features/auth/pages/ForgotPassword";
-import ResetPassword from "../Features/auth/pages/ResetPassword";
-import AboutUs from "../Features/dashboard/Home/layout/AboutUs";
-import PrivacyPolicy from "../Features/dashboard/Home/layout/PrivacyPolicy";
-import TermsCondition from "../Features/dashboard/Home/layout/TermsCondition";
-import PricingRefund from "../Features/dashboard/Home/layout/PricingRefund";
-import { Hiring } from "../Features/dashboard/Home/layout/Hiring";
-import { Support } from "../Features/dashboard/Home/layout/Support";
+// Admin
+const AdminLayout = lazy(() => import("../Features/dashboard/adminPanel/layout/AdminLayout"));
+const AdminDashboard = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminDashboard"));
+const AdminCourses = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminCourses"));
+const MediaLibrary = lazy(() => import("../Features/dashboard/adminPanel/pages/MediaLibrary"));
+const Enrollments = lazy(() => import("../Features/dashboard/adminPanel/pages/Enrollments"));
+const Analytics = lazy(() => import("../Features/dashboard/adminPanel/components/Analytics"));
+const AdminCreateCourse = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminCreateCourse"));
+const UserCourseProgress = lazy(() => import("../Features/dashboard/adminPanel/components/UserCourseProgress"));
+const GetContacts = lazy(() => import("../Features/dashboard/adminPanel/pages/GetContacts"));
+const AdminPayments = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminPayments"));
+const AdminCourseDetail = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminCourseDetail"));
+const AdminCreateLesson = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminCreateLesson"));
+const AdminBootcampManagement = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminBootcampManagement"));
+const AdminCoupons = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminCoupons"));
+const AdminBootcamp = lazy(() => import("../Features/dashboard/adminPanel/pages/AdminBootcamp"));
+const AdminBootcampUpdate = lazy(() => import("../Features/dashboard/adminPanel/components/AdminBootcampUpdate"));
+const AdminSettings = lazy(() => import("../Features/dashboard/adminPanel/components/AdminSettings"));
 
-import AdminDashboard from "../Features/dashboard/adminPanel/pages/AdminDashboard";
-import AdminLayout from "../Features/dashboard/adminPanel/layout/AdminLayout";
-import AdminCourses from "../Features/dashboard/adminPanel/pages/AdminCourses";
-import MediaLibrary from "../Features/dashboard/adminPanel/pages/MediaLibrary";
-import Enrollments from "../Features/dashboard/adminPanel/pages/Enrollments";
-import Analytics from "../Features/dashboard/adminPanel/components/Analytics";
-import AdminCreateCourse from "../Features/dashboard/adminPanel/pages/AdminCreateCourse";
-import UserCourseProgress from "../Features/dashboard/adminPanel/components/UserCourseProgress";
-import GetContacts from "../Features/dashboard/adminPanel/pages/GetContacts";
-import AdminPayments from "../Features/dashboard/adminPanel/pages/AdminPayments";
-import AdminCourseDetail from "../Features/dashboard/adminPanel/pages/AdminCourseDetail";
-import AdminCreateLesson from "../Features/dashboard/adminPanel/pages/AdminCreateLesson";
-import AdminBootcampManagement from "../Features/dashboard/adminPanel/pages/AdminBootcampManagement";
-import AdminCoupons from "../Features/dashboard/adminPanel/pages/AdminCoupons";
-import AdminBootcamp from "../Features/dashboard/adminPanel/pages/AdminBootcamp";
-import AdminBootcampUpdate from "../Features/dashboard/adminPanel/components/AdminBootcampUpdate";
-import AdminSettings from "../Features/dashboard/adminPanel/components/AdminSettings";
+// Protected Route (kept eager — it's tiny and needed everywhere)
+import ProtectedRoute from "../Features/auth/components/ProtectedRoute";
 
+// Suspense wrapper — minimal spinner matching the site's dark theme
+function SuspenseWrapper({ children }) {
+  return (
+    <Suspense fallback={null}>
+      {children}
+    </Suspense>
+  );
+}
 
-//footer links
+// Helper to wrap element with Suspense
+const S = (Component) => (
+  <SuspenseWrapper>
+    <Component />
+  </SuspenseWrapper>
+);
 
 export const router = createBrowserRouter([
   // Public Routes
   {
     path: "/",
-    element: <HomePage />,
+    element: S(HomePage),
   },
   {
     path: "/courses",
-    element: <CoursesPage />,
+    element: S(CoursesPage),
   },
   {
     path: "/profile",
-    element: <ProfilePage />,
+    element: S(ProfilePage),
   },
   {
     path: "/bootcamp",
-    element: <BootcampPage />,
+    element: S(BootcampPage),
   },
 
 
   {
     path: "/callback",
-    element: <RequestCallback />,
+    element: S(RequestCallback),
   },
   {
     path: "/login",
-    element: <Login />,
+    element: S(Login),
   },
   {
     path: "/register",
-    element: <Register />,
+    element: S(Register),
   },
 
   {
     path: "/forgot-password",
-    element: <ForgotPassword />,
+    element: S(ForgotPassword),
   },
   {
     path: "/reset-password/:token",
-    element: <ResetPassword />,
+    element: S(ResetPassword),
   },
   {
     path: "/cohort/:slug",
-    element: <CourseDetailPage />,
+    element: S(CourseDetailPage),
   },
 
 
 
-  { path: "/about-us", element: <AboutUs /> },
-  { path: "/privacy-policy", element: <PrivacyPolicy /> },
-  { path: "/terms-and-condition", element: <TermsCondition /> },
-  { path: "/pricing-and-refund", element: <PricingRefund /> },
-  { path: "/hire-from-us", element: <Hiring /> },
-  { path: "/support", element: <Support /> },
+  { path: "/about-us", element: S(AboutUs) },
+  { path: "/privacy-policy", element: S(PrivacyPolicy) },
+  { path: "/terms-and-condition", element: S(TermsCondition) },
+  { path: "/pricing-and-refund", element: S(PricingRefund) },
+  { path: "/hire-from-us", element: S(Hiring) },
+  { path: "/support", element: S(Support) },
 
 
   {
     path: "/admin",
     element: (
       <ProtectedRoute adminOnly={true}>
-        <AdminLayout />
+        <SuspenseWrapper>
+          <AdminLayout />
+        </SuspenseWrapper>
       </ProtectedRoute>
     ),
     children: [
       {
         index: true,
-        element: <AdminDashboard />,
+        element: S(AdminDashboard),
       },
       {
         path: "courses",
-        element: <AdminCourses />,
+        element: S(AdminCourses),
       },
 
       {
         path: "courses/:slug/add-lesson",
-        element: <AdminCreateLesson />
+        element: S(AdminCreateLesson),
       },
 
 
       {
         path: "courses/:slug",
-        element: <AdminCourseDetail />,
+        element: S(AdminCourseDetail),
       },
       {
         path: "courses/create",
-        element: <AdminCreateCourse />,
+        element: S(AdminCreateCourse),
       },
       {
         path: "users",
-        element: <GetContacts />,
+        element: S(GetContacts),
       },
       {
         path: "enrollments",
-        element: <Enrollments />,
+        element: S(Enrollments),
       },
       {
         path: "course-progress/:courseId",
-        element: <UserCourseProgress />,
+        element: S(UserCourseProgress),
       },
 
 
       {
         path: "payments",
-        element: <AdminPayments />,
+        element: S(AdminPayments),
       },
 
 
       {
         path: "media",
-        element: <MediaLibrary />,
+        element: S(MediaLibrary),
       },
       {
         path: "analytics",
-        element: <Analytics />,
+        element: S(Analytics),
       },
 
 
       {
         path: "bootcamps",
-        element: <AdminBootcamp />,
+        element: S(AdminBootcamp),
       },
 
 
       {
         path: "bootcamps/manage", // Use this for "Create New"
-        element: <AdminBootcampManagement />,
+        element: S(AdminBootcampManagement),
       },
       {
         path: "bootcamps/manage/:id", // Use this for "Edit Existing"
-        element: <AdminBootcampUpdate />,
+        element: S(AdminBootcampUpdate),
       },
       {
         path: "coupons",
-        element: <AdminCoupons />,
+        element: S(AdminCoupons),
       },
       {
         path: "settings",
-        element: <AdminSettings />
+        element: S(AdminSettings),
       },
     ],
   },
@@ -195,21 +214,23 @@ export const router = createBrowserRouter([
     path: "/classroom",
     element: (
       <ProtectedRoute>
-        <MainLayout />
+        <SuspenseWrapper>
+          <MainLayout />
+        </SuspenseWrapper>
       </ProtectedRoute>
     ),
     children: [
       {
         index: true,
-        element: <ClassroomPage />,
+        element: S(ClassroomPage),
       },
       {
         path: "course/:courseId",
-        element: <LearningPage />,
+        element: S(LearningPage),
       },
       {
         path: "course/:courseId/lecture/:lectureId",
-        element: <LecturePage />,
+        element: S(LecturePage),
       },
     ],
   },

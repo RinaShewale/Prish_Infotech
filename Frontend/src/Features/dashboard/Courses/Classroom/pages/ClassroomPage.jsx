@@ -6,10 +6,12 @@ import NotificationPanel from '../components/NotificationPanel';
 import StatsBento from '../components/StatsBento';
 import { FluidBackground } from '../../../Home/components/FluidBackground';
 import { getMyEnrollments } from '../../redux/enrollment.slice';
+import { useNavigate } from 'react-router-dom';
 
 const ClassroomPage = () => {
   const dispatch = useDispatch();
   const { enrollments = [], loading } = useSelector((state) => state.enrollment);
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getMyEnrollments());
@@ -32,57 +34,66 @@ const ClassroomPage = () => {
     : 0;
 
   return (
-    /* h-screen + overflow-hidden locks the page height */
-    <div className="h-screen w-full bg-[var(--color-bg)] text-text overflow-hidden font-sans relative">
-      <FluidBackground />
+    <>
+      <style>{`
+        .classroom-no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .classroom-no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+
+      {/* h-screen + overflow-hidden locks the page height */}
+      <div className="h-screen w-full bg-[var(--color-bg)] text-text overflow-hidden font-sans relative">
+        <FluidBackground />
       
-      <div className="relative z-10 max-w-[1600px] mx-auto h-full flex flex-col px-4 sm:px-6 lg:px-10">
-        
-        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-6 lg:py-8 gap-4 shrink-0">
-          <h1 className="text-3xl font-display font-bold text-gradient">Classroom</h1>
-          <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 glass rounded-xl text-xs font-bold hover:bg-white/10 transition-all border border-white/5">
-              <Video size={16} className="text-accent" /> Overview
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-accent/20 border border-accent/30 rounded-xl text-xs font-bold hover:bg-accent/30 transition-all">
-              <Headphones size={16} className="text-accent" /> Support
-            </button>
-          </div>
-        </header>
+        <div className="relative z-10 max-w-[1600px] mx-auto h-full flex flex-col px-4 sm:px-6 lg:px-10">
+          {/* Header modified: items-center and flex-row used for mobile side-by-side alignment */}
+          <header className="flex flex-row items-center justify-between py-6 lg:py-8 gap-4 shrink-0">
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-gradient">Classroom</h1>
+            <div className="flex gap-3">
+              <button onClick={() => navigate("/support")} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-accent/20 border border-accent/30 rounded-xl text-xs font-bold hover:bg-accent/30 transition-all">
+                <Headphones size={16} className="text-accent" /> Support
+              </button>
+            </div>
+          </header>
 
-        <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-8 min-h-0 pb-6">
-          {/* Main Section */}
-          <section className="xl:col-span-8 flex flex-col min-h-0">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0">
-              <h2 className="text-xl font-display font-bold">Your Enrolled Courses</h2>
-              <div className="relative group w-full md:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/40" size={16} />
-                <input type="text" placeholder="Search" className="w-full bg-white/5 border border-border/50 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-accent/50 transition-all" />
+          <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-8 min-h-0 pb-6">
+            {/* Main Section */}
+            <section className="xl:col-span-8 flex flex-col min-h-0">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0">
+                <h2 className="text-xl font-display font-bold">Your Enrolled Courses</h2>
+                <div className="relative group w-full md:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/40" size={16} />
+                  <input type="text" placeholder="Search" className="w-full bg-white/5 border border-border/50 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-accent/50 transition-all" />
+                </div>
               </div>
-            </div>
 
-            {/* ONLY THIS DIV SCROLLS */}
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4 scroll-smooth">
-              {loading ? (
-                <p className="text-center text-text-secondary py-10">Loading...</p>
-              ) : courses.length === 0 ? (
-                <p className="text-center text-text-secondary py-10">No courses found</p>
-              ) : (
-                courses.map((course, idx) => (
-                  <EnrolledCourseCards key={course.id} course={course} index={idx} />
-                ))
-              )}
-            </div>
-          </section>
+              {/* ONLY THIS DIV SCROLLS */}
+              <div className="flex-1 overflow-y-auto pr-2 classroom-no-scrollbar space-y-4 scroll-smooth">
+                {loading ? (
+                  <p className="text-center text-text-secondary py-10">Loading...</p>
+                ) : courses.length === 0 ? (
+                  <p className="text-center text-text-secondary py-10">No courses found</p>
+                ) : (
+                  courses.map((course, idx) => (
+                    <EnrolledCourseCards key={course.id} course={course} index={idx} />
+                  ))
+                )}
+              </div>
+            </section>
 
-          {/* Sidebar - Remains fixed in its grid position */}
-          <aside className="hidden xl:flex xl:col-span-4 flex-col gap-6 min-h-0">
-            <NotificationPanel empty />
-            <StatsBento progress={overallProgress} />
-          </aside>
+            {/* Sidebar - Remains fixed in its grid position */}
+            <aside className="hidden xl:flex xl:col-span-4 flex-col gap-6 min-h-0">
+              <NotificationPanel empty />
+              <StatsBento progress={overallProgress} />
+            </aside>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
