@@ -24,7 +24,7 @@ export const createMedia = async (req, res) => {
       }
     }
 
-    const media = await Media.findOneAndUpdate(
+    const media = await MediaModel.findOneAndUpdate(
       {},
       {
         $set: updateFields,
@@ -50,7 +50,7 @@ export const createMedia = async (req, res) => {
 // 📤 GET MEDIA
 export const getMedia = async (req, res) => {
   try {
-    const media = await Media.findOne();
+    const media = await MediaModel.findOne();
 
     res.status(200).json({
       success: true,
