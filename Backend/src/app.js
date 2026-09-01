@@ -4,6 +4,7 @@ import session from "express-session";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 import passport from "./config/passport.js";
 
@@ -117,8 +118,6 @@ app.use("/api/admin", adminRoutes);
 // ======================
 // SERVE STATIC FILES (DIST FOLDER)
 // ======================
-import fs from "fs";
-
 const distPath = path.join(__dirname, "../../Frontend/dist");
 
 // Only serve static files if dist folder exists
