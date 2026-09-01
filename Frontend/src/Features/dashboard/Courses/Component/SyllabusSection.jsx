@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Loader2, ChevronDown, Check, ArrowRight, Globe, Sparkles, Server, Code, BookOpen, Download } from "lucide-react";
+import jsPDF from "jspdf";
 
 // Helper to map icons based on module title keywords
 const getIcon = (title) => {
@@ -97,6 +98,92 @@ export default function SyllabusSection() {
 
   const onlineBootcamp = bootcamps.find((b) => b.type === "online");
 
+  // PDF Download Function
+  const handleDownloadPDF = () => {
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      let yPosition = 20;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      const maxWidth = pdf.internal.pageSize.getWidth() - 2 * margin;
+
+      // Title
+      pdf.setFontSize(24);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Course Syllabus", margin, yPosition);
+      yPosition += 15;
+
+      // Batch Info
+      pdf.setFontSize(12);
+      pdf.setFont(undefined, "normal");
+      pdf.text(`Batch: ${onlineBootcamp?.batch?.year || "2025"}`, margin, yPosition);
+      yPosition += 10;
+
+      // Syllabus Content
+      const syllabusData = onlineBootcamp?.syllabus || [];
+      
+      syllabusData.forEach((section, sectionIndex) => {
+        // Check if we need a new page
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+
+        // Section Title
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, "bold");
+        const sectionTitle = `Module ${sectionIndex + 1}: ${section.title}`;
+        const splitTitle = pdf.splitTextToSize(sectionTitle, maxWidth);
+        pdf.text(splitTitle, margin, yPosition);
+        yPosition += splitTitle.length * 6 + 5;
+
+        // Section Content
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, "normal");
+
+        section.content?.forEach((sub) => {
+          // Check page break
+          if (yPosition > pageHeight - 30) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+
+          // Subtitle
+          pdf.setFont(undefined, "bold");
+          pdf.setTextColor(100, 100, 100);
+          const splitSubtitle = pdf.splitTextToSize(`• ${sub.subtitle}`, maxWidth - 5);
+          pdf.text(splitSubtitle, margin + 5, yPosition);
+          yPosition += splitSubtitle.length * 5 + 2;
+
+          // Items
+          pdf.setFont(undefined, "normal");
+          pdf.setTextColor(0, 0, 0);
+          sub.items?.forEach((item) => {
+            // Check page break
+            if (yPosition > pageHeight - 20) {
+              pdf.addPage();
+              yPosition = 20;
+            }
+
+            const splitItem = pdf.splitTextToSize(`- ${item}`, maxWidth - 10);
+            pdf.text(splitItem, margin + 10, yPosition);
+            yPosition += splitItem.length * 5 + 1;
+          });
+
+          yPosition += 3;
+        });
+
+        yPosition += 5;
+      });
+
+      // Save PDF
+      pdf.save(`Syllabus_${onlineBootcamp?.batch?.year || "2025"}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[600px] gap-4">
@@ -160,7 +247,10 @@ export default function SyllabusSection() {
           whileInView={{ opacity: 1 }}
           className="mt-20 flex flex-col items-center gap-6"
         >
-          <button className="group relative glass px-10 py-4 rounded-full font-display font-bold overflow-hidden transition-all hover:scale-105 border border-white/10">
+          <button 
+            onClick={handleDownloadPDF}
+            className="group relative glass px-10 py-4 rounded-full font-display font-bold overflow-hidden transition-all hover:scale-105 border border-white/10 cursor-pointer"
+          >
             <div className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10 transition-opacity" />
             <span className="relative z-10 flex items-center gap-3">
               <Download size={18} className="text-accent" />

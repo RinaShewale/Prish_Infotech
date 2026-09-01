@@ -18,7 +18,6 @@ const AboutUs = lazy(() => import("../Features/dashboard/Home/layout/AboutUs"));
 const PrivacyPolicy = lazy(() => import("../Features/dashboard/Home/layout/PrivacyPolicy"));
 const TermsCondition = lazy(() => import("../Features/dashboard/Home/layout/TermsCondition"));
 const PricingRefund = lazy(() => import("../Features/dashboard/Home/layout/PricingRefund"));
-const Hiring = lazy(() => import("../Features/dashboard/Home/layout/Hiring").then(m => ({ default: m.Hiring })));
 const Support = lazy(() => import("../Features/dashboard/Home/layout/Support").then(m => ({ default: m.Support })));
 
 // Classroom
@@ -117,7 +116,6 @@ export const router = createBrowserRouter([
   { path: "/privacy-policy", element: S(PrivacyPolicy) },
   { path: "/terms-and-condition", element: S(TermsCondition) },
   { path: "/pricing-and-refund", element: S(PricingRefund) },
-  { path: "/hire-from-us", element: S(Hiring) },
   { path: "/support", element: S(Support) },
 
 

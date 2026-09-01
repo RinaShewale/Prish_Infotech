@@ -2,8 +2,14 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import passport from "./config/passport.js";
+
+// Get __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ROUTES
 import authRoutes from "./routes/auth.route.js";
@@ -18,7 +24,7 @@ import enrollmentRoutes from "./routes/enrollment.routes.js";
 import couponRoutes from "./routes/coupon.route.js";
 import lessonProgressRoutes from "./routes/lessonProgress.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
-import courseProgressRoutes from "./routes/courseProgress.routes.js";
+import courseProgressRoutes from "./routes/courseProgress.routes.js"; 
 import bookmarkRoutes from "./routes/bookmark.route.js";
 import mediaRoutes from "./routes/media.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
@@ -41,9 +47,16 @@ createAdminIfNotExists();
 // ======================
 // CORS
 // ======================
+const allowedOrigins = [
+  "http://localhost:5173", // Development
+  "http://localhost:3000",  // Production local
+  "http://localhost:5000",  // Production local
+  process.env.FRONTEND_URL  // Environment variable for production
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -101,15 +114,27 @@ app.use("/api/bootcamps", bootcampRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/admin", adminRoutes);
 
+// ======================
+// SERVE STATIC FILES (DIST FOLDER)
+// ======================
+const distPath = path.join(__dirname, "../../Frontend/dist");
+app.use(express.static(distPath));
 
 // ======================
-// HEALTH CHECK
+// HEALTH CHECK (API)
 // ======================
-app.get("/", (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "Server running on port 3000 🚀",
+    message: "Server running 🚀",
   });
+});
+
+// ======================
+// SPA ROUTING - SERVE INDEX.HTML FOR ALL NON-API ROUTES
+// ======================
+app.get("*name", (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 export default app;

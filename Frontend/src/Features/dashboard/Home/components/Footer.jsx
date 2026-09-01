@@ -128,9 +128,9 @@ export const Footer = ({ courseId }) => {
           <div className="flex flex-col gap-5">
             <h4 className="text-[10px] font-bold tracking-[0.3em] text-accent uppercase">COMPANY</h4>
             <div className="flex flex-col gap-2.5 text-xs text-text-secondary">
-              <Link to="/hire-from-us" className="hover:text-text transition-colors">Hire From Us</Link>
-              <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">Discord</a>
-              <Link to="/pricing-and-refund" className="hover:text-text transition-colors">Pricing and Refund</Link>
+             <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">Discord</a>
+<a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">LinkedIn</a>
+<Link to="/pricing-and-refund" className="hover:text-text transition-colors">Pricing and Refund</Link>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="hover:text-text transition-colors text-left"
