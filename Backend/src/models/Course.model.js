@@ -243,7 +243,7 @@ courseSchema.pre("save", function () {
 // ✅ EXPORT MODEL
 // ======================================================
 
-const Course = mongoose.model(
+const Course = mongoose.models.Course || mongoose.model(
   "Course",
   courseSchema
 );

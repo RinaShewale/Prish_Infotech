@@ -39,7 +39,7 @@ const lessonProgressSchema = new mongoose.Schema(
   }
 );
 
-const LessonProgress = mongoose.model(
+const LessonProgress = mongoose.models.LessonProgress || mongoose.model(
   "LessonProgress",
   lessonProgressSchema
 );

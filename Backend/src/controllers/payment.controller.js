@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import razorpay from "../config/razorpay.js";
-import Payment from "../models/payment.model.js";
+import Payment from "../models/Payment.model.js";
 import Enrollment from "../models/Enrollment.model.js";
 
 // ================= CREATE ORDER =================

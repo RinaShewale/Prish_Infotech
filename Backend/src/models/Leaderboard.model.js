@@ -29,7 +29,7 @@ const leaderboardSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model(
+export default mongoose.models.Leaderboard || mongoose.model(
   "Leaderboard",
   leaderboardSchema
 );

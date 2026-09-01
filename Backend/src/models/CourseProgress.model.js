@@ -34,4 +34,4 @@ const courseProgressSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("CourseProgress", courseProgressSchema);
+export default mongoose.models.CourseProgress || mongoose.model("CourseProgress", courseProgressSchema);

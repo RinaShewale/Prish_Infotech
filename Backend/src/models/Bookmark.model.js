@@ -36,7 +36,7 @@ bookmarkSchema.index(
   }
 );
 
-const Bookmark = mongoose.model(
+const Bookmark = mongoose.models.Bookmark || mongoose.model(
   "Bookmark",
   bookmarkSchema
 );

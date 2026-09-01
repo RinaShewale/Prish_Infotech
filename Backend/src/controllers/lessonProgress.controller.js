@@ -2,7 +2,9 @@ import LessonProgress from "../models/LessonProgress.model.js";
 import Lesson from "../models/Lesson.model.js";
 import Leaderboard from "../models/Leaderboard.model.js";
 import CourseProgress from "../models/CourseProgress.model.js";
-import Certificate from "../models/certificate.model.js";
+import Certificate from "../models/Certificate.model.js";
+
+
 
 // ================= SAVE PROGRESS =================
 export const saveLessonProgress = async (req, res) => {

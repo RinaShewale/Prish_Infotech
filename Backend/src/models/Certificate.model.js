@@ -49,6 +49,7 @@ certificateSchema.index(
 );
 
 const Certificate =
+  mongoose.models.Certificate ||
   mongoose.model(
     "Certificate",
     certificateSchema

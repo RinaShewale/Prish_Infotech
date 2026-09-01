@@ -1,4 +1,4 @@
-import Certificate from "../models/certificate.model.js";
+import Certificate from "../models/Certificate.model.js";
 
 // ======================================================
 // 🎓 CREATE CERTIFICATE
