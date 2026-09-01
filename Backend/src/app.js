@@ -49,9 +49,6 @@ createAdminIfNotExists();
 // CORS
 // ======================
 const allowedOrigins = [
-  "http://localhost:5173", // Development
-  "http://localhost:3000",  // Production local
-  "http://localhost:5000",  // Production local
 "https://prish-infotech.onrender.com"  // Environment variable for production
 ].filter(Boolean);
 
