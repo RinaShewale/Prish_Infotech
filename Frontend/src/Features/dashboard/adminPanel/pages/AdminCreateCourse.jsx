@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { GlassCard } from '../Shared/GlassCard';
+import { useState, useRef } from 'react';
 import { Save, Plus, Trash2, Video, Image as ImageIcon, Loader2, ArrowLeft, Sparkles, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useCourse } from '../../Courses/hooks/useCourse';
+import { uploadImageAPI } from '../../Home/components/services/media.api';
 
 const LEVELS = ['beginner', 'intermediate', 'advanced'];
 const TYPES = ['recorded', 'live'];
@@ -16,11 +16,9 @@ const AdminCreateCourse = () => {
   const { loading: isSaving } = useSelector((state) => state.course);
 
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [isThumbnailDragActive, setIsThumbnailDragActive] = useState(false);
   
   const thumbnailRef = useRef(null);
-  const videoRef = useRef(null);
-  
   const [course, setCourse] = useState({
     title: '',
     slug: '',
@@ -72,8 +70,38 @@ const AdminCreateCourse = () => {
       ),
     }));
 
-  const handleThumbnailUploadPlaceholder = async (e) => {
-    toast.error("Image upload service not found in course hook. Please paste a URL.");
+  const handleThumbnailUpload = async (file) => {
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    try {
+      setUploadingThumbnail(true);
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const { data } = await uploadImageAPI(formData);
+      setCourse((prev) => ({ ...prev, thumbnail: data.url }));
+      toast.success('Thumbnail uploaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Thumbnail upload failed');
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
+
+  const handleThumbnailInputChange = (e) => {
+    handleThumbnailUpload(e.target.files?.[0]);
+    e.target.value = '';
+  };
+
+  const handleThumbnailDrop = (e) => {
+    e.preventDefault();
+    setIsThumbnailDragActive(false);
+    handleThumbnailUpload(e.dataTransfer.files?.[0]);
   };
 
   const handleSave = async () => {
@@ -271,19 +299,25 @@ const AdminCreateCourse = () => {
               <h3 className="text-[10px] md:text-sm font-black text-accent uppercase tracking-widest">Media Assets</h3>
               
               <Field label="Thumbnail Preview">
-                <div 
+                <div
                   onClick={() => thumbnailRef.current?.click()}
-                  className="mt-2 aspect-video bg-black/40 border-2 border-dashed border-white/10 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center text-text-secondary cursor-pointer hover:border-accent/50 transition-all relative overflow-hidden group"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsThumbnailDragActive(true);
+                  }}
+                  onDragLeave={() => setIsThumbnailDragActive(false)}
+                  onDrop={handleThumbnailDrop}
+                  className={`mt-2 aspect-video bg-black/40 border-2 border-dashed rounded-2xl md:rounded-3xl flex flex-col items-center justify-center text-text-secondary cursor-pointer transition-all relative overflow-hidden group ${isThumbnailDragActive ? 'border-accent bg-accent/10' : 'border-white/10 hover:border-accent/50'}`}
                 >
                   {course.thumbnail ? (
                     <img src={course.thumbnail} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <div className="flex flex-col items-center gap-3">
-                      <ImageIcon className="w-8 h-8 opacity-20" />
-                      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Upload Image</span>
+                      {uploadingThumbnail ? <Loader2 className="w-8 h-8 text-accent animate-spin" /> : <ImageIcon className="w-8 h-8 opacity-20" />}
+                      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">{uploadingThumbnail ? 'Uploading...' : 'Upload or Drop Image'}</span>
                     </div>
                   )}
-                  <input type="file" ref={thumbnailRef} onChange={handleThumbnailUploadPlaceholder} accept="image/*" className="hidden" />
+                  <input type="file" ref={thumbnailRef} onChange={handleThumbnailInputChange} accept="image/*" className="hidden" disabled={uploadingThumbnail} />
                 </div>
                 <input value={course.thumbnail} onChange={set('thumbnail')} placeholder="Paste image URL here" className="admin-input mt-4 !text-[11px] font-mono" />
               </Field>
