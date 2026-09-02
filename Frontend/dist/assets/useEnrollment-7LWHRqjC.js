@@ -1,1 +1,0 @@
-import{$ as e,Mt as t,et as n,jt as r,nt as i,tt as a}from"./index-DBSBJqp_.js";var o=()=>{let o=r(),{enrollments:s,loading:c,error:l,success:u,loaded:d}=t(e=>e.enrollment);return{enrollments:s,loading:c,error:l,success:u,loaded:d,fetchMyEnrollments:()=>{o(i())},fetchEnrollments:()=>{o(a())},handleEnroll:e=>{o(n({courseId:e}))},clearState:()=>{o(e())}}};export{o as t};
