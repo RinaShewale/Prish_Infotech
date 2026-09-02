@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { GlassCard } from "../Shared/GlassCard";
+import { EditModal } from "./AdminCourses";
 import {
     deleteLessonAPI,
     updateLessonAPI,
@@ -32,8 +33,9 @@ const AdminCourseDetail = () => {
     const [isDeleting, setIsDeleting] = useState(null);
     const [editingLesson, setEditingLesson] = useState(null);
     const [isSavingLesson, setIsSavingLesson] = useState(false);
+    const [isEditingCourse, setIsEditingCourse] = useState(false);
 
-    const { handleGetSingleCourse } = useCourse();
+    const { handleGetSingleCourse, handleUpdateCourse } = useCourse();
     const { getLessons } = useLesson();
 
     const { singleCourse, loading: courseLoading } = useSelector(state => state.course);
@@ -51,6 +53,16 @@ const AdminCourseDetail = () => {
 
     const handleRefresh = () => {
         if (singleCourse?._id) getLessons(singleCourse._id);
+    };
+
+    const handleSaveCourse = async (form) => {
+        const result = await handleUpdateCourse(singleCourse._id, form);
+        if (result.success) {
+            setIsEditingCourse(false);
+            handleGetSingleCourse(slug);
+        } else {
+            window.alert(result.message || "Course update failed");
+        }
     };
 
     const handleDeleteLesson = async (lessonId) => {
@@ -134,6 +146,13 @@ const AdminCourseDetail = () => {
 
     return (
         <>
+        {isEditingCourse && (
+            <EditModal
+                course={singleCourse}
+                onClose={() => setIsEditingCourse(false)}
+                onSave={handleSaveCourse}
+            />
+        )}
         {editingLesson && (
             <LessonEditModal
                 lesson={editingLesson}
@@ -179,7 +198,7 @@ const AdminCourseDetail = () => {
                     >
                         <RefreshCw size={18} className={lessonLoading ? "animate-spin text-accent" : "text-zinc-400"} />
                     </button>
-                    <button className="flex-[3] lg:flex-none flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all">
+                    <button onClick={() => setIsEditingCourse(true)} className="flex-[3] lg:flex-none flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all">
                         <Pencil size={16} className="text-accent"/> Edit Course
                     </button>
                 </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCourse } from '../../Courses/hooks/useCourse'; // Using your new hook
 import { useSelector } from 'react-redux'; // To get courses from Redux state
 import { GlassCard } from '../Shared/GlassCard';
@@ -116,6 +116,8 @@ const EditModal = ({ course, onClose, onSave }) => {
     </div>
   );
 };
+
+export { EditModal };
 
 // ── ADMIN COURSES PAGE ───────────────────────────────────────────────────────
 const AdminCourses = () => {
