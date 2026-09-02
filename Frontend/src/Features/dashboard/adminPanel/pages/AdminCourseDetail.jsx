@@ -30,6 +30,8 @@ const AdminCourseDetail = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const [isDeleting, setIsDeleting] = useState(null);
+    const [editingLesson, setEditingLesson] = useState(null);
+    const [isSavingLesson, setIsSavingLesson] = useState(false);
 
     const { handleGetSingleCourse } = useCourse();
     const { getLessons } = useLesson();
@@ -70,36 +72,53 @@ const AdminCourseDetail = () => {
         window.open(videoUrl, "_blank", "noopener,noreferrer");
     };
 
-    const handleEditLesson = async (lesson) => {
-        const title = window.prompt("Module title", lesson.title || "");
-        if (title === null) return;
+    const openLessonEditor = (lesson) => {
+        const subModules = lesson.subModules?.length
+            ? lesson.subModules.map((subModule) => ({ ...subModule }))
+            : [{ title: lesson.title || "", videoUrl: lesson.videoUrl || "" }];
 
-        const trimmedTitle = title.trim();
-        if (!trimmedTitle) return;
+        setEditingLesson({ ...lesson, title: lesson.title || "", subModules });
+    };
 
-        const videoUrl = window.prompt(
-            "Video URL",
-            lesson.subModules?.[0]?.videoUrl || lesson.videoUrl || ""
+    const handleEditLesson = async () => {
+        if (!editingLesson) return;
+
+        const title = editingLesson.title.trim();
+        const subModules = editingLesson.subModules.filter(
+            (subModule) => subModule.title.trim() && subModule.videoUrl.trim()
         );
-        if (videoUrl === null) return;
 
+        if (!title || subModules.length === 0) {
+            window.alert("Add a module title and at least one complete video");
+            return;
+        }
+
+        setIsSavingLesson(true);
         try {
-            const lessonData = { ...lesson };
+            const lessonData = { ...editingLesson };
             delete lessonData._id;
             delete lessonData.__v;
             delete lessonData.createdAt;
             delete lessonData.updatedAt;
             delete lessonData.course;
 
-            await updateLessonAPI(lesson._id, {
+            await updateLessonAPI(editingLesson._id, {
                 ...lessonData,
-                title: trimmedTitle,
-                videoUrl: videoUrl.trim(),
+                title,
+                videoUrl: subModules[0].videoUrl.trim(),
+                subModules: subModules.map((subModule) => ({
+                    ...subModule,
+                    title: subModule.title.trim(),
+                    videoUrl: subModule.videoUrl.trim(),
+                })),
             });
+            setEditingLesson(null);
             handleRefresh();
         } catch (error) {
             console.error(error);
             window.alert("Lesson update failed");
+        } finally {
+            setIsSavingLesson(false);
         }
     };
 
@@ -114,6 +133,16 @@ const AdminCourseDetail = () => {
     );
 
     return (
+        <>
+        {editingLesson && (
+            <LessonEditModal
+                lesson={editingLesson}
+                isSaving={isSavingLesson}
+                onChange={setEditingLesson}
+                onClose={() => setEditingLesson(null)}
+                onSave={handleEditLesson}
+            />
+        )}
         <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,7 +276,7 @@ const AdminCourseDetail = () => {
                                                 <ExternalLink size={18}/>
                                             </button>
                                             <button 
-                                                onClick={() => handleEditLesson(lesson)}
+                                                onClick={() => openLessonEditor(lesson)}
                                                 className="p-3 rounded-xl bg-white/5 text-zinc-400 hover:text-accent hover:bg-accent/10 transition-all"
                                                 title="Edit Lesson"
                                             >
@@ -277,6 +306,104 @@ const AdminCourseDetail = () => {
                 :root { --accent-rgb: 124, 58, 237; }
             `}</style>
         </motion.div>
+        </>
+    );
+};
+
+const LessonEditModal = ({ lesson, isSaving, onChange, onClose, onSave }) => {
+    const updateLesson = (key, value) => onChange({ ...lesson, [key]: value });
+
+    const updateSubModule = (index, key, value) => {
+        const subModules = lesson.subModules.map((subModule, subModuleIndex) => (
+            subModuleIndex === index ? { ...subModule, [key]: value } : subModule
+        ));
+        onChange({ ...lesson, subModules });
+    };
+
+    const addSubModule = () => onChange({
+        ...lesson,
+        subModules: [...lesson.subModules, { title: "", videoUrl: "" }],
+    });
+
+    const removeSubModule = (index) => {
+        if (lesson.subModules.length === 1) return;
+        onChange({
+            ...lesson,
+            subModules: lesson.subModules.filter((_, subModuleIndex) => subModuleIndex !== index),
+        });
+    };
+
+    const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl p-3 outline-none focus:border-accent transition-colors text-sm";
+    const labelClass = "text-[10px] text-text-secondary uppercase font-bold block mb-1 tracking-widest";
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+            <GlassCard className="w-full max-w-2xl p-8 space-y-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-display font-bold italic">Edit Module</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-text-secondary hover:text-white">
+                        <span className="text-xl">&times;</span>
+                    </button>
+                </div>
+
+                <div>
+                    <label className={labelClass}>Module Title</label>
+                    <input
+                        value={lesson.title}
+                        onChange={(event) => updateLesson("title", event.target.value)}
+                        className={inputClass}
+                    />
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <label className={labelClass}>Submodules & Videos</label>
+                        <button onClick={addSubModule} className="px-3 py-2 bg-accent/10 border border-accent/20 rounded-lg text-accent text-[10px] font-bold uppercase hover:bg-accent hover:text-white transition-colors">
+                            + Add Video
+                        </button>
+                    </div>
+
+                    {lesson.subModules.map((subModule, index) => (
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+                            <div>
+                                <label className={labelClass}>Submodule Title</label>
+                                <input
+                                    value={subModule.title}
+                                    onChange={(event) => updateSubModule(index, "title", event.target.value)}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Video URL</label>
+                                <input
+                                    value={subModule.videoUrl}
+                                    onChange={(event) => updateSubModule(index, "videoUrl", event.target.value)}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <button
+                                onClick={() => removeSubModule(index)}
+                                disabled={lesson.subModules.length === 1}
+                                className="p-3 bg-white/5 rounded-xl text-zinc-400 hover:text-red-500 disabled:opacity-30 transition-colors"
+                                title="Remove submodule"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                    <button onClick={onClose} className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-sm hover:bg-white/10 transition-colors">
+                        Cancel
+                    </button>
+                    <button onClick={onSave} disabled={isSaving} className="flex items-center gap-2 px-6 py-3 bg-accent text-bg rounded-full font-bold hover:scale-105 transition-transform text-sm disabled:opacity-50">
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                        Save Changes
+                    </button>
+                </div>
+            </GlassCard>
+        </div>
     );
 };
 
