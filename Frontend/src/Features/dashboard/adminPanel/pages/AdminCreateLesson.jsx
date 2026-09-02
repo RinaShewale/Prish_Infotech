@@ -124,7 +124,7 @@ const AdminCreateLesson = () => {
     resources: [],
   });
 
-  const [lessons, setLessons] = useState([createEmptyLesson]);
+  const [lessons, setLessons] = useState([createEmptyLesson()]);
 
   useEffect(() => {
     if (!singleCourse || singleCourse.slug !== slug) {
