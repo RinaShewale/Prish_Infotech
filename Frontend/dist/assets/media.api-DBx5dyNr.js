@@ -1,1 +1,0 @@
-import{Dt as e,Et as t}from"./index-Cco23MtH.js";var n=()=>e.get(`/media`),r=e=>t.post(`/upload/image`,e,{headers:{"Content-Type":`multipart/form-data`}});export{r as n,n as t};

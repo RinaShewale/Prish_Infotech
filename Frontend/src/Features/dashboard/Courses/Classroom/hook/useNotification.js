@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getNotifications,
@@ -19,7 +20,10 @@ export const useNotification = () => {
     error,
     unreadCount,
 
-    fetchNotifications: () => dispatch(getNotifications()),
+    fetchNotifications: useCallback(
+      () => dispatch(getNotifications()),
+      [dispatch]
+    ),
     addNotification: (data) => dispatch(createNotification(data)),
     readNotification: (id) => dispatch(markAsRead(id)),
     removeNotification: (id) => dispatch(deleteNotification(id)),

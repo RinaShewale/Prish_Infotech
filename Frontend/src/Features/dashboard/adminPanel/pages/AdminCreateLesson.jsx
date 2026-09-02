@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { 
@@ -114,8 +114,6 @@ const AdminCreateLesson = () => {
     videoUrl: "",
     level: "Beginner",
     courseType: "Live",
-    price: 0,
-    oldPrice: 0,
     resources: [], 
     content: "Lesson Material",
   }), []);
@@ -166,7 +164,7 @@ const AdminCreateLesson = () => {
       });
       setLessons(newLessons);
       toast.success("Document uploaded successfully");
-    } catch (error) {
+    } catch {
       toast.error("Upload failed");
     } finally {
       setUploadState(prev => {
@@ -200,7 +198,7 @@ const AdminCreateLesson = () => {
       await Promise.all(requests);
       toast.success(`${lessons.length} Modules Published!`);
       navigate(`/admin/courses/${slug}`);
-    } catch (error) {
+    } catch {
       toast.error("Error creating curriculum");
     } finally {
       setLoading(false);
@@ -257,34 +255,13 @@ const AdminCreateLesson = () => {
 
                     <div className="p-5 lg:p-10 space-y-8 lg:space-y-10">
                       
-                      {/* PRICING & LOGISTICS - IMPROVED SECTION */}
+                      {/* LESSON SETTINGS */}
                       <div className="space-y-6">
                         <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/80 flex items-center gap-3">
-                          <span className="w-8 h-[1px] bg-accent/30"></span> Pricing & Logistics
+                          <span className="w-8 h-[1px] bg-accent/30"></span> Lesson Settings
                         </h4>
                         
                         <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
-                          <div className="space-y-2 lg:space-y-3">
-                            <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Price (INR) *</label>
-                            <input 
-                              type="number" 
-                              value={lesson.price} 
-                              onChange={(e) => handleLessonChange(index, "price", e.target.value)}
-                              placeholder="0" 
-                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white outline-none focus:border-accent/50 transition-all" 
-                            />
-                          </div>
-                          <div className="space-y-2 lg:space-y-3">
-                            <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Old Price (INR)</label>
-                            <input 
-                              type="number" 
-                              value={lesson.oldPrice} 
-                              onChange={(e) => handleLessonChange(index, "oldPrice", e.target.value)}
-                              placeholder="0" 
-                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white outline-none focus:border-accent/50 transition-all" 
-                            />
-                          </div>
-
                           {/* THEMED CUSTOM SELECTS */}
                           <ThemedSelect 
                             label="Difficulty Level"
@@ -353,7 +330,7 @@ const AdminCreateLesson = () => {
                             </AnimatePresence>
 
                             {Object.entries(uploadState)
-                              .filter(([_, state]) => state.lessonIndex === index)
+                              .filter(([, state]) => state.lessonIndex === index)
                               .map(([id, state]) => (
                                 <div key={id} className="relative flex items-center gap-4 p-3 lg:p-4 bg-white/[0.01] border border-dashed border-accent/30 rounded-xl lg:rounded-2xl overflow-hidden">
                                     <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">

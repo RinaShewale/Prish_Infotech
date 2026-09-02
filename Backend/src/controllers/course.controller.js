@@ -1,4 +1,6 @@
 import Course from "../models/Course.model.js";
+import Notification from "../models/Notification.model.js";
+import User from "../models/User.model.js";
 import slugify from "slugify";
 
 
@@ -184,6 +186,22 @@ export const createCourse = async (
       "instructor",
       "name email"
     );
+
+    // Notify students when a new course is published.
+    const students = await User.find({
+      role: { $ne: "admin" },
+    }).select("_id");
+
+    if (students.length > 0) {
+      await Notification.insertMany(
+        students.map((student) => ({
+          user: student._id,
+          title: "New Course Published",
+          message: `${course.title} is now available to explore`,
+          type: "success",
+        }))
+      );
+    }
 
     res.status(201).json({
       success: true,

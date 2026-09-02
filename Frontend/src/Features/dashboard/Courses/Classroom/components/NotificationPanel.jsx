@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, Circle, Clock } from "lucide-react";
 import { useNotification } from "../../Classroom/hook/useNotification";
 
@@ -17,7 +17,7 @@ const NotificationPanel = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchNotifications]);
 
   // When the latest notification changes, trigger a fade-out → fade-in swap
   const latestNotification = notifications.length > 0 ? notifications[0] : null;
