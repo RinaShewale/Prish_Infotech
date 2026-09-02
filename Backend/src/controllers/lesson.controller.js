@@ -14,6 +14,16 @@ export const createLesson = async (req, res) => {
       resourceUrL: req.body.resourceUrL?.trim() || "",
     };
 
+    if (Array.isArray(req.body.subModules)) {
+      lessonData.subModules = req.body.subModules
+        .filter((subModule) => subModule?.title?.trim() && subModule?.videoUrl?.trim())
+        .map((subModule) => ({
+          title: subModule.title.trim(),
+          videoUrl: subModule.videoUrl.trim(),
+          resources: Array.isArray(subModule.resources) ? subModule.resources : [],
+        }));
+    }
+
     // ================= SANITIZE RESOURCES =================
     if (Array.isArray(req.body.resources)) {
       lessonData.resources = req.body.resources

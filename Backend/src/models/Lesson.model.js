@@ -37,6 +37,28 @@ const resourceSchema = new mongoose.Schema(
   }
 );
 
+const subModuleSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    videoUrl: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    resources: {
+      type: [resourceSchema],
+      default: [],
+    },
+  },
+  { _id: true }
+);
+
 const lessonSchema = new mongoose.Schema(
   {
     // Lesson Title
@@ -49,8 +71,14 @@ const lessonSchema = new mongoose.Schema(
     // Video URL
     videoUrl: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
+    },
+
+    // Optional nested videos for a module. Existing flat lessons remain valid.
+    subModules: {
+      type: [subModuleSchema],
+      default: [],
     },
 
     // Lesson Content

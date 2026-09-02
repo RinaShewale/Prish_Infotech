@@ -111,14 +111,20 @@ const AdminCreateLesson = () => {
 
   const emptyLesson = useMemo(() => ({
     title: "",
-    videoUrl: "",
+    subModules: [{ title: "", videoUrl: "" }],
     level: "Beginner",
     courseType: "Live",
     resources: [], 
     content: "Lesson Material",
   }), []);
 
-  const [lessons, setLessons] = useState([{ ...emptyLesson }]);
+  const createEmptyLesson = () => ({
+    ...emptyLesson,
+    subModules: emptyLesson.subModules.map((subModule) => ({ ...subModule })),
+    resources: [],
+  });
+
+  const [lessons, setLessons] = useState([createEmptyLesson]);
 
   useEffect(() => {
     if (!singleCourse || singleCourse.slug !== slug) {
@@ -132,8 +138,29 @@ const AdminCreateLesson = () => {
     setLessons(newLessons);
   };
 
+  const handleSubModuleChange = (lessonIndex, subModuleIndex, name, value) => {
+    const newLessons = [...lessons];
+    newLessons[lessonIndex].subModules[subModuleIndex][name] = value;
+    setLessons(newLessons);
+  };
+
+  const addSubModule = (lessonIndex) => {
+    const newLessons = [...lessons];
+    newLessons[lessonIndex].subModules.push({ title: "", videoUrl: "" });
+    setLessons(newLessons);
+  };
+
+  const removeSubModule = (lessonIndex, subModuleIndex) => {
+    const newLessons = [...lessons];
+    if (newLessons[lessonIndex].subModules.length === 1) return;
+    newLessons[lessonIndex].subModules = newLessons[lessonIndex].subModules.filter(
+      (_, index) => index !== subModuleIndex
+    );
+    setLessons(newLessons);
+  };
+
   const addLessonRow = () => {
-    setLessons([...lessons, { ...emptyLesson }]);
+    setLessons([...lessons, createEmptyLesson()]);
     toast.success("New module container added");
   };
 
@@ -185,13 +212,21 @@ const AdminCreateLesson = () => {
     e.preventDefault();
     if (!singleCourse?._id) return toast.error("Course context missing.");
     
-    const isValid = lessons.every(l => l.title && l.videoUrl);
-    if(!isValid) return toast.error("Complete all titles and video links first");
+    const isValid = lessons.every(l =>
+      l.title.trim() &&
+      l.subModules.length > 0 &&
+      l.subModules.every(subModule => subModule.title.trim() && subModule.videoUrl.trim())
+    );
+    if(!isValid) return toast.error("Complete all module, submodule, and video fields first");
 
     setLoading(true);
     try {
       const requests = lessons.map((lesson) => {
-        const payload = { ...lesson, course: singleCourse._id };
+        const payload = {
+          ...lesson,
+          videoUrl: lesson.subModules[0].videoUrl,
+          course: singleCourse._id,
+        };
         return createLessonAPI(payload);
       });
 
@@ -282,12 +317,27 @@ const AdminCreateLesson = () => {
                       {/* Content Inputs */}
                       <div className="pt-6 border-t border-white/5 grid md:grid-cols-2 gap-4 lg:gap-6">
                         <div className="space-y-2 lg:space-y-3">
-                          <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Lesson Title</label>
+                          <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Module Title</label>
                           <input required value={lesson.title} onChange={(e) => handleLessonChange(index, "title", e.target.value)} placeholder="e.g. Introduction to React" className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white outline-none focus:border-accent/50 transition-all" />
                         </div>
-                        <div className="space-y-2 lg:space-y-3">
-                          <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Video Link (Vimeo/Youtube)</label>
-                          <input required value={lesson.videoUrl} onChange={(e) => handleLessonChange(index, "videoUrl", e.target.value)} placeholder="https://..." className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-white outline-none focus:border-accent/50 transition-all" />
+                        <div className="space-y-4 md:col-span-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Submodules & Videos</label>
+                            <button type="button" onClick={() => addSubModule(index)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-[8px] font-black uppercase tracking-widest border border-accent/20 hover:bg-accent hover:text-white transition-all">
+                              <Plus size={12} /> Add Video
+                            </button>
+                          </div>
+                          <div className="space-y-3">
+                            {lesson.subModules.map((subModule, subModuleIndex) => (
+                              <div key={subModuleIndex} className="grid md:grid-cols-[1fr_1fr_auto] gap-3 items-center">
+                                <input required value={subModule.title} onChange={(e) => handleSubModuleChange(index, subModuleIndex, "title", e.target.value)} placeholder={`Submodule ${subModuleIndex + 1} title`} className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 py-3 text-xs text-white outline-none focus:border-accent/50 transition-all" />
+                                <input required value={subModule.videoUrl} onChange={(e) => handleSubModuleChange(index, subModuleIndex, "videoUrl", e.target.value)} placeholder="Video link (Vimeo/YouTube)" className="w-full bg-white/[0.03] border border-white/10 rounded-xl lg:rounded-2xl px-4 py-3 text-xs text-white outline-none focus:border-accent/50 transition-all" />
+                                <button type="button" onClick={() => removeSubModule(index, subModuleIndex)} disabled={lesson.subModules.length === 1} className="p-3 rounded-xl bg-white/5 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-all disabled:opacity-30 disabled:hover:text-zinc-500">
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
 

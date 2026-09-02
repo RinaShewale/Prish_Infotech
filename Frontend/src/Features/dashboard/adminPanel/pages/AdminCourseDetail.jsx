@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ArrowLeft, BookOpen, PlayCircle, PlusCircle, 
     Clock, Pencil, FileText, Trash2, RefreshCw, Video,
-    ExternalLink, Layers, CheckCircle2
+    ExternalLink, Layers, CheckCircle2,
+    Loader2
 } from "lucide-react";
 
 import { GlassCard } from "../Shared/GlassCard";

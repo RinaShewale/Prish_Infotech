@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ChevronLeft, Download, Bookmark,
-  FileText, List, Globe, MonitorPlay, X, 
+  FileText, List, Globe, MonitorPlay,
   ExternalLink, FolderOpen, 
   Terminal, Check, PlayCircle, Eye
 } from 'lucide-react';
@@ -19,6 +19,7 @@ import { FluidBackground } from '../../../Home/components/FluidBackground';
 
 const LecturePage = () => {
   const { courseId, lectureId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const videoRef = useRef(null);
@@ -41,14 +42,19 @@ const LecturePage = () => {
   }, [courseId, dispatch]);
 
   useEffect(() => {
+    let resetTimer;
     if (lectureId) {
         dispatch(getLessonProgress(lectureId));
-        setViewMode('video'); 
         window.scrollTo(0, 0);
+        resetTimer = setTimeout(() => setViewMode('video'), 0);
     }
+    return () => clearTimeout(resetTimer);
   }, [lectureId, dispatch]);
 
   const currentModule = lessons.find(m => (m._id || m.id) === lectureId);
+  const selectedSubModule = currentModule?.subModules?.find(
+    (subModule) => String(subModule._id) === searchParams.get('subModule')
+  );
   const currentIndex = lessons.indexOf(currentModule);
   const isBookmarked = bookmarks.some((b) => String(b.lesson?._id) === String(lectureId));
 
@@ -72,8 +78,13 @@ const LecturePage = () => {
             }
         });
     }
+    if (Array.isArray(selectedSubModule?.resources)) {
+      selectedSubModule.resources.forEach((res) => {
+        if (res.url !== currentModule.resourceUrL) assets.push(res);
+      });
+    }
     return assets;
-  }, [currentModule]);
+  }, [currentModule, selectedSubModule]);
 
   const handleBookmarkToggle = async () => {
     try {
@@ -120,7 +131,7 @@ const LecturePage = () => {
       );
     }
 
-    const url = currentModule?.videoUrl;
+    const url = selectedSubModule?.videoUrl || currentModule?.videoUrl;
     if (!url) return (
         <div className="flex flex-col items-center justify-center h-full bg-[#0a0a0a] text-zinc-700">
             <MonitorPlay size={40} className="opacity-20 mb-4" />
@@ -150,7 +161,7 @@ const LecturePage = () => {
           </button>
           <div className="flex flex-col">
             <span className="text-[9px] font-black text-accent uppercase tracking-widest mb-1">Module {currentIndex + 1}</span>
-            <h1 className="text-base lg:text-lg font-bold text-white tracking-tight line-clamp-1">{currentModule.title}</h1>
+            <h1 className="text-base lg:text-lg font-bold text-white tracking-tight line-clamp-1">{selectedSubModule?.title || currentModule.title}</h1>
           </div>
         </div>
 
@@ -179,20 +190,25 @@ const LecturePage = () => {
           <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 pb-32">
             {activeTab === 'content' && (
               <div className="space-y-2.5">
-                {lessons.map((m, idx) => {
-                  const isActive = m._id === lectureId;
+                {lessons.flatMap((m, idx) => {
+                  const subModules = Array.isArray(m.subModules) && m.subModules.length > 0
+                    ? m.subModules
+                    : [{ _id: null, title: m.title, videoUrl: m.videoUrl }];
+                  return subModules.map((subModule, subIndex) => {
+                  const isActive = m._id === lectureId && String(subModule._id || '') === (searchParams.get('subModule') || '');
                   return (
-                    <button key={m._id} onClick={() => navigate(`/classroom/course/${courseId}/lecture/${m._id}`)} className={`group w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-500 ${isActive ? 'bg-accent/10 border-accent/30 shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}>
+                    <button key={`${m._id}-${subModule._id || 'lesson'}`} onClick={() => navigate(`/classroom/course/${courseId}/lecture/${m._id}${subModule._id ? `?subModule=${subModule._id}` : ''}`)} className={`group w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-500 ${isActive ? 'bg-accent/10 border-accent/30 shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}>
                       <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center text-[10px] font-black ${isActive ? 'bg-accent text-white' : 'bg-white/5 text-zinc-500'}`}>
-                          {m.completed ? <Check size={16} strokeWidth={4} /> : idx + 1}
+                          {m.completed ? <Check size={16} strokeWidth={4} /> : `${idx + 1}.${subIndex + 1}`}
                       </div>
                       <div className="flex flex-col items-start overflow-hidden">
-                        <span className={`text-[13px] font-bold text-left line-clamp-1 ${isActive ? 'text-white' : 'text-zinc-400'}`}>{m.title}</span>
+                        <span className={`text-[13px] font-bold text-left line-clamp-1 ${isActive ? 'text-white' : 'text-zinc-400'}`}>{subModule.title}</span>
                         {isActive && <span className="text-[9px] text-accent font-black uppercase tracking-widest mt-0.5">Active</span>}
                       </div>
                       {isActive && <PlayCircle size={14} className="ml-auto text-accent" />}
                     </button>
                   );
+                });
                 })}
               </div>
             )}

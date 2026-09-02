@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Box, Megaphone, ArrowUpRight, PlayCircle, Lock } from 'lucide-react';
+import { ChevronDown, Box, Megaphone, PlayCircle } from 'lucide-react';
 import { fetchLessons } from '../../../Courses/Classroom/redux/lesson.slice';
 
 const ModuleList = ({ courseId }) => {
@@ -26,19 +26,25 @@ const ModuleList = ({ courseId }) => {
   };
 
   const displayModules = lessons.length > 0
-    ? lessons.map((lesson, idx) => ({
+    ? lessons.map((lesson) => ({
       id: lesson._id || lesson.id,
       title: lesson.title || 'Untitled Lesson',
       badge: lesson.completed ? "Completed" : "New",
       badgeType: lesson.completed ? "green" : "accent",
-      lessons: [
-        {
+      lessons: Array.isArray(lesson.subModules) && lesson.subModules.length > 0
+        ? lesson.subModules.map((subModule) => ({
+          id: lesson._id || lesson.id,
+          subModuleId: subModule._id,
+          title: subModule.title || 'Submodule',
+          type: "video",
+          completed: lesson.completed || false,
+        }))
+        : [{
           id: lesson._id || lesson.id,
           title: lesson.title || 'Lesson',
           type: "video",
           completed: lesson.completed || false,
-        }
-      ]
+        }]
     }))
     : [];
 
@@ -200,7 +206,7 @@ const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/classroom/course/${courseId}/lecture/${lesson.id}`);
+                      navigate(`/classroom/course/${courseId}/lecture/${lesson.id}${lesson.subModuleId ? `?subModule=${lesson.subModuleId}` : ''}`);
                     }}
                     className={`shrink-0 text-[9px] font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg uppercase border transition-all ${
                       lesson.completed
