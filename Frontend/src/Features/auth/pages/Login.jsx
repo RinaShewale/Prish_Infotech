@@ -28,9 +28,7 @@ export const Login = () => {
 
     try {
       const res = await handleLogin(formData);
-      if (res?.success) {
-        navigate("/");
-      } else {
+      if (!res?.success) {
         setError(res?.message || "Invalid email or password");
       }
     } catch (err) {

@@ -153,7 +153,7 @@ const AdminCoupons = () => {
           <h1 className="text-3xl font-display font-bold italic">Coupon Management</h1>
           <p className="text-text-secondary text-sm">Create and manage discounts with validation, preview, and expiration controls.</p>
         </div>
-        <button onClick={() => navigate('/admin/dashboard')} className="flex items-center gap-2 px-5 py-3 rounded-full bg-accent text-bg font-bold">Back to Dashboard</button>
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-2 px-5 py-3 rounded-full bg-accent text-bg font-bold">Back to Dashboard</button>
       </div>
 
       <GlassCard className="p-6 space-y-6">

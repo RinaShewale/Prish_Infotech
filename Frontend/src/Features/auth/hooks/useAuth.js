@@ -65,17 +65,19 @@ export function useAuth() {
       dispatch(setError(null));
 
       const res = await login(data);
+      const user = res?.data?.user;
 
-      if (res?.data?.user) {
-        dispatch(setUser(res.data.user));
+      if (user) {
+        dispatch(setUser(user));
         dispatch(setAuthChecked(true));
       }
 
-      navigate("/");
+      const redirectPath = user?.role === "admin" ? "/admin" : "/";
+      navigate(redirectPath, { replace: true });
 
       return {
         success: true,
-        user: res?.data?.user,
+        user,
       };
     } catch (err) {
       const message =
