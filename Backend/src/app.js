@@ -49,7 +49,8 @@ createAdminIfNotExists();
 // CORS
 // ======================
 const allowedOrigins = [
-"https://prish-infotech.onrender.com"  // Environment variable for production
+  "https://prish-infotech.onrender.com",
+  "https://prish-infotech.vercel.app"
 ].filter(Boolean);
 
 app.use(
