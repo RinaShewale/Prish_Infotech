@@ -1,1 +1,0 @@
-import{Dt as e}from"./index-B7txf6Oi.js";var t=()=>e.get(`/media`),n=t=>e.post(`/media/create`,t),r=t=>e.post(`/media/image`,t),i=t=>e.post(`/media/video`,t),a=(t,n)=>{let r=new FormData;return r.append(`file`,t),e.post(`/upload/file`,r,{headers:{"Content-Type":`multipart/form-data`},onUploadProgress:n})};export{i as a,r as i,t as n,a as r,n as t};

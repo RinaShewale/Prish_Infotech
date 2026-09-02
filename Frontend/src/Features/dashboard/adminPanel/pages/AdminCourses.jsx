@@ -36,7 +36,10 @@ const EditModal = ({ course, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
-      <GlassCard className="w-full max-w-2xl p-8 space-y-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <GlassCard
+        className="w-full max-w-2xl p-8 space-y-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-display font-bold italic">Edit Course</h2>
           <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-text-secondary hover:text-white">
