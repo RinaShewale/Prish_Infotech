@@ -80,8 +80,12 @@ export const Nav = () => {
       name: "Bootcamp",
       path: "/bootcamp",
     },
+    ...(user?.role === "admin"
+      ? [{ name: "Admin", path: "/admin" }]
+      : []
+    ),
     // Conditionally insert Classroom here
-    ...(user && hasEnrollments 
+    ...(user && user.role !== "admin" && hasEnrollments 
       ? [{ name: "Classroom", path: "/classroom" }] 
       : []
     ),
@@ -209,16 +213,29 @@ export const Nav = () => {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="absolute top-full right-0 mt-4 w-48 bg-bg border border-white/10 rounded-xl overflow-hidden shadow-2xl py-2"
                   >
-                    <button
-                      onClick={() => {
-                        navigate("/profile");
-                        setDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/5 transition-colors text-xs uppercase tracking-widest"
-                    >
-                      <User size={16} className="text-accent" />
-                      My Profile
-                    </button>
+                    {user?.role === "admin" ? (
+                      <button
+                        onClick={() => {
+                          navigate("/admin");
+                          setDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/5 transition-colors text-xs uppercase tracking-widest"
+                      >
+                        <User size={16} className="text-accent" />
+                        Admin Dashboard
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          navigate("/profile");
+                          setDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/5 transition-colors text-xs uppercase tracking-widest"
+                      >
+                        <User size={16} className="text-accent" />
+                        My Profile
+                      </button>
+                    )}
                     <div className="h-[1px] bg-white/5 mx-2 my-1" />
                     <button
                       onClick={logoutUser}
