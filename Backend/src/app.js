@@ -49,6 +49,7 @@ createAdminIfNotExists();
 // CORS
 // ======================
 const allowedOrigins = [
+  "http://localhost:5173",
   "https://prish-infotech.onrender.com",
   "https://prish-infotech.vercel.app"
 ].filter(Boolean);

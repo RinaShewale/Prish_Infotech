@@ -46,7 +46,7 @@ export const createCourse = async (
     // ✅ THUMBNAIL
 
     const thumbnail =
-      req.file?.path;
+      req.file?.path || req.body.thumbnail;
 
     if (!thumbnail) {
       return res.status(400).json({
