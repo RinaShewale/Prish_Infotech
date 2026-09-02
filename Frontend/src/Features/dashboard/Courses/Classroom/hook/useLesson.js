@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useDispatch, useSelector }
 from "react-redux";
 
@@ -21,14 +22,14 @@ export const useLesson = () => {
 
 
   // ================= FETCH =================
-  const getLessons = async (
+  const getLessons = useCallback(async (
     courseId
   ) => {
 
     await dispatch(
       fetchLessons(courseId)
     );
-  };
+  }, [dispatch]);
 
 
 

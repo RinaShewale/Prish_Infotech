@@ -29,7 +29,7 @@ const EnrolledCourseCards = ({ course, index }) => {
               <h3 className="text-base font-bold text-text line-clamp-1 group-hover:text-accent transition-colors">
                 {course.title}
               </h3>
-              <p className="text-xs text-text-secondary/60">by {course.instructor}</p>
+             
             </div>
           </div>
 

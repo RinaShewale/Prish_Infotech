@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCourse } from "../../Courses/hooks/useCourse";
 import { useLesson } from "../../Courses/Classroom/hook/useLesson";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    ArrowLeft, BookOpen, PlayCircle, PlusCircle, 
+    ArrowLeft, BookOpen, PlusCircle, 
     Clock, Pencil, FileText, Trash2, RefreshCw, Video,
     ExternalLink, Layers, CheckCircle2,
     Loader2
 } from "lucide-react";
 
 import { GlassCard } from "../Shared/GlassCard";
-import { deleteLessonAPI } from "../../Courses/Classroom/service/lesson.api";
+import {
+    deleteLessonAPI,
+    updateLessonAPI,
+} from "../../Courses/Classroom/service/lesson.api";
 
 // --- SKELETON LOADER ---
 const ListSkeleton = () => (
@@ -42,7 +45,7 @@ const AdminCourseDetail = () => {
         if (singleCourse?._id) {
             getLessons(singleCourse._id);
         }
-    }, [singleCourse?._id]);
+    }, [singleCourse?._id, getLessons]);
 
     const handleRefresh = () => {
         if (singleCourse?._id) getLessons(singleCourse._id);
@@ -58,6 +61,45 @@ const AdminCourseDetail = () => {
             console.error(error);
         } finally {
             setIsDeleting(null);
+        }
+    };
+
+    const handlePreviewLesson = (lesson) => {
+        const videoUrl = lesson.subModules?.[0]?.videoUrl || lesson.videoUrl;
+        if (!videoUrl) return;
+        window.open(videoUrl, "_blank", "noopener,noreferrer");
+    };
+
+    const handleEditLesson = async (lesson) => {
+        const title = window.prompt("Module title", lesson.title || "");
+        if (title === null) return;
+
+        const trimmedTitle = title.trim();
+        if (!trimmedTitle) return;
+
+        const videoUrl = window.prompt(
+            "Video URL",
+            lesson.subModules?.[0]?.videoUrl || lesson.videoUrl || ""
+        );
+        if (videoUrl === null) return;
+
+        try {
+            const lessonData = { ...lesson };
+            delete lessonData._id;
+            delete lessonData.__v;
+            delete lessonData.createdAt;
+            delete lessonData.updatedAt;
+            delete lessonData.course;
+
+            await updateLessonAPI(lesson._id, {
+                ...lessonData,
+                title: trimmedTitle,
+                videoUrl: videoUrl.trim(),
+            });
+            handleRefresh();
+        } catch (error) {
+            console.error(error);
+            window.alert("Lesson update failed");
         }
     };
 
@@ -197,12 +239,15 @@ const AdminCourseDetail = () => {
 
                                         <div className="flex items-center justify-end gap-3 border-t sm:border-t-0 border-white/5 pt-4 sm:pt-0">
                                             <button 
+                                                onClick={() => handlePreviewLesson(lesson)}
+                                                disabled={!lesson.videoUrl && !lesson.subModules?.[0]?.videoUrl}
                                                 className="p-3 rounded-xl bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
                                                 title="Preview Lesson"
                                             >
                                                 <ExternalLink size={18}/>
                                             </button>
                                             <button 
+                                                onClick={() => handleEditLesson(lesson)}
                                                 className="p-3 rounded-xl bg-white/5 text-zinc-400 hover:text-accent hover:bg-accent/10 transition-all"
                                                 title="Edit Lesson"
                                             >
