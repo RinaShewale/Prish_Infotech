@@ -12,12 +12,12 @@ export const createMedia = (data) => {
 
 // UPLOAD IMAGE FILE
 export const uploadMediaImage = (formData) => {
-  return API.post("/media/image", formData);
+  return API.post("/upload/image", formData);
 };
 
 // UPLOAD VIDEO FILE
 export const uploadMediaVideo = (formData) => {
-  return API.post("/media/video", formData);
+  return API.post("/upload/video", formData);
 };
 
 // UPLOAD GENERIC LESSON/RESOURCE FILE

@@ -1,10 +1,10 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useMedia } from '../hooks/useMedia';
 import { GlassCard } from '../Shared/GlassCard';
 import { 
   Upload, Video, Image as ImageIcon, 
   Loader2, Trash2, Layout, Users, PlayCircle, X, 
-  Plus, Search, FilePlus, ChevronDown, Check
+  Plus, FilePlus, ChevronDown, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -57,7 +57,7 @@ const MediaLibrary = () => {
       const res = type === 'video' ? await handleUploadVideo(file) : await handleUploadImage(file);
       await saveMedia({ [key]: res.url });
       toast.success(`${key} synchronized`);
-    } catch (err) { toast.error("Deployment failed"); }
+    } catch (err) { toast.error(err.response?.data?.message || "Deployment failed"); }
     finally { setUploading(prev => ({ ...prev, [key]: false })); }
   };
 
@@ -70,7 +70,7 @@ const MediaLibrary = () => {
       await saveMedia({ customAssets: updatedList });
       setCustomForm({ key: '', label: '', type: 'image' });
       toast.success("Asset integrated");
-    } catch (err) { toast.error("Integration failed"); }
+    } catch (err) { toast.error(err.response?.data?.message || "Integration failed"); }
     finally { setUploading(prev => ({ ...prev, custom: false })); }
   };
 
@@ -82,7 +82,12 @@ const MediaLibrary = () => {
       const res = await handleUploadImage(file);
       await saveMedia({ images: [...(media?.images || []), res.url] });
       toast.success("Pool updated");
-    } finally { setUploading(prev => ({ ...prev, gallery: false })); }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Image upload failed");
+    } finally {
+      e.target.value = '';
+      setUploading(prev => ({ ...prev, gallery: false }));
+    }
   };
 
   const sections = [
@@ -125,7 +130,7 @@ const MediaLibrary = () => {
                     </button>
                     <span className="text-[8px] font-black uppercase tracking-widest text-white mt-3">Upload New</span>
                   </div>
-                  <input type="file" className="hidden" ref={el => fileInputRefs.current[item.key] = el} onChange={e => onFileChange(item.key, item.type, e.target.files[0])} />
+                  <input type="file" accept={item.type === 'video' ? 'video/mp4,video/quicktime,video/x-msvideo' : 'image/jpeg,image/png,image/webp'} className="hidden" ref={el => fileInputRefs.current[item.key] = el} onChange={e => onFileChange(item.key, item.type, e.target.files[0])} />
                 </div>
                 <div className="mt-4 flex justify-between items-center">
                   <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{item.label}</p>
@@ -147,7 +152,7 @@ const MediaLibrary = () => {
             <ThemedSelect label="Media Type" value={customForm.type} options={[{label:'Image', value:'image'}, {label:'Video', value:'video'}]} onChange={(v) => setCustomForm({...customForm, type: v})} />
             <label className="h-[46px] bg-accent text-white flex items-center justify-center rounded-xl font-black uppercase text-[10px] tracking-widest cursor-pointer hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] transition-all">
                {uploading.custom ? <Loader2 className="animate-spin" size={18}/> : <><Plus size={14} className="mr-2"/> Push Asset</>}
-               <input type="file" className="hidden" onChange={e => onAddCustomAsset(e.target.files[0])} />
+               <input type="file" accept={customForm.type === 'video' ? 'video/mp4,video/quicktime,video/x-msvideo' : 'image/jpeg,image/png,image/webp'} className="hidden" onChange={e => onAddCustomAsset(e.target.files[0])} />
             </label>
           </div>
 
@@ -173,7 +178,7 @@ const MediaLibrary = () => {
           <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 flex items-center gap-2"><ImageIcon size={16} className="text-blue-400"/> General Pool</h2>
           <label className="w-full sm:w-auto bg-white/5 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10 border border-white/10 transition-all text-center">
             {uploading.gallery ? <Loader2 className="animate-spin inline mr-2" size={14}/> : <Plus size={14} className="inline mr-2"/>} Extend Pool
-            <input type="file" className="hidden" onChange={onGalleryUpload} />
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onGalleryUpload} />
           </label>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-3">
