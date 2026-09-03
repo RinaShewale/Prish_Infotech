@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMedia } from "../../Home/components/hooks/useMedia";
 
 export const Media = () => {
   const { media, loading } = useMedia();
   const reelVideoRef = useRef(null);
-  const [reelVideoFailed, setReelVideoFailed] = useState(false);
+  const [failedReelVideo, setFailedReelVideo] = useState(null);
 
   useEffect(() => {
     const video = reelVideoRef.current;
@@ -23,10 +23,6 @@ export const Media = () => {
     };
   }, [media?.reelVideo]);
 
-  useEffect(() => {
-    setReelVideoFailed(false);
-  }, [media?.reelVideo]);
-
   if (loading) {
     return (
       <div className="w-full h-[80vh] flex items-center justify-center">
@@ -42,18 +38,21 @@ export const Media = () => {
         {/* 🎥 LEFT SIDE: VIDEO (REEL) */}
         <div className="md:row-span-2 glow-card glass rounded-3xl overflow-hidden group relative">
           <div className="absolute inset-0 bg-card">
-            {media?.reelVideo && !reelVideoFailed ? (
+            {media?.reelVideo && failedReelVideo !== media.reelVideo ? (
               <video
                 ref={reelVideoRef}
                 src={media.reelVideo}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90"
+                className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 opacity-90"
                 autoPlay
                 muted
                 loop
                 playsInline
                 preload="auto"
-                onCanPlay={event => event.currentTarget.play().catch(() => {})}
-                onError={() => setReelVideoFailed(true)}
+                onLoadedData={event => event.currentTarget.play().catch(() => {})}
+                onCanPlay={event => {
+                  if (event.currentTarget.paused) event.currentTarget.play().catch(() => {});
+                }}
+                onError={() => setFailedReelVideo(media.reelVideo)}
               />
             ) : (
               <img

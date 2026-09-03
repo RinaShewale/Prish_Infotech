@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 
@@ -10,6 +10,7 @@ export default function BootcampVideo() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef(null);
   const videoSource = media?.courseInfoVideo || media?.reelVideo;
@@ -31,6 +32,7 @@ export default function BootcampVideo() {
     setIsPlaying(false);
     setProgress(0);
     setDuration(0);
+    setCurrentTime(0);
     video.load();
   }, [videoSource]);
 
@@ -53,12 +55,17 @@ export default function BootcampVideo() {
 
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
-    const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+    const { currentTime: time, duration: videoDuration } = videoRef.current;
+    setCurrentTime(time);
+    const currentProgress = (time / videoDuration) * 100;
     setProgress(currentProgress || 0);
   };
 
   const handleLoadedMetadata = () => {
-    if (videoRef.current) setDuration(videoRef.current.duration);
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+      setCurrentTime(videoRef.current.currentTime);
+    }
   };
 
   const handleSeek = (e) => {
@@ -91,6 +98,7 @@ export default function BootcampVideo() {
       {/* 🎥 VIDEO ELEMENT (Poster Removed) */}
       <video
         ref={videoRef}
+        key={videoSource}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onClick={togglePlay}
@@ -100,7 +108,7 @@ export default function BootcampVideo() {
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
       >
-        <source key={videoSource} src={videoSource} />
+        <source src={videoSource} />
       </video>
 
       {/* 🛡️ OVERLAY: TOP BADGE */}
@@ -159,7 +167,7 @@ export default function BootcampVideo() {
 
             {/* Time Display */}
             <div className="flex items-center gap-2 font-mono text-[11px] text-white/70">
-              <span className="text-white">{formatTime(videoRef.current?.currentTime || 0)}</span>
+              <span className="text-white">{formatTime(currentTime)}</span>
               <span className="opacity-30">/</span>
               <span>{formatTime(duration)}</span>
             </div>
