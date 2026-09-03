@@ -50,7 +50,15 @@ const App = () => {
     };
 
     resetScroll();
-    const unsubscribe = router.subscribe(resetScroll);
+    let previousLocationKey = router.state.location.key;
+    const unsubscribe = router.subscribe(state => {
+      if (state.navigation.state !== "idle" || state.location.key === previousLocationKey) {
+        return;
+      }
+
+      previousLocationKey = state.location.key;
+      resetScroll();
+    });
 
     return () => unsubscribe();
   }, []);
