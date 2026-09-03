@@ -40,6 +40,19 @@ const App = () => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
+
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      document.querySelectorAll("main, [data-scroll-container]").forEach(element => {
+        element.scrollTop = 0;
+        element.scrollLeft = 0;
+      });
+    };
+
+    resetScroll();
+    const unsubscribe = router.subscribe(resetScroll);
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
