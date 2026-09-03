@@ -12,6 +12,7 @@ export default function BootcampVideo() {
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef(null);
+  const videoSource = media?.courseInfoVideo || media?.reelVideo;
 
   // Sync state if video ends
   useEffect(() => {
@@ -22,6 +23,16 @@ export default function BootcampVideo() {
     video.addEventListener("ended", handleEnded);
     return () => video.removeEventListener("ended", handleEnded);
   }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoSource) return;
+
+    setIsPlaying(false);
+    setProgress(0);
+    setDuration(0);
+    video.load();
+  }, [videoSource]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -79,8 +90,9 @@ export default function BootcampVideo() {
         onClick={togglePlay}
         className="w-full h-full object-contain cursor-pointer"
         playsInline
+        preload="metadata"
       >
-        <source src={media?.courseInfoVideo || media?.reelVideo} type="video/mp4" />
+        <source key={videoSource} src={videoSource} type="video/mp4" />
       </video>
 
       {/* 🛡️ OVERLAY: TOP BADGE */}

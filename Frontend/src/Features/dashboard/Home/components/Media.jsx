@@ -27,6 +27,8 @@ export const Media = () => {
                 muted
                 loop
                 playsInline
+                preload="auto"
+                onCanPlay={event => event.currentTarget.play().catch(() => {})}
               />
             ) : (
               <img
