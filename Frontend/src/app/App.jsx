@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
@@ -12,6 +12,7 @@ import Lenis from "lenis";
 const App = () => {
   useAuthInit();
   const dispatch = useDispatch();
+  const lenisRef = useRef(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -42,10 +43,10 @@ const App = () => {
     }
 
     const resetScroll = () => {
-      window.scrollTo(0, 0);
+      lenisRef.current?.scrollTo(0, { immediate: true, force: true });
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       document.querySelectorAll("main, [data-scroll-container]").forEach(element => {
-        element.scrollTop = 0;
-        element.scrollLeft = 0;
+        element.scrollTo({ top: 0, left: 0, behavior: "instant" });
       });
     };
 
@@ -58,6 +59,7 @@ const App = () => {
 
       previousLocationKey = state.location.key;
       resetScroll();
+      window.requestAnimationFrame(resetScroll);
     });
 
     return () => unsubscribe();
@@ -71,6 +73,7 @@ const App = () => {
       smoothWheel: true,
       touchMultiplier: 1.5,
     });
+    lenisRef.current = lenis;
     let animationFrame;
 
     const animate = time => {
@@ -83,6 +86,7 @@ const App = () => {
     return () => {
       window.cancelAnimationFrame(animationFrame);
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
 
