@@ -1,0 +1,1 @@
+import{Dt as e,Ot as t}from"./index-CgHawJ3h.js";var n=()=>t.get(`/media`),r=t=>e.post(`/upload/image`,t,{headers:{"Content-Type":`multipart/form-data`}});export{r as n,n as t};

@@ -52,6 +52,12 @@ const MediaLibrary = () => {
 
   const onFileChange = async (key, type, file) => {
     if (!file) return;
+    const isValidFile = type === 'video' ? file.type.startsWith('video/') : file.type.startsWith('image/');
+    if (!isValidFile) {
+      toast.error(`Please select a ${type} file`);
+      return;
+    }
+
     setUploading(prev => ({ ...prev, [key]: true }));
     try {
       const res = type === 'video' ? await handleUploadVideo(file) : await handleUploadImage(file);
@@ -63,15 +69,8 @@ const MediaLibrary = () => {
 
   const onDrop = (event, key, type) => {
     event.preventDefault();
+    event.stopPropagation();
     const file = event.dataTransfer.files[0];
-    if (!file) return;
-
-    const isVideo = file.type.startsWith('video/');
-    if ((type === 'video') !== isVideo) {
-      toast.error(`Please drop a ${type} file here`);
-      return;
-    }
-
     onFileChange(key, type, file);
   };
 
@@ -132,9 +131,9 @@ const MediaLibrary = () => {
             {sec.items.map(item => (
               <GlassCard key={item.key} className="p-4 group border-white/5 hover:border-accent/30 transition-all overflow-hidden relative">
                 <div
+                  className="aspect-square bg-black/40 rounded-2xl overflow-hidden flex items-center justify-center relative border border-white/5"
                   onDragOver={event => event.preventDefault()}
                   onDrop={event => onDrop(event, item.key, item.type)}
-                  className="aspect-square bg-black/40 rounded-2xl overflow-hidden flex items-center justify-center relative border border-white/5"
                 >
                   {media?.[item.key] ? (
                     item.type === 'video' ? 
