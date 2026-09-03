@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 
 // 👇 MEDIA HOOK
 import { useMedia } from "../../Home/components/hooks/useMedia";
@@ -34,13 +34,19 @@ export default function BootcampVideo() {
     video.load();
   }, [videoSource]);
 
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
+  const togglePlay = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      try {
+        await video.play();
+        setIsPlaying(true);
+      } catch {
+        setIsPlaying(false);
+      }
     } else {
-      videoRef.current.pause();
+      video.pause();
       setIsPlaying(false);
     }
   };
@@ -90,9 +96,11 @@ export default function BootcampVideo() {
         onClick={togglePlay}
         className="w-full h-full object-contain cursor-pointer"
         playsInline
-        preload="metadata"
+        preload="auto"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
       >
-        <source key={videoSource} src={videoSource} type="video/mp4" />
+        <source key={videoSource} src={videoSource} />
       </video>
 
       {/* 🛡️ OVERLAY: TOP BADGE */}

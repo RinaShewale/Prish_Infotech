@@ -1,19 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useMedia } from "../../Home/components/hooks/useMedia";
 
 export const Media = () => {
   const { media, loading } = useMedia();
   const reelVideoRef = useRef(null);
+  const [reelVideoFailed, setReelVideoFailed] = useState(false);
 
   useEffect(() => {
     const video = reelVideoRef.current;
     if (!video || !media?.reelVideo) return;
-
-    const keepPlaying = () => {
-      if (document.visibilityState === "visible" && video.paused) {
-        video.play().catch(() => {});
-      }
-    };
 
     const restartReel = () => {
       if (document.visibilityState !== "visible") return;
@@ -21,18 +16,15 @@ export const Media = () => {
       video.play().catch(() => {});
     };
 
-    video.addEventListener("pause", keepPlaying);
     video.addEventListener("ended", restartReel);
-    video.addEventListener("canplay", keepPlaying);
-    document.addEventListener("visibilitychange", keepPlaying);
-    keepPlaying();
 
     return () => {
-      video.removeEventListener("pause", keepPlaying);
       video.removeEventListener("ended", restartReel);
-      video.removeEventListener("canplay", keepPlaying);
-      document.removeEventListener("visibilitychange", keepPlaying);
     };
+  }, [media?.reelVideo]);
+
+  useEffect(() => {
+    setReelVideoFailed(false);
   }, [media?.reelVideo]);
 
   if (loading) {
@@ -50,7 +42,7 @@ export const Media = () => {
         {/* 🎥 LEFT SIDE: VIDEO (REEL) */}
         <div className="md:row-span-2 glow-card glass rounded-3xl overflow-hidden group relative">
           <div className="absolute inset-0 bg-card">
-            {media?.reelVideo ? (
+            {media?.reelVideo && !reelVideoFailed ? (
               <video
                 ref={reelVideoRef}
                 src={media.reelVideo}
@@ -61,6 +53,7 @@ export const Media = () => {
                 playsInline
                 preload="auto"
                 onCanPlay={event => event.currentTarget.play().catch(() => {})}
+                onError={() => setReelVideoFailed(true)}
               />
             ) : (
               <img

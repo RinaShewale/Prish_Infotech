@@ -1,0 +1,1 @@
+import{Mt as e,Nt as t,et as n,nt as r,rt as i,tt as a}from"./index-BpKk-Xk4.js";var o=()=>{let o=e(),{enrollments:s,loading:c,error:l,success:u,loaded:d}=t(e=>e.enrollment);return{enrollments:s,loading:c,error:l,success:u,loaded:d,fetchMyEnrollments:()=>{o(i())},fetchEnrollments:()=>{o(r())},handleEnroll:e=>{o(a({courseId:e}))},clearState:()=>{o(n())}}};export{o as t};
