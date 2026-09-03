@@ -32,8 +32,8 @@ export const registerUser = async (req, res) => {
     // ✅ FIXED COOKIE CONFIG
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // localhost
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/", // 🔥 IMPORTANT FIX
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -84,8 +84,8 @@ export const loginUser = async (req, res) => {
     // 🔥 FIXED COOKIE SETTINGS
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // localhost
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/", // IMPORTANT
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });

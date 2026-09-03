@@ -61,6 +61,20 @@ const MediaLibrary = () => {
     finally { setUploading(prev => ({ ...prev, [key]: false })); }
   };
 
+  const onDrop = (event, key, type) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+
+    const isVideo = file.type.startsWith('video/');
+    if ((type === 'video') !== isVideo) {
+      toast.error(`Please drop a ${type} file here`);
+      return;
+    }
+
+    onFileChange(key, type, file);
+  };
+
   const onAddCustomAsset = async (file) => {
     if (!customForm.key || !customForm.label || !file) return toast.error("Incomplete parameters");
     setUploading(prev => ({ ...prev, custom: true }));
@@ -117,7 +131,11 @@ const MediaLibrary = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {sec.items.map(item => (
               <GlassCard key={item.key} className="p-4 group border-white/5 hover:border-accent/30 transition-all overflow-hidden relative">
-                <div className="aspect-square bg-black/40 rounded-2xl overflow-hidden flex items-center justify-center relative border border-white/5">
+                <div
+                  onDragOver={event => event.preventDefault()}
+                  onDrop={event => onDrop(event, item.key, item.type)}
+                  className="aspect-square bg-black/40 rounded-2xl overflow-hidden flex items-center justify-center relative border border-white/5"
+                >
                   {media?.[item.key] ? (
                     item.type === 'video' ? 
                     <video src={media[item.key]} className="w-full h-full object-cover" /> : 
@@ -128,7 +146,7 @@ const MediaLibrary = () => {
                     <button onClick={() => fileInputRefs.current[item.key].click()} className="w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
                       {uploading[item.key] ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                     </button>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-white mt-3">Upload New</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-white mt-3">Drop or Upload</span>
                   </div>
                   <input type="file" accept={item.type === 'video' ? 'video/mp4,video/quicktime,video/x-msvideo' : 'image/jpeg,image/png,image/webp'} className="hidden" ref={el => fileInputRefs.current[item.key] = el} onChange={e => onFileChange(item.key, item.type, e.target.files[0])} />
                 </div>
@@ -142,54 +160,8 @@ const MediaLibrary = () => {
         </motion.div>
       ))}
 
-      {/* DYNAMIC CUSTOM ASSETS */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-8 border-t border-white/10 space-y-6">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 flex items-center gap-2"><FilePlus size={16} className="text-emerald-500"/> Integration Engine</h2>
-        <GlassCard className="p-6 md:p-8 border-white/5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 items-end">
-            <Field label="Identification Key"><input placeholder="e.g. bg_pattern" value={customForm.key} onChange={e => setCustomForm({...customForm, key: e.target.value})} className="input-modern" /></Field>
-            <Field label="Admin Label"><input placeholder="Background Grid" value={customForm.label} onChange={e => setCustomForm({...customForm, label: e.target.value})} className="input-modern" /></Field>
-            <ThemedSelect label="Media Type" value={customForm.type} options={[{label:'Image', value:'image'}, {label:'Video', value:'video'}]} onChange={(v) => setCustomForm({...customForm, type: v})} />
-            <label className="h-[46px] bg-accent text-white flex items-center justify-center rounded-xl font-black uppercase text-[10px] tracking-widest cursor-pointer hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] transition-all">
-               {uploading.custom ? <Loader2 className="animate-spin" size={18}/> : <><Plus size={14} className="mr-2"/> Push Asset</>}
-               <input type="file" accept={customForm.type === 'video' ? 'video/mp4,video/quicktime,video/x-msvideo' : 'image/jpeg,image/png,image/webp'} className="hidden" onChange={e => onAddCustomAsset(e.target.files[0])} />
-            </label>
-          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mt-12">
-            <AnimatePresence>
-                {media?.customAssets?.map(asset => (
-                <motion.div key={asset.key} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="relative group p-2 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-red-500/30 transition-all">
-                    <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-inner">
-                    {asset.type === 'video' ? <video src={asset.url} className="w-full h-full object-cover" /> : <img src={asset.url} className="w-full h-full object-cover" alt="" />}
-                    </div>
-                    <p className="text-[9px] mt-2 truncate font-bold uppercase text-zinc-500 px-1">{asset.label}</p>
-                    <button onClick={() => saveMedia({ customAssets: media.customAssets.filter(a => a.key !== asset.key)})} className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-xl transition-all"><X size={12}/></button>
-                </motion.div>
-                ))}
-            </AnimatePresence>
-          </div>
-        </GlassCard>
-      </motion.div>
-
-      {/* GALLERY POOL */}
-      <div className="pt-8 border-t border-white/10 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 flex items-center gap-2"><ImageIcon size={16} className="text-blue-400"/> General Pool</h2>
-          <label className="w-full sm:w-auto bg-white/5 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10 border border-white/10 transition-all text-center">
-            {uploading.gallery ? <Loader2 className="animate-spin inline mr-2" size={14}/> : <Plus size={14} className="inline mr-2"/>} Extend Pool
-            <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onGalleryUpload} />
-          </label>
-        </div>
-        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-3">
-          {media?.images?.map((url, i) => (
-            <motion.div whileHover={{ scale: 1.05 }} key={i} className="aspect-square relative group rounded-xl overflow-hidden border border-white/5 bg-black">
-               <img src={url} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="" />
-               <button onClick={() => saveMedia({ images: media.images.filter(u => u !== url)})} className="absolute inset-0 bg-red-500/90 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all backdrop-blur-sm"><Trash2 size={16} className="text-white"/></button>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+     
 
       <style>{`
         :root { --accent-rgb: 124, 58, 237; }
