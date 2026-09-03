@@ -1,8 +1,39 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useMedia } from "../../Home/components/hooks/useMedia";
 
 export const Media = () => {
   const { media, loading } = useMedia();
+  const reelVideoRef = useRef(null);
+
+  useEffect(() => {
+    const video = reelVideoRef.current;
+    if (!video || !media?.reelVideo) return;
+
+    const keepPlaying = () => {
+      if (document.visibilityState === "visible" && video.paused) {
+        video.play().catch(() => {});
+      }
+    };
+
+    const restartReel = () => {
+      if (document.visibilityState !== "visible") return;
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+
+    video.addEventListener("pause", keepPlaying);
+    video.addEventListener("ended", restartReel);
+    video.addEventListener("canplay", keepPlaying);
+    document.addEventListener("visibilitychange", keepPlaying);
+    keepPlaying();
+
+    return () => {
+      video.removeEventListener("pause", keepPlaying);
+      video.removeEventListener("ended", restartReel);
+      video.removeEventListener("canplay", keepPlaying);
+      document.removeEventListener("visibilitychange", keepPlaying);
+    };
+  }, [media?.reelVideo]);
 
   if (loading) {
     return (
@@ -21,6 +52,7 @@ export const Media = () => {
           <div className="absolute inset-0 bg-card">
             {media?.reelVideo ? (
               <video
+                ref={reelVideoRef}
                 src={media.reelVideo}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90"
                 autoPlay
@@ -78,11 +110,7 @@ export const Media = () => {
           {/* GRADIENT OVERLAY FOR TEXT READABILITY */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
 
-          <div className="relative z-10 p-6 h-full flex flex-col justify-end">
-            <p className="text-accent font-display text-xs font-bold uppercase tracking-tighter drop-shadow-lg">
-              Advanced Technology / Prish Infotech
-            </p>
-          </div>
+          <div className="relative z-10 p-6 h-full flex flex-col justify-end" />
         </div>
 
         {/* 🖼 RIGHT BOTTOM IMAGE */}
@@ -104,11 +132,7 @@ export const Media = () => {
           {/* GRADIENT OVERLAY FOR TEXT READABILITY */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
 
-          <div className="relative z-10 p-6 w-full h-full flex flex-col justify-end">
-            <p className="text-accent font-display text-xs font-bold uppercase tracking-tighter drop-shadow-lg">
-              Future Innovations / Digital Solutions
-            </p>
-          </div>
+          <div className="relative z-10 p-6 w-full h-full flex flex-col justify-end" />
         </div>
 
       </div>
