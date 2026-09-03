@@ -6,8 +6,9 @@ import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 import { useMedia } from "../../Home/components/hooks/useMedia";
 
 export default function BootcampVideo() {
-  const { media, loading } = useMedia();
+  const { media } = useMedia(); // Removed 'loading' to show UI instantly
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false); // New state for smoothness
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -15,41 +16,18 @@ export default function BootcampVideo() {
   const videoRef = useRef(null);
   const videoSource = media?.courseInfoVideo || media?.reelVideo;
 
-  // Sync state if video ends
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleEnded = () => setIsPlaying(false);
-    video.addEventListener("ended", handleEnded);
-    return () => video.removeEventListener("ended", handleEnded);
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !videoSource) return;
-
-    setIsPlaying(false);
-    setProgress(0);
-    setDuration(0);
-    setCurrentTime(0);
-    video.load();
-  }, [videoSource]);
-
   const togglePlay = async () => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !videoSource) return;
 
     if (video.paused) {
       try {
         await video.play();
-        setIsPlaying(true);
-      } catch {
-        setIsPlaying(false);
+      } catch (err) {
+        console.error("Playback failed", err);
       }
     } else {
       video.pause();
-      setIsPlaying(false);
     }
   };
 
@@ -57,14 +35,8 @@ export default function BootcampVideo() {
     if (!videoRef.current) return;
     const { currentTime: time, duration: videoDuration } = videoRef.current;
     setCurrentTime(time);
-    const currentProgress = (time / videoDuration) * 100;
-    setProgress(currentProgress || 0);
-  };
-
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
-      setCurrentTime(videoRef.current.currentTime);
+    if (videoDuration) {
+      setProgress((time / videoDuration) * 100);
     }
   };
 
@@ -72,47 +44,43 @@ export default function BootcampVideo() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
-    videoRef.current.currentTime = percentage * videoRef.current.duration;
+    if (videoRef.current && videoRef.current.duration) {
+      videoRef.current.currentTime = percentage * videoRef.current.duration;
+    }
   };
 
   const formatTime = (time) => {
+    if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto aspect-video bg-neutral-900 animate-pulse rounded-xl border border-white/5 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-          <p className="text-xs font-mono text-white/40 tracking-widest uppercase">Initializing Stream...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="group relative max-w-5xl mx-auto aspect-video bg-black rounded-xl overflow-hidden border border-white/10 shadow-2xl ring-1 ring-white/5">
       
-      {/* 🎥 VIDEO ELEMENT (Poster Removed) */}
+      {/* 🎥 VIDEO ELEMENT */}
       <video
         ref={videoRef}
-        key={videoSource}
+        key={videoSource} // Crucial for smooth source switching
+        src={videoSource} // Direct src is more stable than <source> tags
         onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
         onClick={togglePlay}
+        onWaiting={() => setIsBuffering(true)}
+        onPlaying={() => {
+            setIsBuffering(false);
+            setIsPlaying(true);
+        }}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
         className="w-full h-full object-contain cursor-pointer"
         playsInline
         preload="auto"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      >
-        <source src={videoSource} />
-      </video>
+      />
 
       {/* 🛡️ OVERLAY: TOP BADGE */}
-      <div className="absolute top-4 left-4 pointer-events-none">
+      <div className="absolute top-4 left-4 pointer-events-none z-20">
         <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
           <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-white/40'}`} />
           <span className="text-[10px] font-bold text-white/90 uppercase tracking-tighter">
@@ -123,12 +91,12 @@ export default function BootcampVideo() {
 
       {/* ▶ CENTER PLAY BUTTON */}
       <AnimatePresence>
-        {!isPlaying && (
+        {!isPlaying && !isBuffering && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] pointer-events-none"
+            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] pointer-events-none z-10"
           >
             <motion.button 
               initial={{ scale: 0.8 }}
@@ -142,7 +110,7 @@ export default function BootcampVideo() {
       </AnimatePresence>
 
       {/* 🎛 CONTROL BAR */}
-      <div className="absolute inset-x-0 bottom-0 p-6 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-gradient-to-t from-black via-black/60 to-transparent">
+      <div className="absolute inset-x-0 bottom-0 p-6 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-gradient-to-t from-black via-black/60 to-transparent z-30">
         
         {/* Seekable Progress Bar */}
         <div 
@@ -176,8 +144,9 @@ export default function BootcampVideo() {
           <div className="flex items-center gap-5">
             <button 
               onClick={() => {
-                setIsMuted(!isMuted);
-                videoRef.current.muted = !isMuted;
+                const newMuted = !isMuted;
+                setIsMuted(newMuted);
+                videoRef.current.muted = newMuted;
               }}
               className="text-white/60 hover:text-white transition-colors"
             >

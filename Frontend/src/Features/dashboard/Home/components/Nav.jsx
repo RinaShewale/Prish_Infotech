@@ -26,6 +26,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import { preloadRoute } from "../../../../app/AppRouter";
+
 import {
   useSelector,
   useDispatch,
@@ -178,6 +180,8 @@ export const Nav = () => {
             <Link
               key={item.name}
               to={item.path}
+              onPointerEnter={() => preloadRoute(item.path)}
+              onFocus={() => preloadRoute(item.path)}
               className="hover:text-accent transition-colors"
             >
               {item.name}
@@ -281,6 +285,8 @@ export const Nav = () => {
                 <Link
                   key={link.name}
                   to={link.path}
+                  onPointerEnter={() => preloadRoute(link.path)}
+                  onFocus={() => preloadRoute(link.path)}
                   onClick={() => setMobileMenuOpen(false)}
                   className={mobileItemStyle}
                 >

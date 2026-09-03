@@ -2,34 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { useMedia } from "../../Home/components/hooks/useMedia";
 
 export const Media = () => {
-  const { media, loading } = useMedia();
+  const { media } = useMedia(); // Loading is no longer used to block the UI
   const reelVideoRef = useRef(null);
   const [failedReelVideo, setFailedReelVideo] = useState(null);
 
   useEffect(() => {
-    const video = reelVideoRef.current;
-    if (!video || !media?.reelVideo) return;
-
-    const restartReel = () => {
-      if (document.visibilityState !== "visible") return;
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    };
-
-    video.addEventListener("ended", restartReel);
-
-    return () => {
-      video.removeEventListener("ended", restartReel);
-    };
+    // Ensuring the video plays if the browser allows autoplay
+    if (reelVideoRef.current && media?.reelVideo) {
+      reelVideoRef.current.play().catch(() => {});
+    }
   }, [media?.reelVideo]);
-
-  if (loading) {
-    return (
-      <div className="w-full h-[80vh] flex items-center justify-center">
-        Loading media...
-      </div>
-    );
-  }
 
   return (
     <section className="w-full h-[80vh] p-4 md:p-8 bg-bg font-sans">
@@ -41,17 +23,15 @@ export const Media = () => {
             {media?.reelVideo && failedReelVideo !== media.reelVideo ? (
               <video
                 ref={reelVideoRef}
+                key={media.reelVideo} // Fixes "stuck" video by refreshing element on source change
                 src={media.reelVideo}
-                className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 opacity-90"
+                // Changed object-contain to object-cover to make it FULL
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90"
                 autoPlay
                 muted
                 loop
                 playsInline
                 preload="auto"
-                onLoadedData={event => event.currentTarget.play().catch(() => {})}
-                onCanPlay={event => {
-                  if (event.currentTarget.paused) event.currentTarget.play().catch(() => {});
-                }}
                 onError={() => setFailedReelVideo(media.reelVideo)}
               />
             ) : (
@@ -61,11 +41,11 @@ export const Media = () => {
                 alt="Fallback"
               />
             )}
-            {/* IMPROVED GRADIENT OVERLAY */}
+            {/* GRADIENT OVERLAY */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
           </div>
 
-          <div className="relative z-10 h-full p-6 flex flex-col justify-between">
+          <div className="relative z-10 h-full p-6 flex flex-col justify-between pointer-events-none">
             <span className="px-3 py-1 bg-accent/20 backdrop-blur-md border border-accent/30 text-accent text-xs font-display uppercase tracking-widest rounded-full w-fit">
               Prish Infotech
             </span>
@@ -85,45 +65,23 @@ export const Media = () => {
 
         {/* 🖼 RIGHT TOP IMAGE */}
         <div className="glow-card glass rounded-3xl overflow-hidden relative group">
-          {media?.img1 ? (
-            <img
-              src={media.img1}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
-              alt="Tech 1"
-            />
-          ) : (
-            <img
-              src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000"
-              className="absolute inset-0 w-full h-full object-cover opacity-70"
-              alt="Fallback Tech 1"
-            />
-          )}
-
-          {/* GRADIENT OVERLAY FOR TEXT READABILITY */}
+          <img
+            src={media?.img1 || "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000"}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+            alt="Tech 1"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
-
           <div className="relative z-10 p-6 h-full flex flex-col justify-end" />
         </div>
 
         {/* 🖼 RIGHT BOTTOM IMAGE */}
         <div className="glow-card glass rounded-3xl overflow-hidden relative group">
-          {media?.img2 ? (
-            <img
-              src={media.img2}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
-              alt="Tech 2"
-            />
-          ) : (
-            <img
-              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000"
-              className="absolute inset-0 w-full h-full object-cover opacity-70"
-              alt="Fallback Tech 2"
-            />
-          )}
-
-          {/* GRADIENT OVERLAY FOR TEXT READABILITY */}
+          <img
+            src={media?.img2 || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000"}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+            alt="Tech 2"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
-
           <div className="relative z-10 p-6 w-full h-full flex flex-col justify-end" />
         </div>
 

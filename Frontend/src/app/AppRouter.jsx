@@ -2,12 +2,21 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
 // Lazy-loaded Pages
-const HomePage = lazy(() => import("../Features/dashboard/Home/Pages/HomePage"));
-const CoursesPage = lazy(() => import("../Features/dashboard/Courses/page/CoursePage"));
-const BootcampPage = lazy(() => import("../Features/dashboard/Courses/page/BootcampPage"));
-const RequestCallback = lazy(() => import("../Features/auth/pages/RequestCallback").then(m => ({ default: m.RequestCallback })));
-const Login = lazy(() => import("../Features/auth/pages/Login").then(m => ({ default: m.Login })));
-const Register = lazy(() => import("../Features/auth/pages/Register").then(m => ({ default: m.Register })));
+const pageLoaders = {
+  "/": () => import("../Features/dashboard/Home/Pages/HomePage"),
+  "/courses": () => import("../Features/dashboard/Courses/page/CoursePage"),
+  "/bootcamp": () => import("../Features/dashboard/Courses/page/BootcampPage"),
+  "/callback": () => import("../Features/auth/pages/RequestCallback").then(m => ({ default: m.RequestCallback })),
+  "/login": () => import("../Features/auth/pages/Login").then(m => ({ default: m.Login })),
+  "/register": () => import("../Features/auth/pages/Register").then(m => ({ default: m.Register })),
+};
+
+const HomePage = lazy(pageLoaders["/"]);
+const CoursesPage = lazy(pageLoaders["/courses"]);
+const BootcampPage = lazy(pageLoaders["/bootcamp"]);
+const RequestCallback = lazy(pageLoaders["/callback"]);
+const Login = lazy(pageLoaders["/login"]);
+const Register = lazy(pageLoaders["/register"]);
 const CourseDetailPage = lazy(() => import("../Features/dashboard/Courses/page/CoursesDetailPage").then(m => ({ default: m.CourseDetailPage })));
 const ProfilePage = lazy(() => import("../Features/dashboard/Home/Pages/ProfilePage"));
 const ForgotPassword = lazy(() => import("../Features/auth/pages/ForgotPassword"));
@@ -51,11 +60,26 @@ import ProtectedRoute from "../Features/auth/components/ProtectedRoute";
 // Suspense wrapper — minimal spinner matching the site's dark theme
 function SuspenseWrapper({ children }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PageLoading />}>
       {children}
     </Suspense>
   );
 }
+
+function PageLoading() {
+  return (
+    <div className="min-h-screen bg-bg flex items-center justify-center" aria-busy="true" aria-label="Loading page">
+      <div className="w-10 h-10 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+    </div>
+  );
+}
+
+export const preloadRoute = (path) => {
+  const loadPage = pageLoaders[path];
+  if (loadPage) {
+    loadPage();
+  }
+};
 
 // Helper to wrap element with Suspense
 const S = (Component) => (
