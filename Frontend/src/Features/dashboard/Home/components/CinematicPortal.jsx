@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useMemo } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import Lenis from "@studio-freight/lenis";
 import { Clock, BadgeCheck, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -46,20 +45,6 @@ export default function CinematicPortal() {
 
   const generateSlug = (title) =>
     title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
-
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smooth: true,
-    });
-    function update(time) { lenis.raf(time * 1000); }
-    gsap.ticker.add(update);
-    return () => {
-      gsap.ticker.remove(update);
-      lenis.destroy();
-    };
-  }, []);
 
   useGSAP(() => {
     if (!latestCourses || latestCourses.length === 0) return;

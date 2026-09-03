@@ -4,7 +4,6 @@ import { ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import Lenis from "lenis";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -67,31 +66,6 @@ export default function BootcampPage() {
       cert.bootcamp?._id === "6a2daa2f8f74f190f15dac93" // Hardcoded check based on your JSON
     );
   }, [myCertificates, id]);
-
-  // 4. SMOOTH SCROLL IMPLEMENTATION (LENIS)
-  useLayoutEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: "vertical",
-      gestureDirection: "vertical",
-      smoothHover: true,
-      smoothWheel: true,
-      touchMultiplier: 2,
-    });
-
-    lenis.on("scroll", ScrollTrigger.update);
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-    gsap.ticker.lagSmoothing(0);
-    window.scrollTo(0, 0);
-
-    return () => {
-      lenis.destroy();
-      gsap.ticker.remove(lenis.raf);
-    };
-  }, []);
 
   // 5. GSAP ANIMATIONS
   useGSAP(() => {
