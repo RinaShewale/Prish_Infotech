@@ -6,9 +6,9 @@ import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 import { useMedia } from "../../Home/components/hooks/useMedia";
 
 export default function BootcampVideo() {
-  const { media } = useMedia(); // Removed 'loading' to show UI instantly
+  const { media } = useMedia(); 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false); // New state for smoothness
+  const [isBuffering, setIsBuffering] = useState(false); 
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -59,11 +59,11 @@ export default function BootcampVideo() {
   return (
     <div className="group relative max-w-5xl mx-auto aspect-video bg-black rounded-xl overflow-hidden border border-white/10 shadow-2xl ring-1 ring-white/5">
       
-      {/* 🎥 VIDEO ELEMENT */}
+      {/* 🎥 VIDEO ELEMENT - Fixed with transform-gpu and backface-visibility */}
       <video
         ref={videoRef}
-        key={videoSource} // Crucial for smooth source switching
-        src={videoSource} // Direct src is more stable than <source> tags
+        key={videoSource}
+        src={videoSource}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
         onClick={togglePlay}
@@ -74,9 +74,13 @@ export default function BootcampVideo() {
         }}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
-        className="w-full h-full object-contain cursor-pointer"
+        // Added transform-gpu to fix laptop stuttering
+        className="w-full h-full object-contain cursor-pointer transform-gpu"
+        // Added style to force hardware layer rendering
+        style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         playsInline
         preload="auto"
+        muted={isMuted}
       />
 
       {/* 🛡️ OVERLAY: TOP BADGE */}
@@ -109,6 +113,13 @@ export default function BootcampVideo() {
         )}
       </AnimatePresence>
 
+      {/* ⏳ BUFFERING INDICATOR (Crucial for laptops) */}
+      {isBuffering && (
+         <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+         </div>
+      )}
+
       {/* 🎛 CONTROL BAR */}
       <div className="absolute inset-x-0 bottom-0 p-6 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-gradient-to-t from-black via-black/60 to-transparent z-30">
         
@@ -119,6 +130,8 @@ export default function BootcampVideo() {
         >
           <motion.div
             className="absolute top-0 left-0 h-full bg-white rounded-full z-10"
+            // Changed to a non-spring transition to reduce CPU load on laptops
+            transition={{ type: "tween", ease: "linear", duration: 0.1 }}
             style={{ width: `${progress}%` }}
           />
           <div className="absolute top-0 left-0 w-full h-full bg-white/10 opacity-0 group-hover/progress:opacity-100 transition-opacity" />
