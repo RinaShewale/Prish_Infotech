@@ -36,7 +36,7 @@ const LearningPage = () => {
   };
 
   return (
-    <div className="min-h-screen lg:h-screen w-full bg-bg text-text font-sans overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row p-2 md:p-4 gap-4">
+    <div className="h-screen w-full bg-bg text-text font-sans overflow-hidden flex flex-col lg:flex-row p-2 md:p-4 gap-4">
       <FluidBackground />
 
       {/* Navigation Column (Top on Mobile, Right on Desktop) */}
@@ -50,7 +50,7 @@ const LearningPage = () => {
         <div className="shrink-0">
           <StatsHeader courseId={courseId} />
         </div>
-        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar rounded-[2rem]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar rounded-[2rem]">
           <ModuleList courseId={courseId} />
         </div>
       </div>
@@ -58,7 +58,7 @@ const LearningPage = () => {
       {/* Center Panel Column (Leaderboard/Cert/Bookmarks) */}
       {/* On mobile: Fixed height to prevent squishing. On desktop: Fixed width, full height */}
       <div className="w-full lg:w-[400px] shrink-0 order-3 lg:order-2 h-[350px] md:h-[450px] lg:h-full overflow-hidden">
-        <div className="h-full min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="h-full overflow-y-auto custom-scrollbar">
             {renderCenterPanel()}
         </div>
       </div>
@@ -74,6 +74,13 @@ const LearningPage = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 10px;
+        }
+        @media (max-width: 1024px) {
+          .h-screen {
+            height: auto;
+            min-height: 100vh;
+            overflow-y: auto;
+          }
         }
       `}</style>
     </div>

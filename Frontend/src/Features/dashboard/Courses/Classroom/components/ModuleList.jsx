@@ -49,7 +49,7 @@ const ModuleList = ({ courseId }) => {
     : [];
 
   return (
-    <div className="flex-1 min-h-0 h-full bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
+    <div className="flex-1 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
 
       {/* Tabs - Scrollable on mobile */}
       <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 overflow-x-auto scrollbar-hide">
