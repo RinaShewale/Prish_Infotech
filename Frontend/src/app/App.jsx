@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
@@ -13,6 +13,7 @@ const App = () => {
   useAuthInit();
   const dispatch = useDispatch();
   const lenisRef = useRef(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -52,18 +53,29 @@ const App = () => {
 
     resetScroll();
     let previousLocationKey = router.state.location.key;
+    let revealFrame;
     const unsubscribe = router.subscribe(state => {
-      if (state.navigation.state !== "idle" || state.location.key === previousLocationKey) {
+      if (state.navigation.state !== "idle") {
+        cancelAnimationFrame(revealFrame);
+        setIsNavigating(true);
         return;
       }
 
+      if (state.location.key === previousLocationKey) return;
+
       previousLocationKey = state.location.key;
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(resetScroll);
+      revealFrame = window.requestAnimationFrame(() => {
+        revealFrame = window.requestAnimationFrame(() => {
+          resetScroll();
+          setIsNavigating(false);
+        });
       });
     });
 
-    return () => unsubscribe();
+    return () => {
+      cancelAnimationFrame(revealFrame);
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -91,7 +103,17 @@ const App = () => {
     };
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      {isNavigating && (
+        <div
+          className="fixed inset-0 z-[9999] bg-bg"
+          aria-hidden="true"
+        />
+      )}
+    </>
+  );
 };
 
 export default App;
