@@ -1,12 +1,10 @@
 import React, { useRef, useLayoutEffect, useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
-  ArrowRight, CheckCircle2, Terminal, MousePointer2, Layers, Cpu,
-  ChevronDown, Check, Globe, Sparkles, Server, Code, BookOpen, Download
+  ArrowRight, CheckCircle2, Terminal, MousePointer2,
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { motion, AnimatePresence } from "framer-motion";
 
 // Components
 import { FluidBackground } from "../../../Home/components/FluidBackground";
@@ -23,6 +21,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const CohortPage = ({ courseData }) => {
 
+  
   const containerRef = useRef(null);
   const syllabusRef = useRef(null);
   const enrollmentRef = useRef(null);
@@ -36,7 +35,8 @@ export const CohortPage = ({ courseData }) => {
   // ======================================================
   const { user } = useSelector((state) => state.auth);
   const { myCertificates, getMyCertificates } = useCertificate();
-  const { enrollments } = useEnrollment();
+
+  const { enrollments, fetchEnrollments } = useEnrollment();
 
   useEffect(() => {
     getMyCertificates();
@@ -69,6 +69,7 @@ export const CohortPage = ({ courseData }) => {
     if (!courseData) return;
 
     let ctx = gsap.context(() => {
+      // 1. Hero Entrance Timeline
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
       tl.from(".hero-reveal", {
@@ -85,6 +86,7 @@ export const CohortPage = ({ courseData }) => {
           ease: "power2.out"
         }, "-=1.2");
 
+      // 2. Parallax Mouse Effect for Hero Image (Desktop Only)
       const handleMouseMove = (e) => {
         const { clientX, clientY } = e;
         const xPos = (clientX / window.innerWidth - 0.5) * 20;
@@ -104,6 +106,7 @@ export const CohortPage = ({ courseData }) => {
         window.addEventListener('mousemove', handleMouseMove);
       }
 
+      // 3. Scroll Reveal Logic
       gsap.utils.toArray('.reveal-section').forEach(section => {
         gsap.from(section, {
           scrollTrigger: {
@@ -118,6 +121,7 @@ export const CohortPage = ({ courseData }) => {
         });
       });
 
+      // 4. Sticky CTA
       gsap.fromTo(".sticky-cta",
         { y: 150, opacity: 0 },
         {
@@ -138,6 +142,15 @@ export const CohortPage = ({ courseData }) => {
 
     return () => ctx.revert();
   }, [courseData]);
+
+  // Content change transition for syllabus
+  useLayoutEffect(() => {
+    if (!contentRef.current) return;
+    gsap.fromTo(contentRef.current,
+      { opacity: 0, x: 10, filter: 'blur(10px)' },
+      { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.6, ease: "expo.out" }
+    );
+  }, [activeModule]);
 
   const handleTabChange = (index) => {
     if (index === activeModule) return;
@@ -160,7 +173,7 @@ export const CohortPage = ({ courseData }) => {
         <FluidBackground />
         <div className="absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: `linear-gradient(rgba(var(--accent-rgb), 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--accent-rgb), 0.5) 1px, transparent 1px)`, backgroundSize: '50px 50px' }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/60 to-bg" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg" />
       </div>
 
       <main className="relative z-10 pt-28 md:pt-40 pb-24 px-4 sm:px-8 max-w-7xl mx-auto">
@@ -232,114 +245,66 @@ export const CohortPage = ({ courseData }) => {
         {/* SYLLABUS SECTION */}
         {SYLLABUS.length > 0 && (
           <section ref={syllabusRef} className="reveal-section mb-24 md:mb-48">
-            <div className="mb-12 md:mb-20 text-center lg:text-left px-2 max-w-4xl">
-               <div className="inline-block px-4 py-1 border border-accent/20 bg-accent/5 rounded-full mb-6">
-                    <span className="text-accent text-[9px] md:text-[10px] tracking-[0.4em] uppercase font-black">Technical Roadmap</span>
-                </div>
-              <h2 className="text-4xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-6">Curriculum Architecture<span className="text-accent">.</span></h2>
-              <p className="text-text-secondary/50 text-base md:text-xl font-light italic">"A strictly engineered curriculum designed for deep industry-level mastery."</p>
+            <div className="mb-10 md:mb-16 text-center lg:text-left px-2">
+              <h2 className="text-4xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-6">Curriculum<span className="text-accent">.</span></h2>
+              <p className="text-text-secondary/50 text-base md:text-lg">Structured roadmap designed for industry-level mastery.</p>
             </div>
 
-            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-              {/* STICKY SIDEBAR TABS */}
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
               <div className="w-full lg:col-span-4 lg:sticky lg:top-32 z-20">
                 <div className="relative">
                   <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-bg to-transparent z-10 lg:hidden pointer-events-none" />
-                  <div ref={tabsRef} className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto pb-4 lg:pb-0 lg:max-h-[80vh] no-scrollbar snap-x snap-mandatory lg:pr-4 px-2 lg:px-0">
+                  <div ref={tabsRef} className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto pb-4 lg:pb-0 lg:max-h-[100vh] no-scrollbar snap-x snap-mandatory lg:pr-2 px-2 lg:px-0">
                     {SYLLABUS.map((item, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleTabChange(idx)}
-                        className={`flex-shrink-0 w-[280px] lg:w-full p-6 md:p-8 rounded-[2rem] border transition-all duration-500 text-left snap-center group outline-none relative overflow-hidden ${
-                            activeModule === idx 
-                            ? "bg-accent border-accent text-bg shadow-[0_20px_40px_rgba(var(--accent-rgb),0.2)] scale-[1.03]" 
-                            : "bg-white/[0.02] border-white/5 text-text-secondary hover:border-white/20 hover:bg-white/[0.04]"
+                        className={`flex-shrink-0 w-[280px] lg:w-full p-5 md:p-6 rounded-2xl md:rounded-[28px] border transition-all duration-500 text-left snap-center group outline-none ${activeModule === idx ? "bg-accent border-accent text-bg shadow-[0_10px_30px_rgba(var(--accent-rgb),0.2)] scale-[1.02]" : "bg-white/[0.03] border-white/5 text-text-secondary hover:border-white/20 hover:bg-white/[0.05]"
                           }`}
                       >
-                        <div className="flex flex-col items-start gap-1 pointer-events-none relative z-10">
-                          <span className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeModule === idx ? "text-bg/50" : "text-accent/50"}`}>
-                            Step 0{idx + 1} // {item.phase}
+                        <div className="flex flex-col items-start gap-1 pointer-events-none">
+                          <span className={`text-[9px] font-black uppercase tracking-widest ${activeModule === idx ? "text-bg/60" : "text-accent/60"}`}>
+                            0{idx + 1} — {item.phase}
                           </span>
-                          <h3 className="font-black uppercase text-base md:text-xl tracking-tight leading-tight">{item.title}</h3>
+                          <h3 className="font-bold uppercase text-sm md:text-lg tracking-tight leading-tight">{item.title}</h3>
                         </div>
-                        {activeModule === idx && (
-                             <div className="absolute -right-2 -bottom-2 opacity-10 rotate-12"><Cpu size={100} strokeWidth={1} /></div>
-                        )}
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* CONTENT AREA */}
               <div className="w-full lg:col-span-8">
-                <AnimatePresence mode="wait">
-                  <motion.div 
-                    key={activeModule}
-                    initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
-                    transition={{ duration: 0.5, ease: "circOut" }}
-                    className="relative bg-white/[0.02] border border-white/10 rounded-[3rem] md:rounded-[5rem] p-8 md:p-14 lg:p-20 backdrop-blur-3xl overflow-hidden shadow-2xl group"
-                  >
-                    {/* BLUEPRINT OVERLAY BACKGROUND */}
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-                    <div className="absolute top-0 right-0 p-12 opacity-[0.05] pointer-events-none hidden lg:block group-hover:rotate-12 transition-transform duration-1000">
-                        <Terminal size={320} strokeWidth={0.5} />
-                    </div>
-
-                    <div className="relative z-10 flex flex-col h-full">
-                        <div className="flex items-center gap-3 mb-6">
-                            <span className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] text-accent font-black uppercase tracking-widest animate-pulse">Live Blueprint</span>
-                            <span className="text-white/20 text-[10px] font-mono">ID: MOD_0{activeModule+1}</span>
+                <div className="relative bg-white/[0.01] border border-white/10 rounded-[32px] md:rounded-[60px] p-6 md:p-12 lg:p-16 min-h-[400px] md:min-h-[500px] backdrop-blur-3xl overflow-hidden shadow-2xl">
+                  <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none hidden lg:block">
+                    <Terminal size={300} />
+                  </div>
+                  <div ref={contentRef} className="relative z-10 flex flex-col h-full will-change-transform">
+                    <span className="text-accent/60 font-black tracking-[0.2em] uppercase text-[10px] md:text-[12px] mb-4 block">{SYLLABUS[activeModule]?.phase}</span>
+                    <h3 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white mb-8 md:mb-12 tracking-tighter leading-[1.1]">{SYLLABUS[activeModule]?.title}</h3>
+                    <div className="grid md:grid-cols-2 gap-10 md:gap-12 mt-auto">
+                      <div>
+                        <h4 className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-6 border-l-2 border-accent/30 pl-3">Learning Objectives</h4>
+                        <ul className="space-y-4 md:space-y-5">
+                          {SYLLABUS[activeModule]?.topics?.map((t, i) => (
+                            <li key={i} className="flex gap-3 md:gap-4 text-sm md:text-base lg:text-lg text-text-secondary/70 font-light items-start group/item">
+                              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-accent/40 shrink-0 mt-1 group-hover/item:text-accent transition-colors" />
+                              <span className="group-hover/item:text-text transition-colors">{t}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="bg-white/[0.03] border border-white/5 rounded-2xl md:rounded-[32px] p-6 md:p-8 h-fit">
+                        <h4 className="text-text-secondary/30 text-[9px] font-black uppercase tracking-widest mb-4">Core Modules</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {SYLLABUS[activeModule]?.tools?.map((tool, i) => (
+                            <span key={i} className="px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-[9px] font-mono text-accent uppercase tracking-wider hover:bg-accent hover:text-bg transition-colors duration-300 cursor-default">{tool}</span>
+                          ))}
                         </div>
-                        
-                        <h3 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white mb-10 md:mb-16 tracking-tighter leading-[1] max-w-2xl">{SYLLABUS[activeModule]?.title}</h3>
-                        
-                        <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
-                            {/* Learning Milestones (Left) */}
-                            <div className="lg:col-span-3 space-y-8">
-                                <h4 className="text-[10px] font-black uppercase text-white/40 tracking-[0.3em] flex items-center gap-3">
-                                    <Layers size={14} className="text-accent" /> Knowledge Milestones
-                                </h4>
-                                <div className="relative ml-2 space-y-6">
-                                    <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-accent/40 via-accent/5 to-transparent" />
-                                    {SYLLABUS[activeModule]?.topics?.map((t, i) => (
-                                        <motion.div 
-                                            initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                                            key={i} className="flex items-start gap-5 group/item"
-                                        >
-                                            <div className="relative z-10 mt-2 w-3.5 h-3.5 rounded-full bg-bg border-2 border-accent/40 group-hover/item:border-accent group-hover/item:scale-125 transition-all" />
-                                            <span className="text-base md:text-xl text-text-secondary/70 group-hover/item:text-white transition-colors font-light leading-relaxed">{t}</span>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Engineering Stack Dashboard (Right) */}
-                            <div className="lg:col-span-2">
-                                <div className="bg-black/40 rounded-[2.5rem] p-8 border border-white/5 h-fit relative group/stack overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover/stack:opacity-100 transition-opacity duration-500" />
-                                    <h4 className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em] mb-8 flex items-center gap-2">
-                                        <Cpu size={12} className="text-accent" /> Stack // Tools
-                                    </h4>
-                                    <div className="grid grid-cols-1 gap-3 relative z-10">
-                                        {SYLLABUS[activeModule]?.tools?.map((tool, i) => (
-                                            <div key={i} className="px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-between hover:border-accent/30 transition-all group/tool">
-                                                <span className="text-[10px] md:text-xs font-bold text-white/80 uppercase tracking-wider">{tool}</span>
-                                                <span className="text-[8px] font-mono text-accent/30 group-hover/tool:text-accent transition-colors">0{i+1}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="mt-8 pt-6 border-t border-white/5 opacity-40">
-                                        <p className="text-[9px] leading-relaxed italic">Module optimized for current industry deployment cycles.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                      </div>
                     </div>
-                  </motion.div>
-                </AnimatePresence>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -384,10 +349,12 @@ export const CohortPage = ({ courseData }) => {
           data={{
             _id: courseData?._id,
             isEnrolled: courseData?.isEnrolled,
+
             mainHeading: "Validate Your",
             highlightedText: "Expertise",
             description:
               "Earn a specialized certification upon successful completion of the cohort curriculum and final project assessment.",
+
             certType: courseData.title || "Mastery",
             skillsLearned: CATEGORIES.join(", "),
           }}
