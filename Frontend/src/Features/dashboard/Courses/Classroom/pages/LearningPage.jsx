@@ -49,8 +49,7 @@ const LearningPage = () => {
         <div className="shrink-0">
           <StatsHeader courseId={courseId} />
         </div>
-        {/* FIX: Applied hide-scrollbar class to keep it scrollable but clean */}
-        <div className="flex-1 overflow-y-auto hide-scrollbar rounded-[2rem]">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded-[2rem]">
           <ModuleList courseId={courseId} />
         </div>
       </div>
