@@ -12,6 +12,8 @@ export default function InteractiveLoader({ onComplete }) {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         onComplete: () => {
+          if (!onComplete) return;
+
           // Final exit animation
           gsap.to(containerRef.current, {
             opacity: 0,

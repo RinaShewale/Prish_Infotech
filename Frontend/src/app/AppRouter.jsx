@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import InteractiveLoader from "../Features/dashboard/Home/components/InteractiveLoader";
 
 // Lazy-loaded Pages
 const pageLoaders = {
@@ -68,9 +69,7 @@ function SuspenseWrapper({ children }) {
 
 function PageLoading() {
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center" aria-busy="true" aria-label="Loading page">
-      <div className="w-10 h-10 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-    </div>
+    <InteractiveLoader aria-busy="true" aria-label="Loading page" />
   );
 }
 
