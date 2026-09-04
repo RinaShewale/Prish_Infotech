@@ -1,0 +1,1 @@
+import{jt as e}from"./index-B5tQP-M1.js";import{t}from"./proxy-DEFocCvu.js";var n=e(),r=({children:e,className:r=``,delay:i=0})=>(0,n.jsx)(t.div,{initial:{opacity:0,y:20},animate:{opacity:1,y:0},transition:{duration:.5,delay:i},className:`bg-white/[0.03] border border-white/10 rounded-[24px] backdrop-blur-xl overflow-hidden ${r}`,children:e});export{r as t};

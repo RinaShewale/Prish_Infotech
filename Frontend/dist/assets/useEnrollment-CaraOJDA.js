@@ -1,0 +1,1 @@
+import{Ft as e,Pt as t,it as n,nt as r,rt as i,tt as a}from"./index-B5tQP-M1.js";var o=()=>{let o=t(),{enrollments:s,loading:c,error:l,success:u,loaded:d}=e(e=>e.enrollment);return{enrollments:s,loading:c,error:l,success:u,loaded:d,fetchMyEnrollments:()=>{o(n())},fetchEnrollments:()=>{o(i())},handleEnroll:e=>{o(r({courseId:e}))},clearState:()=>{o(a())}}};export{o as t};
