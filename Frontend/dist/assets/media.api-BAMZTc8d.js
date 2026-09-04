@@ -1,0 +1,1 @@
+import{Ot as e,kt as t}from"./index-BakBmB0C.js";var n=()=>t.get(`/media`),r=t=>e.post(`/upload/image`,t,{headers:{"Content-Type":`multipart/form-data`}});export{r as n,n as t};
