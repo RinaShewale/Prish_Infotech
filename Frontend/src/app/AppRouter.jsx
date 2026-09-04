@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { lazy, Suspense, useLayoutEffect, useState } from "react";
+import { createBrowserRouter, Outlet, useLocation, useNavigation } from "react-router-dom";
 
 // Lazy-loaded Pages
 const pageLoaders = {
@@ -94,7 +94,39 @@ const S = (Component) => (
   </SuspenseWrapper>
 );
 
+function RouteTransitionLayout() {
+  const location = useLocation();
+  const navigation = useNavigation();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    document.querySelectorAll("main, [data-scroll-container]").forEach(element => {
+      element.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    });
+    setIsTransitioning(false);
+  }, [location.key]);
+
+  useLayoutEffect(() => {
+    if (navigation.state !== "idle") {
+      setIsTransitioning(true);
+    }
+  }, [navigation.state]);
+
+  return (
+    <>
+      <Outlet />
+      {isTransitioning && (
+        <div className="fixed inset-0 z-[9999] bg-bg" aria-hidden="true" />
+      )}
+    </>
+  );
+}
+
 export const router = createBrowserRouter([
+  {
+    element: <RouteTransitionLayout />,
+    children: [
   // Public Routes
   {
     path: "/",
@@ -260,6 +292,8 @@ export const router = createBrowserRouter([
         path: "course/:courseId/lecture/:lectureId",
         element: S(LecturePage),
       },
+    ],
+  },
     ],
   },
 ]);

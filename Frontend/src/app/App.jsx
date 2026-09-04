@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
@@ -12,8 +12,6 @@ import Lenis from "lenis";
 const App = () => {
   useAuthInit();
   const dispatch = useDispatch();
-  const lenisRef = useRef(null);
-  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -42,38 +40,6 @@ const App = () => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
-
-    const resetScroll = () => {
-      lenisRef.current?.scrollTo(0, { immediate: true, force: true });
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      document.querySelectorAll("main, [data-scroll-container]").forEach(element => {
-        element.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      });
-    };
-
-    resetScroll();
-    let previousLocationKey = router.state.location.key;
-    let revealFrame;
-    const unsubscribe = router.subscribe(state => {
-      if (state.navigation.state !== "idle") {
-        cancelAnimationFrame(revealFrame);
-        setIsNavigating(true);
-        return;
-      }
-
-      if (state.location.key === previousLocationKey) return;
-
-      previousLocationKey = state.location.key;
-      revealFrame = window.requestAnimationFrame(() => {
-        resetScroll();
-        setIsNavigating(false);
-      });
-    });
-
-    return () => {
-      cancelAnimationFrame(revealFrame);
-      unsubscribe();
-    };
   }, []);
 
   useEffect(() => {
@@ -84,7 +50,6 @@ const App = () => {
       smoothWheel: true,
       touchMultiplier: 1.5,
     });
-    lenisRef.current = lenis;
     let animationFrame;
 
     const animate = time => {
@@ -97,21 +62,10 @@ const App = () => {
     return () => {
       window.cancelAnimationFrame(animationFrame);
       lenis.destroy();
-      lenisRef.current = null;
     };
   }, []);
 
-  return (
-    <>
-      <RouterProvider router={router} />
-      {isNavigating && (
-        <div
-          className="fixed inset-0 z-[9999] bg-bg"
-          aria-hidden="true"
-        />
-      )}
-    </>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;

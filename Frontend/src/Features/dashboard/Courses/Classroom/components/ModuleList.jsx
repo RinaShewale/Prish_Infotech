@@ -49,7 +49,7 @@ const ModuleList = ({ courseId }) => {
     : [];
 
   return (
-    <div className="flex-1 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
+    <div className="flex-1 min-h-0 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
 
       {/* Tabs */}
       <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 overflow-x-auto scrollbar-hide">
@@ -67,8 +67,7 @@ const ModuleList = ({ courseId }) => {
         />
       </div>
 
-      {/* FIX: Removed overflow-y-auto and custom-scrollbar to prevent double scrollbars */}
-      <div className="flex-1 p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 min-h-0 overflow-y-auto hide-scrollbar p-4 sm:p-6 lg:p-8">
         <AnimatePresence mode="wait">
           {activeTab === 'modules' ? (
             <motion.div
