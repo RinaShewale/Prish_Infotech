@@ -175,7 +175,7 @@ export const CohortPage = ({ courseData }) => {
 
       <main className="relative z-10 pt-24 md:pt-36 pb-20 px-6 max-w-7xl mx-auto">
 
-        {/* UPDATED HERO SECTION - LARGER IMAGE & ANIMATION */}
+        {/* HERO SECTION */}
         <section className="grid lg:grid-cols-[1fr_1fr] gap-12 lg:gap-16 items-center mb-32 md:mb-48">
           <div className="text-center lg:text-left order-2 lg:order-1">
             <div className="hero-reveal inline-flex items-center gap-2 px-3 py-1 border border-accent/20 bg-accent/5 rounded-full mb-8">
@@ -204,16 +204,14 @@ export const CohortPage = ({ courseData }) => {
             </div>
           </div>
 
-          {/* IMPROVED IMAGE CONTAINER */}
+          {/* IMAGE CONTAINER */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
              <motion.div 
                 animate={{ y: [0, -20, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="hero-img-container relative w-full max-w-[480px] lg:max-w-[540px] aspect-square"
              >
-                {/* Visual Glow Layer */}
                 <div className="absolute inset-0 bg-accent/20 blur-[100px] rounded-full opacity-30 translate-y-10 scale-110" />
-                
                 <div className="relative h-full w-full rounded-[48px] overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] bg-black/40 group">
                     <img 
                       src={courseData.thumbnail} 
@@ -221,15 +219,6 @@ export const CohortPage = ({ courseData }) => {
                       alt={courseData.title} 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent opacity-60" />
-                    
-                    {/* Floating Tech Badges (Optional flair) */}
-                    <div className="absolute bottom-6 left-6 right-6 p-4 glass rounded-2xl border border-white/10 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <span className="text-[10px] font-mono text-accent uppercase tracking-widest">Industry Standard Curriculum</span>
-                        <div className="flex gap-2">
-                           <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                           <div className="w-2 h-2 rounded-full bg-accent/40" />
-                        </div>
-                    </div>
                 </div>
              </motion.div>
           </div>
@@ -261,34 +250,28 @@ export const CohortPage = ({ courseData }) => {
 
         <div className="reveal-section mb-32 md:mb-48"><ComparisonSection /></div>
 
-        {/* UPDATED QUOTE SECTION - MORE PREMIUM UI */}
+        {/* REFINED SMALLER QUOTE SECTION */}
         <section className="reveal-section mb-32 md:mb-48 px-2">
           <motion.div 
             whileInView={{ opacity: 1, scale: 1 }}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.8 }}
-            className="relative py-24 md:py-40 bg-white/[0.03] border border-white/10 rounded-[60px] md:rounded-[100px] text-center overflow-hidden group"
+            className="relative py-16 md:py-24 bg-white/[0.03] border border-white/10 rounded-[40px] md:rounded-[60px] text-center overflow-hidden group max-w-5xl mx-auto"
           >
-            {/* Spotlight effect behind text */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-accent/5 blur-[120px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-accent/5 blur-[100px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
             
             <div className="relative z-10 px-6">
-              <h2 className="text-4xl md:text-8xl font-bold text-white mb-14 leading-[0.95] tracking-tighter">
+              <h2 className="text-3xl md:text-6xl font-bold text-white mb-10 leading-[1.1] tracking-tighter">
                 {courseData.heroQuote || "Don't Just Use AI."} <br />
-                <span className="text-accent italic font-serif inline-block mt-4">Engineer It.</span>
+                <span className="text-accent italic font-serif inline-block">Engineer It.</span>
               </h2>
               <button 
                 onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} 
-                className="group inline-flex items-center gap-4 px-14 py-7 bg-white text-bg rounded-2xl transition-all hover:bg-accent hover:text-bg active:scale-95 font-black uppercase tracking-tighter text-sm md:text-xl shadow-2xl"
+                className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-bg rounded-2xl transition-all hover:bg-accent hover:text-bg active:scale-95 font-black uppercase tracking-tighter text-xs md:text-lg shadow-xl"
               >
                 SECURE YOUR SPOT 
-                <ArrowRight className="w-6 h-6 transition-transform group-hover:translate-x-2" />
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </button>
-            </div>
-            
-            {/* Subtle bottom text for the quote block */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
-               <span className="text-[10px] tracking-[0.5em] text-white/20 font-black uppercase">Start Your Journey Today</span>
             </div>
           </motion.div>
         </section>
