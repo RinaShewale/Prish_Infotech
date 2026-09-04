@@ -29,7 +29,9 @@ export const CourseDetailPage = () => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [slug]);
 
-  if (loading && !courseData) {
+  const isCourseForRoute = courseData?.slug === slug;
+
+  if (loading || (!courseData && !error) || (courseData && !isCourseForRoute && !error)) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-bg text-accent">
         <Loader2 className="w-12 h-12 animate-spin mb-4" />

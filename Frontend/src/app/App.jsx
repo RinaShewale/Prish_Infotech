@@ -58,8 +58,9 @@ const App = () => {
       }
 
       previousLocationKey = state.location.key;
-      resetScroll();
-      window.requestAnimationFrame(resetScroll);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(resetScroll);
+      });
     });
 
     return () => unsubscribe();

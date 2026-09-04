@@ -51,7 +51,7 @@ const ModuleList = ({ courseId }) => {
   return (
     <div className="flex-1 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
 
-      {/* Tabs - Scrollable on mobile */}
+      {/* Tabs */}
       <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 overflow-x-auto scrollbar-hide">
         <TabButton
           active={activeTab === 'modules'}
@@ -67,8 +67,8 @@ const ModuleList = ({ courseId }) => {
         />
       </div>
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8">
+      {/* FIX: Removed overflow-y-auto and custom-scrollbar to prevent double scrollbars */}
+      <div className="flex-1 p-4 sm:p-6 lg:p-8">
         <AnimatePresence mode="wait">
           {activeTab === 'modules' ? (
             <motion.div
@@ -84,7 +84,7 @@ const ModuleList = ({ courseId }) => {
                 <div className="text-red-500 text-xs text-center py-10">Error: {error}</div>
               ) : (
                 <>
-                  {/* Join Live Section - Responsive Stack */}
+                  {/* Join Live Section */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-accent/5 rounded-2xl border border-accent/10 mb-6 gap-3">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
