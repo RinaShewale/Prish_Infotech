@@ -38,7 +38,7 @@ const ModuleList = ({ courseId }) => {
     })) : [];
 
   return (
-    <div className="flex flex-col h-full w-full bg-bg2/40 border border-border/50 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-md">
+    <div className="flex flex-col flex-1 min-h-0 h-full w-full bg-bg2/40 border border-border/50 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-md">
       <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0">
         <TabButton active={activeTab === 'modules'} onClick={() => setActiveTab('modules')} icon={<Box size={14} />} label="Modules" />
         <TabButton active={activeTab === 'announcements'} onClick={() => setActiveTab('announcements')} icon={<Megaphone size={14} />} label="Updates" />
@@ -70,6 +70,17 @@ const ModuleList = ({ courseId }) => {
           )}
         </AnimatePresence>
       </div>
+
+      <style jsx>{`
+        .scrollbar-hide {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };

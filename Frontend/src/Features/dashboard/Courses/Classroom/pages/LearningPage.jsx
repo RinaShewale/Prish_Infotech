@@ -52,7 +52,7 @@ const LearningPage = () => {
         </div>
         
         {/* ModuleList Wrapper: h-full + min-h-0 forces it to stay inside the flex box */}
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
           <ModuleList courseId={courseId} />
         </div>
       </div>
