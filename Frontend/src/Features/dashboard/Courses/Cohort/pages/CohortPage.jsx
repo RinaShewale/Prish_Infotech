@@ -31,39 +31,21 @@ const getIcon = (title) => {
 };
 
 const SyllabusCard = ({ section, isOpen, toggle, index }) => {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const mouseXSpring = useSpring(x);
-  const mouseYSpring = useSpring(y);
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["4deg", "-4deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-4deg", "4deg"]);
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - rect.left) / rect.width - 0.5);
-    y.set((e.clientY - rect.top) / rect.height - 0.5);
-  };
-
   return (
-    <motion.div
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => { x.set(0); y.set(0); }}
-      className="relative mb-4"
-    >
+    <div className="relative mb-4">
       <div 
         onClick={toggle}
-        className={`glass rounded-2xl md:rounded-[24px] transition-all duration-500 border border-white/5 ${
-          isOpen ? 'bg-white/[0.06] border-accent/40 shadow-[0_0_30px_rgba(var(--accent-rgb),0.1)]' : 'hover:border-white/20 bg-white/[0.02]'
+        className={`glass rounded-2xl md:rounded-[28px] transition-all duration-500 border ${
+          isOpen ? 'bg-white/[0.05] border-accent/40' : 'hover:border-white/20 border-white/5 bg-white/[0.02]'
         }`}
       >
         <div className="p-5 md:p-7 flex items-center justify-between cursor-pointer">
-          <div className="flex items-center gap-5" style={{ transform: "translateZ(30px)" }}>
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500 ${isOpen ? 'bg-accent text-bg shadow-[0_0_20px_rgba(var(--accent-rgb),0.4)]' : 'bg-white/5 text-accent border border-white/10'}`}>
+          <div className="flex items-center gap-5">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${isOpen ? 'bg-accent text-bg' : 'bg-white/5 text-accent border border-white/10'}`}>
               {getIcon(section.title)}
             </div>
             <div>
-              <span className="text-[9px] uppercase tracking-[0.3em] text-accent/60 font-bold mb-1 block">
+              <span className="text-[9px] uppercase tracking-[0.3em] text-accent/60 font-bold mb-0.5 block">
                 Module 0{index + 1}
               </span>
               <h3 className="text-lg md:text-xl font-bold tracking-tight text-white uppercase">
@@ -82,18 +64,18 @@ const SyllabusCard = ({ section, isOpen, toggle, index }) => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.4, ease: "circOut" }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
               className="overflow-hidden px-5 md:px-7 pb-7"
             >
-              <div className="pt-6 grid md:grid-cols-2 gap-8 border-t border-white/10" style={{ transform: "translateZ(20px)" }}>
+              <div className="pt-6 grid md:grid-cols-2 gap-8 border-t border-white/10">
                 <div className="space-y-4">
                   <h4 className="font-serif italic text-accent text-base flex items-center gap-2">
-                    <ArrowRight size={14} className="not-italic" /> Curriculum
+                    <ArrowRight size={14} className="not-italic" /> Curriculum Breakdown
                   </h4>
                   <ul className="space-y-2.5">
                     {section.topics?.map((topic, j) => (
                       <li key={j} className="flex items-start gap-3 text-text-secondary/80 text-sm leading-relaxed group/item">
-                        <Check size={14} className="mt-1 text-accent/50 group-hover/item:text-accent transition-colors shrink-0" />
+                        <Check size={14} className="mt-1 text-accent/50 shrink-0" />
                         <span className="group-hover:text-text transition-colors">{topic}</span>
                       </li>
                     ))}
@@ -101,11 +83,11 @@ const SyllabusCard = ({ section, isOpen, toggle, index }) => {
                 </div>
                 
                 {section.tools && (
-                  <div className="bg-black/20 border border-white/5 rounded-xl p-5 h-fit">
+                  <div className="bg-black/20 border border-white/5 rounded-2xl p-5 h-fit">
                     <h4 className="text-text-secondary/40 text-[9px] font-black uppercase tracking-widest mb-4">Tech Stack</h4>
                     <div className="flex flex-wrap gap-2">
                       {section.tools.map((tool, i) => (
-                        <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[9px] font-mono text-accent/90 uppercase tracking-wider">
+                        <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-mono text-accent/80 uppercase tracking-wider">
                           {tool}
                         </span>
                       ))}
@@ -117,7 +99,7 @@ const SyllabusCard = ({ section, isOpen, toggle, index }) => {
           )}
         </AnimatePresence>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -152,14 +134,12 @@ export const CohortPage = ({ courseData }) => {
     try {
       const pdf = new jsPDF("p", "mm", "a4");
       let yPos = 20;
-      pdf.setFontSize(22);
-      pdf.text(`${courseData.title} Syllabus`, 15, yPos);
+      pdf.setFontSize(22); pdf.text(`${courseData.title} Syllabus`, 15, yPos);
       yPos += 15;
       SYLLABUS.forEach((s, i) => {
         if (yPos > 270) { pdf.addPage(); yPos = 20; }
         pdf.setFontSize(14); pdf.setFont(undefined, 'bold');
-        pdf.text(`Module ${i+1}: ${s.title}`, 15, yPos);
-        yPos += 8;
+        pdf.text(`Module ${i+1}: ${s.title}`, 15, yPos); yPos += 8;
         pdf.setFontSize(10); pdf.setFont(undefined, 'normal');
         s.topics?.forEach(t => { pdf.text(`• ${t}`, 20, yPos); yPos += 6; });
         yPos += 4;
@@ -172,7 +152,7 @@ export const CohortPage = ({ courseData }) => {
     if (!courseData) return;
     let ctx = gsap.context(() => {
       gsap.from(".hero-reveal", { y: 30, opacity: 0, stagger: 0.1, duration: 1.2, ease: "power4.out" });
-      gsap.from(".hero-img-reveal", { scale: 0.9, opacity: 0, duration: 1.5, ease: "expo.out", delay: 0.2 });
+      gsap.from(".hero-img-container", { scale: 0.95, opacity: 0, duration: 1.5, ease: "expo.out", delay: 0.3 });
       gsap.utils.toArray('.reveal-section').forEach(s => {
         gsap.from(s, { scrollTrigger: { trigger: s, start: "top 90%" }, y: 30, opacity: 0, duration: 1 });
       });
@@ -187,58 +167,51 @@ export const CohortPage = ({ courseData }) => {
   return (
     <div ref={containerRef} className="bg-bg text-text min-h-screen selection:bg-accent/30 overflow-x-hidden relative font-sans">
       
+      {/* Background stays subtle and consistent with theme */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <FluidBackground />
-        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/20 to-bg" />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: `linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg" />
       </div>
 
       <main className="relative z-10 pt-24 md:pt-36 pb-20 px-6 max-w-7xl mx-auto">
 
-        {/* HERO SECTION - REFINED LAYOUT */}
-        <section className="grid lg:grid-cols-[1.2fr_0.8fr] gap-12 lg:gap-16 items-center mb-32 md:mb-48">
+        {/* HERO SECTION - REFINED PROPORTIONS */}
+        <section className="grid lg:grid-cols-[1.3fr_0.7fr] gap-12 lg:gap-20 items-center mb-32 md:mb-48">
           <div className="text-center lg:text-left order-2 lg:order-1">
             <div className="hero-reveal inline-flex items-center gap-2 px-3 py-1 border border-accent/20 bg-accent/5 rounded-full mb-8">
-              <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
               <span className="text-[10px] font-black tracking-[0.2em] uppercase text-accent">
                 {courseData.heroHighlight || "Engineering Cohort"}
               </span>
             </div>
-            <h1 className="hero-reveal text-5xl sm:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tighter text-white mb-8">
+            <h1 className="hero-reveal text-5xl sm:text-7xl lg:text-[84px] font-bold leading-[0.9] tracking-tighter text-white mb-8">
               {mainTitle} <br />
               <span className="italic font-serif text-accent">{lastWord}</span>
             </h1>
             <p className="hero-reveal text-lg md:text-xl text-text-secondary/70 max-w-xl mb-10 mx-auto lg:mx-0 font-light leading-relaxed">
               {courseData.description}
             </p>
-            <div className="hero-reveal flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-8">
+            <div className="hero-reveal flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-10">
               <div className="flex items-baseline gap-3">
                 <span className="text-5xl font-bold text-white tracking-tighter">₹{PRICE}</span>
                 <span className="text-lg text-white/20 line-through">₹{OLD_PRICE}</span>
               </div>
               <button
                 onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto px-10 py-5 bg-accent text-bg font-black rounded-2xl hover:scale-105 transition-all shadow-[0_10px_30px_rgba(var(--accent-rgb),0.3)] uppercase tracking-widest text-[11px] flex items-center justify-center gap-3"
+                className="w-full sm:w-auto px-10 py-5 bg-accent text-bg font-black rounded-2xl hover:scale-[1.03] active:scale-95 transition-all uppercase tracking-widest text-[11px] flex items-center justify-center gap-3"
               >
                 Enroll Now <ArrowRight size={16} />
               </button>
             </div>
           </div>
 
-          {/* SMALLER HERO IMAGE CONTAINER */}
+          {/* SMALLER HERO IMAGE AREA */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-             <div className="hero-img-reveal relative w-full max-w-[420px] aspect-[4/5] lg:aspect-square">
-                <div className="absolute inset-0 bg-accent/20 blur-[100px] rounded-full opacity-30" />
-                <div className="relative h-full w-full rounded-[32px] overflow-hidden border border-white/10 shadow-2xl">
+             <div className="hero-img-container relative w-full max-w-[360px] aspect-[4/5] lg:aspect-square">
+                <div className="absolute inset-0 bg-accent/10 blur-[80px] rounded-full opacity-40 translate-y-10" />
+                <div className="relative h-full w-full rounded-[40px] overflow-hidden border border-white/10 shadow-2xl bg-black/40">
                     <img src={courseData.thumbnail} className="w-full h-full object-cover grayscale-[0.1]" alt={courseData.title} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
-                </div>
-                {/* Floating Elements for visual interest */}
-                <div className="absolute -bottom-6 -left-6 glass p-4 rounded-2xl border border-white/10 hidden md:block">
-                    <div className="flex gap-2 mb-2">
-                        {[1,2,3,4,5].map(i => <div key={i} className="w-2 h-2 rounded-full bg-accent" />)}
-                    </div>
-                    <p className="text-[10px] font-mono text-white/50 uppercase tracking-widest">Industry Standard</p>
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg/60 via-transparent to-transparent" />
                 </div>
              </div>
           </div>
@@ -248,8 +221,8 @@ export const CohortPage = ({ courseData }) => {
         {SYLLABUS.length > 0 && (
           <section ref={syllabusRef} className="reveal-section mb-32 md:mb-48">
              <header className="text-center mb-16 md:mb-20">
-                <span className="text-accent text-[10px] tracking-[0.4em] uppercase font-black mb-4 block">Curriculum Roadmap</span>
-                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter text-white leading-tight mb-4">
+                <span className="text-accent text-[10px] tracking-[0.4em] uppercase font-black mb-4 block">The Curriculum</span>
+                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter text-white leading-tight">
                   Master the Craft<span className="text-accent">.</span>
                 </h2>
             </header>
@@ -262,7 +235,7 @@ export const CohortPage = ({ courseData }) => {
 
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="mt-16 flex justify-center">
               <button onClick={handleDownloadPDF} className="group flex items-center gap-3 px-8 py-4 rounded-full border border-white/10 hover:border-accent/40 transition-all text-white/60 hover:text-white uppercase text-[10px] tracking-[0.2em] font-black">
-                <Download size={16} className="text-accent" /> Download Syllabus PDF
+                <Download size={16} className="text-accent" /> Download Full Syllabus
               </button>
             </motion.div>
           </section>
@@ -272,14 +245,13 @@ export const CohortPage = ({ courseData }) => {
 
         {/* QUOTE SECTION */}
         <section className="reveal-section mb-32 md:mb-48 px-2">
-          <div className="relative py-20 md:py-32 bg-white/[0.02] border border-white/5 rounded-[40px] md:rounded-[80px] text-center overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+          <div className="relative py-20 md:py-32 bg-white/[0.02] border border-white/5 rounded-[60px] md:rounded-[100px] text-center overflow-hidden">
             <h2 className="text-3xl md:text-6xl font-bold text-white mb-12 leading-[1.1] tracking-tighter">
               {courseData.heroQuote || "Don't Just Use AI."} <br />
               <span className="text-accent italic font-serif">Engineer It.</span>
             </h2>
-            <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-4 px-12 py-6 bg-white text-bg rounded-full transition-all hover:scale-105 active:scale-95 font-black uppercase tracking-tighter text-sm md:text-lg">
-              GET STARTED NOW <ArrowRight className="w-5 h-5" />
+            <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-4 px-12 py-6 bg-white text-bg rounded-full transition-all hover:scale-105 active:scale-95 font-black uppercase tracking-tighter text-sm md:text-lg shadow-xl">
+              SECURE YOUR SPOT <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </section>
@@ -291,8 +263,8 @@ export const CohortPage = ({ courseData }) => {
             _id: courseData?._id,
             isEnrolled: courseData?.isEnrolled,
             mainHeading: "Verified",
-            highlightedText: "Certification",
-            description: "Receive a globally recognized digital credential upon completing the cohort requirements.",
+            highlightedText: "Expertise",
+            description: "Receive a professional certification upon successful completion to showcase your skills to the world.",
             certType: courseData.title || "Specialist",
             skillsLearned: CATEGORIES.join(", "),
           }}
@@ -306,23 +278,22 @@ export const CohortPage = ({ courseData }) => {
       </main>
 
       {/* STICKY CTA */}
-      <div className="sticky-cta fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[440px]">
-        <div className="bg-bg/90 backdrop-blur-xl border border-white/10 rounded-3xl p-2.5 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className="sticky-cta fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px]">
+        <div className="bg-bg/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-2.5 flex items-center justify-between shadow-2xl">
           <div className="pl-5">
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-white tracking-tighter">₹{PRICE}</span>
-              <span className="text-[10px] text-white/20 line-through font-mono">₹{OLD_PRICE}</span>
+              <span className="text-[10px] text-white/20 line-through">₹{OLD_PRICE}</span>
             </div>
           </div>
-          <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="bg-accent text-bg px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-accent/20">
-            Secure Seat
+          <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="bg-accent text-bg px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-accent/20 transition-transform active:scale-95">
+            Join Cohort
           </button>
         </div>
       </div>
 
       <style jsx global>{`
-        :root { --accent-rgb: 0, 255, 153; /* Adjust to match your theme's accent color */ }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); }
       `}</style>
     </div>
   );
