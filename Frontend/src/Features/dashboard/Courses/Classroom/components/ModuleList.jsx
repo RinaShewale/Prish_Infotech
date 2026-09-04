@@ -88,27 +88,35 @@ const ModuleList = ({ courseId }) => {
 const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
   return (
     <div className="border-b border-border/20 last:border-0">
-      <div onClick={onToggle} className="flex items-center justify-between py-5 cursor-pointer group px-2">
+      <div onClick={onToggle} className="flex items-center justify-between py-4 cursor-pointer group px-2 select-none">
         <span className={`text-sm font-bold truncate ${isExpanded ? 'text-accent' : 'text-text-secondary group-hover:text-text'}`}>
           {module.title}
         </span>
-        <ChevronDown size={16} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-accent' : 'text-text-secondary'}`} />
+        <ChevronDown size={16} className={`transition-transform duration-300 shrink-0 ml-2 ${isExpanded ? 'rotate-180 text-accent' : 'text-text-secondary'}`} />
       </div>
 
       <AnimatePresence>
         {isExpanded && (
-          <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-            {/* THIS IS THE SUPART FIX: added max-height and internal scrolling for lessons */}
-            <div className="pl-4 pb-6 space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide">
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }} 
+            animate={{ height: 'auto', opacity: 1 }} 
+            exit={{ height: 0, opacity: 0 }} 
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="pl-2 sm:pl-4 pb-4 space-y-2">
               {module.lessons.map((lesson, idx) => (
-                <div key={`${lesson.id}-${idx}`} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-transparent hover:border-border/30">
-                  <div className="flex items-center gap-3 truncate">
-                    <PlayCircle size={14} className={lesson.completed ? 'text-green-500' : 'text-accent'} />
-                    <p className="text-xs font-medium truncate">{lesson.title}</p>
+                <div key={`${lesson.id}-${idx}`} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-transparent hover:border-border/30 transition-all gap-2">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <PlayCircle size={16} className={`shrink-0 ${lesson.completed ? 'text-green-500' : 'text-accent'}`} />
+                    <p className="text-xs font-medium truncate text-text">{lesson.title}</p>
                   </div>
                   <button 
-                    onClick={() => navigate(`/classroom/course/${courseId}/lecture/${lesson.id}`)}
-                    className="shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-green-900/30 text-green-400 bg-green-900/10 hover:bg-green-900/20"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/classroom/course/${courseId}/lecture/${lesson.id}${lesson.subModuleId ? `?subModule=${lesson.subModuleId}` : ''}`);
+                    }}
+                    className="shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-green-900/30 text-green-400 bg-green-900/10 hover:bg-green-900/20 transition-colors"
                   >
                     REVIEW
                   </button>

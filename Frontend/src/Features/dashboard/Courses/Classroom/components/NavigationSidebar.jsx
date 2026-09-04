@@ -26,7 +26,7 @@ const NavigationSidebar = ({ activeTab, setActiveTab }) => {
       {/* --- DESKTOP SIDEBAR --- */}
       <div className="hidden lg:flex lg:relative lg:h-full lg:w-20 xl:w-64 flex-col gap-4 z-50">
         {/* Static Header showing Current Section Name */}
-        <div className="bg-bg2/40 backdrop-blur-md border border-border/50 rounded-2xl p-3">
+        <div className="bg-bg2/40 backdrop-blur-md border border-border/50 rounded-2xl p-3 shrink-0">
           <div className="flex items-center justify-center gap-3 p-3 bg-card/50 text-text rounded-xl border border-border/50">
         
             <div className="hidden xl:flex flex-col items-start">
@@ -36,7 +36,7 @@ const NavigationSidebar = ({ activeTab, setActiveTab }) => {
         </div>
 
         {/* Main Navigation Links */}
-        <nav className="h-full bg-bg2/40 backdrop-blur-2xl border border-border/50 rounded-3xl flex flex-col items-stretch pt-6 gap-2">
+        <nav className="flex-1 min-h-0 bg-bg2/40 backdrop-blur-2xl border border-border/50 rounded-3xl flex flex-col items-stretch pt-6 gap-2">
           {menuItems.map((item) => (
             <NavItem 
               key={item.id} 

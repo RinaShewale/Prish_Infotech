@@ -36,17 +36,16 @@ const LearningPage = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-bg text-text font-sans overflow-hidden flex flex-col lg:flex-row p-2 md:p-4 gap-4">
+    <div className="h-full w-full bg-transparent text-text font-sans overflow-hidden flex flex-col lg:flex-row gap-4 min-h-0 flex-1">
       <FluidBackground />
 
       {/* Navigation Column */}
-      <div className="w-full lg:w-64 shrink-0 order-1 lg:order-3">
+      <div className="w-full lg:w-64 shrink-0 order-1 lg:order-3 h-auto lg:h-full">
         <NavigationSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       {/* Main Content Column (Stats & Modules) */}
-      {/* min-h-0 is crucial here for the internal scroll to work */}
-      <div className="flex-1 flex flex-col gap-4 min-h-0 order-2 lg:order-1 overflow-hidden">
+      <div className="flex-1 flex flex-col gap-4 min-h-0 order-2 lg:order-1 overflow-hidden h-full">
         <div className="shrink-0">
           <StatsHeader courseId={courseId} />
         </div>
@@ -72,15 +71,6 @@ const LearningPage = () => {
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
-        }
-        
-        @media (max-width: 1024px) {
-          /* Do not set height: auto here if you want internal components to scroll */
-          /* Instead, keep h-screen or set a specific height */
-          .h-screen {
-            height: 100vh; 
-            overflow: hidden;
-          }
         }
       `}</style>
     </div>
