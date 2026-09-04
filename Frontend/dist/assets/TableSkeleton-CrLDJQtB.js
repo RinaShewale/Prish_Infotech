@@ -1,0 +1,1 @@
+import{At as e}from"./index-Dax5bvbO.js";var t=e(),n=({rows:e=5,cols:n=6})=>(0,t.jsx)(t.Fragment,{children:[...Array(e)].map((e,r)=>(0,t.jsx)(`tr`,{className:`border-b border-white/5 animate-pulse`,children:[...Array(n)].map((e,n)=>(0,t.jsx)(`td`,{className:`p-6`,children:(0,t.jsx)(`div`,{className:`h-4 bg-white/5 rounded-full w-3/4`})},n))},r))});export{n as t};
