@@ -63,6 +63,26 @@ const LearningPage = () => {
             {renderCenterPanel()}
         </div>
       </div>
+
+      <style jsx>{`
+        /* Consistent scrollbar hiding class */
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        
+        @media (max-width: 1024px) {
+          /* Do not set height: auto here if you want internal components to scroll */
+          /* Instead, keep h-screen or set a specific height */
+          .h-screen {
+            height: 100vh; 
+            overflow: hidden;
+          }
+        }
+      `}</style>
     </div>
   );
 };
