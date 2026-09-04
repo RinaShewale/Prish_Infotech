@@ -24,11 +24,10 @@ let hasSeenLoader = false;
 export default function HomePage() {
 
   const { courses } = useSelector((state) => state.course);
-  const [loading, setLoading] = useState(!hasSeenLoader);
+  const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
 
   const handleLoaderComplete = () => {
-    hasSeenLoader = true;
     setLoading(false);
   };
 

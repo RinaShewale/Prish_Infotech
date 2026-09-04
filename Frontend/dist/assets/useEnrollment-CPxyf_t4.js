@@ -1,0 +1,1 @@
+import{Ft as e,Pt as t,et as n,nt as r,rt as i,tt as a}from"./index-8xHPOCMN.js";var o=()=>{let o=t(),{enrollments:s,loading:c,error:l,success:u,loaded:d}=e(e=>e.enrollment);return{enrollments:s,loading:c,error:l,success:u,loaded:d,fetchMyEnrollments:()=>{o(i())},fetchEnrollments:()=>{o(r())},handleEnroll:e=>{o(a({courseId:e}))},clearState:()=>{o(n())}}};export{o as t};

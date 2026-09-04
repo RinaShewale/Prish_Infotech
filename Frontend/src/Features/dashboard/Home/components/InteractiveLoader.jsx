@@ -10,6 +10,10 @@ export default function InteractiveLoader({ onComplete }) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      const paths = [pPathRef.current, iPathRef.current];
+
+      if (paths.some((path) => !path)) return;
+
       const tl = gsap.timeline({
         onComplete: () => {
           if (!onComplete) return;
@@ -34,23 +38,22 @@ export default function InteractiveLoader({ onComplete }) {
         });
       };
 
-      preparePath(pPathRef.current);
-      preparePath(iPathRef.current);
+      paths.forEach(preparePath);
 
       // 2. Animation Sequence
-      tl.to(pPathRef.current, {
+      tl.to(paths[0], {
         strokeDashoffset: 0,
         duration: 1.5,
         ease: "power2.inOut",
       })
-      .to(iPathRef.current, {
+      .to(paths[1], {
         strokeDashoffset: 0,
         duration: 0.8,
         ease: "power2.inOut",
       }, "-=0.2") // Start slightly before P finishes
       
       // 3. Glow & Pulse Effect
-      .to([pPathRef.current, iPathRef.current], {
+      .to(paths, {
         stroke: "#926868", // --color-accent
         filter: "drop-shadow(0 0 8px rgba(146, 104, 104, 0.8))",
         duration: 0.5,
