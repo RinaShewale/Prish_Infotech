@@ -7,18 +7,25 @@ export default function InteractiveLoader({ onComplete }) {
   const iPathRef = useRef(null);
   const textRef = useRef(null);
   const glowRef = useRef(null);
+  const svgRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const paths = [pPathRef.current, iPathRef.current];
+      // 1. Initial Setup: Hide everything immediately to prevent glitches
+      const pLength = pPathRef.current.getTotalLength();
+      const iLength = iPathRef.current.getTotalLength();
 
-      if (paths.some((path) => !path)) return;
+      gsap.set([pPathRef.current, iPathRef.current], {
+        strokeDasharray: (i) => i === 0 ? pLength : iLength,
+        strokeDashoffset: (i) => i === 0 ? pLength : iLength,
+        opacity: 1,
+      });
+
+      // Now that paths are "erased", make the SVG visible
+      gsap.set(svgRef.current, { visibility: "visible" });
 
       const tl = gsap.timeline({
         onComplete: () => {
-          if (!onComplete) return;
-
-          // Final exit animation
           gsap.to(containerRef.current, {
             opacity: 0,
             duration: 0.8,
@@ -28,33 +35,20 @@ export default function InteractiveLoader({ onComplete }) {
         },
       });
 
-      // 1. Initial State: Hide paths using stroke-dasharray
-      const preparePath = (path) => {
-        const length = path.getTotalLength();
-        gsap.set(path, {
-          strokeDasharray: length,
-          strokeDashoffset: length,
-          opacity: 1,
-        });
-      };
-
-      paths.forEach(preparePath);
-
       // 2. Animation Sequence
-      tl.to(paths[0], {
+      tl.to(pPathRef.current, {
         strokeDashoffset: 0,
         duration: 1.5,
         ease: "power2.inOut",
       })
-      .to(paths[1], {
+      .to(iPathRef.current, {
         strokeDashoffset: 0,
         duration: 0.8,
         ease: "power2.inOut",
-      }, "-=0.2") // Start slightly before P finishes
+      }, "-=0.2")
       
-      // 3. Glow & Pulse Effect
-      .to(paths, {
-        stroke: "#926868", // --color-accent
+      .to([pPathRef.current, iPathRef.current], {
+        stroke: "#926868", // accent color
         filter: "drop-shadow(0 0 8px rgba(146, 104, 104, 0.8))",
         duration: 0.5,
       })
@@ -66,7 +60,6 @@ export default function InteractiveLoader({ onComplete }) {
         yoyo: true,
       }, "-=0.5")
 
-      // 4. Fade in Tagline
       .to(textRef.current, {
         opacity: 1,
         y: 0,
@@ -74,7 +67,6 @@ export default function InteractiveLoader({ onComplete }) {
         ease: "back.out(1.7)",
       }, "-=0.3")
 
-      // 5. Final Hold
       .to({}, { duration: 1 }); 
     });
 
@@ -86,10 +78,8 @@ export default function InteractiveLoader({ onComplete }) {
       ref={containerRef}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-bg"
     >
-      {/* Background Noise Layer to match your theme */}
       <div className="noise-bg" />
       
-      {/* Decorative Glow Orb */}
       <div 
         ref={glowRef}
         className="absolute w-64 h-64 bg-accent/20 rounded-full blur-[100px] opacity-0 pointer-events-none" 
@@ -97,34 +87,31 @@ export default function InteractiveLoader({ onComplete }) {
 
       <div className="relative flex flex-col items-center">
         <svg
+          ref={svgRef}
           width="160"
           height="160"
           viewBox="0 0 100 100"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="drop-shadow-2xl"
+          style={{ visibility: "hidden" }} // Prevents initial flash glitch
         >
-          {/* Path for 'P' */}
           <path
             ref={pPathRef}
             d="M30 75V25C30 25 65 25 65 42.5C65 60 30 60 30 60"
             stroke="#ebdfdc"
             strokeWidth="6"
             strokeLinecap="square"
-            style={{ opacity: 0 }}
           />
-          {/* Path for 'I' */}
           <path
             ref={iPathRef}
             d="M75 25V75"
             stroke="#ebdfdc"
             strokeWidth="6"
             strokeLinecap="square"
-            style={{ opacity: 0 }}
           />
         </svg>
 
-        {/* Tagline */}
         <div 
           ref={textRef}
           className="mt-8 overflow-hidden opacity-0 translate-y-4"

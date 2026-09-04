@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { Zap, ArrowUpRight, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -10,6 +10,7 @@ import { FluidBackground } from "../../Home/components/FluidBackground";
 import { Media } from "../../Home/components/Media";
 import ZoomEffect from "../../Home/components/CinematicPortal";
 import { InfiniteScroll } from "../../Home/components/InfiniteScroll";
+import InteractiveLoader from "../../Home/components/InteractiveLoader";
 import { Footer } from "../../Home/components/Footer";
 import ComparisonSection from "../../Home/components/ComparisonSection";
 import { FAQSection } from "../../Home/components/FAQSection";
@@ -18,10 +19,18 @@ import { TestimonialSection } from "../../Home/components/TestimonialSection";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+let hasSeenLoader = false;
+
 export default function HomePage() {
 
   const { courses } = useSelector((state) => state.course);
+  const [loading, setLoading] = useState(!hasSeenLoader);
   const containerRef = useRef(null);
+
+  const handleLoaderComplete = () => {
+    hasSeenLoader = true;
+    setLoading(false);
+  };
 
   
 
@@ -29,6 +38,8 @@ export default function HomePage() {
 
   // GSAP 3D Mouse Follow Effect
   useGSAP(() => {
+    if (loading) return;
+
     const handleMouseMove = (e) => {
       const { clientX, clientY } = e;
       const xPos = (clientX / window.innerWidth - 0.5) * 15;
@@ -45,11 +56,16 @@ export default function HomePage() {
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [loading]);
 
   return (
     <div ref={containerRef} className="bg-bg text-text selection:bg-accent/30 overflow-x-hidden perspective-1000">
-      <motion.div
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <InteractiveLoader key="loader" onComplete={handleLoaderComplete} />
+        ) : (
+          <motion.div
+            key="content"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="relative min-h-screen"
@@ -170,7 +186,9 @@ export default function HomePage() {
 
             </main>
             <Footer />
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

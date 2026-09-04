@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import InteractiveLoader from "../Features/dashboard/Home/components/InteractiveLoader";
 
 // Lazy-loaded Pages
 const pageLoaders = {
@@ -67,9 +66,17 @@ function SuspenseWrapper({ children }) {
   );
 }
 
+// Replace your existing PageLoading function with this:
 function PageLoading() {
   return (
-    <InteractiveLoader aria-busy="true" aria-label="Loading page" />
+    <div
+      className="min-h-screen bg-bg flex items-center justify-center"
+      aria-busy="true"
+      aria-label="Loading page"
+    >
+      {/* The ring div was removed from here to ensure only your logo loader shows */}
+      <div className="noise-bg" />
+    </div>
   );
 }
 
