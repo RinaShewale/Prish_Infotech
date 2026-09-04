@@ -11,22 +11,17 @@ const ModuleList = ({ courseId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { lessons = [], loading, error } = useSelector(
-    (state) => state.lesson
-  );
+  const { lessons = [], loading, error } = useSelector((state) => state.lesson);
 
   useEffect(() => {
-    if (courseId) {
-      dispatch(fetchLessons(courseId));
-    }
+    if (courseId) dispatch(fetchLessons(courseId));
   }, [courseId, dispatch]);
 
   const toggleModule = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const displayModules = lessons.length > 0
-    ? lessons.map((lesson) => ({
+  const displayModules = lessons.length > 0 ? lessons.map((lesson) => ({
       id: lesson._id || lesson.id,
       title: lesson.title || 'Untitled Lesson',
       badge: lesson.completed ? "Completed" : "New",
@@ -39,184 +34,72 @@ const ModuleList = ({ courseId }) => {
           type: "video",
           completed: lesson.completed || false,
         }))
-        : [{
-          id: lesson._id || lesson.id,
-          title: lesson.title || 'Lesson',
-          type: "video",
-          completed: lesson.completed || false,
-        }]
-    }))
-    : [];
+        : [{ id: lesson._id || lesson.id, title: lesson.title || 'Lesson', type: "video", completed: lesson.completed || false }]
+    })) : [];
 
   return (
-    // Parent container MUST have a fixed height or be in a flex-1 container that has one
     <div className="flex flex-col h-full w-full bg-bg2/40 border border-border/50 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-md">
-
-      {/* Tabs - Fixed at top */}
-      <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 bg-transparent z-10">
-        <TabButton
-          active={activeTab === 'modules'}
-          onClick={() => setActiveTab('modules')}
-          icon={<Box size={14} />}
-          label="Modules"
-        />
-        <TabButton
-          active={activeTab === 'announcements'}
-          onClick={() => setActiveTab('announcements')}
-          icon={<Megaphone size={14} />}
-          label="Updates"
-        />
+      <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0">
+        <TabButton active={activeTab === 'modules'} onClick={() => setActiveTab('modules')} icon={<Box size={14} />} label="Modules" />
+        <TabButton active={activeTab === 'announcements'} onClick={() => setActiveTab('announcements')} icon={<Megaphone size={14} />} label="Updates" />
       </div>
 
-      {/* Main Content Area - Scrollable */}
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide p-4 sm:p-6">
         <AnimatePresence mode="wait">
           {activeTab === 'modules' ? (
-            <motion.div
-              key="modules"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
-            >
+            <motion.div key="modules" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
               {loading ? (
-                <div className="flex items-center justify-center py-20 opacity-50 text-xs uppercase tracking-widest">Loading...</div>
-              ) : error ? (
-                <div className="text-red-500 text-xs text-center py-10">Error: {error}</div>
+                <div className="py-10 text-center opacity-50 text-xs">Loading...</div>
               ) : (
-                <>
-                  {/* Join Live Section */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-accent/5 rounded-2xl border border-accent/10 mb-6 gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                      <span className="text-xs sm:text-sm font-semibold tracking-tight truncate">Live Class: Introduction to React</span>
-                    </div>
-                    <button className="w-full sm:w-auto bg-red-900/20 text-red-400 text-[9px] font-black px-4 py-2 rounded-lg uppercase border border-red-900/30 hover:bg-red-900/40 transition-colors">
-                      Join Live
-                    </button>
-                  </div>
-
-                  {/* Dynamic Module List */}
-                  <div className="space-y-1 pb-10">
-                    {displayModules.map((module) => (
-                      <ModuleItem
-                        key={module.id}
-                        module={module}
-                        isExpanded={expandedId === module.id}
-                        onToggle={() => toggleModule(module.id)}
-                        courseId={courseId}
-                        navigate={navigate}
-                      />
-                    ))}
-                  </div>
-                </>
+                <div className="space-y-1 pb-10">
+                  {displayModules.map((module) => (
+                    <ModuleItem
+                      key={module.id}
+                      module={module}
+                      isExpanded={expandedId === module.id}
+                      onToggle={() => toggleModule(module.id)}
+                      courseId={courseId}
+                      navigate={navigate}
+                    />
+                  ))}
+                </div>
               )}
             </motion.div>
           ) : (
-            <motion.div
-              key="announcements"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-20 text-text-secondary"
-            >
-              <Megaphone size={32} className="mb-4 opacity-10" />
-              <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-40">No new announcements</p>
-            </motion.div>
+            <div className="flex flex-col items-center justify-center py-20 opacity-40 text-[10px] uppercase tracking-widest">No Updates</div>
           )}
         </AnimatePresence>
       </div>
-
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
 };
 
-const TabButton = ({ active, onClick, icon, label }) => (
-  <button
-    onClick={onClick}
-    className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] pb-4 transition-all relative whitespace-nowrap ${
-      active ? 'text-accent' : 'text-text-secondary hover:text-text'
-    }`}
-  >
-    {icon} {label}
-    {active && (
-      <motion.div
-        layoutId="tab-underline"
-        className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
-      />
-    )}
-  </button>
-);
-
 const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
-  const isLocked = module.badge === "Locked";
-
   return (
-    <div className={`border-b border-border/20 last:border-0 ${isLocked ? 'opacity-40' : ''}`}>
-      <div
-        onClick={onToggle}
-        className="flex items-center justify-between py-5 cursor-pointer group gap-4"
-      >
-        <div className="flex flex-1 items-center gap-3 min-w-0">
-          <span className={`text-xs sm:text-sm font-bold transition-colors truncate ${isExpanded ? 'text-accent' : 'text-text-secondary group-hover:text-text'}`}>
-            {module.title}
-          </span>
-          <span className={`shrink-0 text-[8px] font-black uppercase px-2 py-0.5 rounded border tracking-tighter ${
-            module.badgeType === 'green' ? 'bg-green-900/20 text-green-400 border-green-900/30' :
-            module.badgeType === 'accent' ? 'bg-accent/20 text-accent border-accent/30' :
-            'bg-white/5 text-text-secondary border-white/10'
-          }`}>
-            {module.badge}
-          </span>
-        </div>
-        {!isLocked && (
-          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} className="shrink-0">
-            <ChevronDown size={16} className="text-text-secondary" />
-          </motion.div>
-        )}
+    <div className="border-b border-border/20 last:border-0">
+      <div onClick={onToggle} className="flex items-center justify-between py-5 cursor-pointer group px-2">
+        <span className={`text-sm font-bold truncate ${isExpanded ? 'text-accent' : 'text-text-secondary group-hover:text-text'}`}>
+          {module.title}
+        </span>
+        <ChevronDown size={16} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-accent' : 'text-text-secondary'}`} />
       </div>
 
       <AnimatePresence>
-        {isExpanded && !isLocked && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            {/* FIXED PART: Added max-height and overflow-y-auto to the lesson container */}
-            <div className="pl-2 sm:pl-4 pb-6 space-y-2 max-h-[350px] overflow-y-auto scrollbar-hide pr-1">
+        {isExpanded && (
+          <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+            {/* THIS IS THE SUPART FIX: added max-height and internal scrolling for lessons */}
+            <div className="pl-4 pb-6 space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide">
               {module.lessons.map((lesson, idx) => (
-                <div
-                  key={`${lesson.id}-${idx}`}
-                  className="flex items-center justify-between group p-3 rounded-xl transition-all hover:bg-white/[0.03] border border-transparent hover:border-border/30 gap-4"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="shrink-0">
-                      <PlayCircle size={14} className={lesson.completed ? 'text-green-500' : 'text-accent'} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className={`text-[11px] sm:text-xs font-semibold truncate ${lesson.completed ? 'text-text-secondary' : 'text-text'}`}>
-                        {lesson.title}
-                      </p>
-                    </div>
+                <div key={`${lesson.id}-${idx}`} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-transparent hover:border-border/30">
+                  <div className="flex items-center gap-3 truncate">
+                    <PlayCircle size={14} className={lesson.completed ? 'text-green-500' : 'text-accent'} />
+                    <p className="text-xs font-medium truncate">{lesson.title}</p>
                   </div>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/classroom/course/${courseId}/lecture/${lesson.id}${lesson.subModuleId ? `?subModule=${lesson.subModuleId}` : ''}`);
-                    }}
-                    className={`shrink-0 text-[9px] font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg uppercase border transition-all ${
-                      lesson.completed
-                        ? "bg-green-900/20 text-green-400 border-green-900/30"
-                        : "bg-accent text-white border-accent shadow-lg shadow-accent/10"
-                    }`}
+                  <button 
+                    onClick={() => navigate(`/classroom/course/${courseId}/lecture/${lesson.id}`)}
+                    className="shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-green-900/30 text-green-400 bg-green-900/10 hover:bg-green-900/20"
                   >
-                    {lesson.completed ? "Review" : "Start"}
+                    REVIEW
                   </button>
                 </div>
               ))}
@@ -227,5 +110,12 @@ const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
     </div>
   );
 };
+
+const TabButton = ({ active, onClick, icon, label }) => (
+  <button onClick={onClick} className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest pb-4 transition-all relative ${active ? 'text-accent' : 'text-text-secondary'}`}>
+    {icon} {label}
+    {active && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent" />}
+  </button>
+);
 
 export default ModuleList;

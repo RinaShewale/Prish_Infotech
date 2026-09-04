@@ -45,38 +45,41 @@ const LearningPage = () => {
       </div>
 
       {/* Main Content Column (Stats & Modules) */}
+      {/* min-h-0 is crucial here for the internal scroll to work */}
       <div className="flex-1 flex flex-col gap-4 min-h-0 order-2 lg:order-1 overflow-hidden">
         <div className="shrink-0">
           <StatsHeader courseId={courseId} />
         </div>
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded-[2rem]">
+        
+        {/* ModuleList Wrapper: h-full + min-h-0 forces it to stay inside the flex box */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           <ModuleList courseId={courseId} />
         </div>
       </div>
 
       {/* Center Panel Column */}
       <div className="w-full lg:w-[400px] shrink-0 order-3 lg:order-2 h-[350px] md:h-[450px] lg:h-full overflow-hidden">
-        <div className="h-full overflow-y-auto hide-scrollbar">
+        <div className="h-full overflow-y-auto scrollbar-hide">
             {renderCenterPanel()}
         </div>
       </div>
 
       <style jsx>{`
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .hide-scrollbar::-webkit-scrollbar {
+        /* Consistent scrollbar hiding class */
+        .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .hide-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
         
         @media (max-width: 1024px) {
+          /* Do not set height: auto here if you want internal components to scroll */
+          /* Instead, keep h-screen or set a specific height */
           .h-screen {
-            height: auto;
-            min-height: 100vh;
-            overflow-y: auto;
+            height: 100vh; 
+            overflow: hidden;
           }
         }
       `}</style>
