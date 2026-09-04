@@ -2,7 +2,7 @@ import React, { useRef, useLayoutEffect, useState, useEffect, useMemo } from 're
 import { useSelector } from 'react-redux';
 import {
   ArrowRight, CheckCircle2, Terminal, MousePointer2, Layers,
-  ChevronDown, Check, Globe, Sparkles, Server, Code, BookOpen, Download
+  ChevronDown, Check, Globe, Sparkles, Server, Code, BookOpen, Download, Cpu
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -27,54 +27,67 @@ gsap.registerPlugin(ScrollTrigger);
 // ======================================================
 const getIcon = (title) => {
   const t = title?.toLowerCase() || "";
-  if (t.includes('web') || t.includes('frontend')) return <Globe className="w-5 h-5" />;
-  if (t.includes('ai') || t.includes('gen')) return <Sparkles className="w-5 h-5" />;
-  if (t.includes('cloud') || t.includes('devops') || t.includes('server')) return <Server className="w-5 h-5" />;
-  if (t.includes('system') || t.includes('design') || t.includes('dsa')) return <Code className="w-5 h-5" />;
-  return <BookOpen className="w-5 h-5" />;
+  if (t.includes('web') || t.includes('frontend')) return <Globe className="w-5 h-5 md:w-6 md:h-6" />;
+  if (t.includes('ai') || t.includes('gen')) return <Sparkles className="w-5 h-5 md:w-6 md:h-6" />;
+  if (t.includes('cloud') || t.includes('devops') || t.includes('server')) return <Server className="w-5 h-5 md:w-6 md:h-6" />;
+  if (t.includes('system') || t.includes('design') || t.includes('dsa')) return <Code className="w-5 h-5 md:w-6 md:h-6" />;
+  return <BookOpen className="w-5 h-5 md:w-6 md:h-6" />;
 };
 
 // ======================================================
-// 📱 COMPONENT: RESPONSIVE SYLLABUS CARD
+// 📱 COMPONENT: ENHANCED SYLLABUS CARD
 // ======================================================
 const SyllabusCard = ({ section, isOpen, toggle, index }) => {
+  const cardRef = useRef(null);
+  
+  // 3D Tilt Logic
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const mouseXSpring = useSpring(x);
   const mouseYSpring = useSpring(y);
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["4deg", "-4deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-4deg", "4deg"]);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
 
   const handleMouseMove = (e) => {
-    if (window.innerWidth < 1024) return; // Disable tilt on mobile for performance
-    const rect = e.currentTarget.getBoundingClientRect();
+    if (window.innerWidth < 1024) return;
+    const rect = cardRef.current.getBoundingClientRect();
     x.set((e.clientX - rect.left) / rect.width - 0.5);
     y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   return (
     <motion.div
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      ref={cardRef}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1000 }}
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => { x.set(0); y.set(0); }}
-      className="relative mb-4 md:mb-6"
+      onMouseLeave={handleMouseLeave}
+      className="relative mb-6"
     >
       <div 
         onClick={toggle}
-        className={`glass rounded-2xl md:rounded-[2rem] transition-all duration-500 border border-white/5 overflow-hidden cursor-pointer ${
-          isOpen ? 'bg-white/[0.04] border-accent/30' : 'hover:border-accent/20 bg-white/[0.02]'
+        className={`glass rounded-[2rem] transition-all duration-500 border border-white/5 overflow-hidden cursor-pointer ${
+          isOpen ? 'bg-white/[0.04] border-accent/40 shadow-[0_0_50px_-12px_rgba(var(--accent-rgb),0.2)]' : 'hover:border-white/20 bg-white/[0.02]'
         }`}
       >
-        <div className="p-5 md:p-8 flex items-center justify-between">
-          <div className="flex items-center gap-4 md:gap-6" style={{ transform: "translateZ(30px)" }}>
-            <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all duration-500 shrink-0 ${isOpen ? 'bg-accent text-bg' : 'bg-white/5 text-accent border border-white/10'}`}>
-              {getIcon(section.title)}
+        {/* Module Header */}
+        <div className="p-6 md:p-10 flex items-center justify-between">
+          <div className="flex items-center gap-5 md:gap-8" style={{ transform: "translateZ(40px)" }}>
+            <div className="relative">
+              <div className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl flex items-center justify-center transition-all duration-500 ${isOpen ? 'bg-accent text-bg scale-110' : 'bg-white/5 text-accent border border-white/10'}`}>
+                {getIcon(section.title)}
+              </div>
+              {isOpen && <motion.div layoutId="glow" className="absolute -inset-2 bg-accent/20 blur-xl rounded-full -z-10" />}
             </div>
             <div>
-              <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-accent/60 font-black mb-1 block">
+              <span className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-accent/60 font-black mb-2 block">
                 {section.phase || `Module 0${index + 1}`}
               </span>
-              <h3 className="text-lg md:text-2xl font-bold tracking-tight text-white leading-tight">
+              <h3 className="text-xl md:text-3xl font-bold tracking-tight text-white leading-tight">
                 {section.title}
               </h3>
             </div>
@@ -83,49 +96,65 @@ const SyllabusCard = ({ section, isOpen, toggle, index }) => {
             animate={{ rotate: isOpen ? 180 : 0 }} 
             className={`shrink-0 ${isOpen ? "text-accent" : "text-white/20"}`}
           >
-            <ChevronDown size={20} className="md:w-6 md:h-6" strokeWidth={2} />
+            <ChevronDown size={24} className="md:w-8 md:h-8" strokeWidth={1.5} />
           </motion.div>
         </div>
 
+        {/* Expandable Content */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.4, ease: "circOut" }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
-              <div className="px-5 md:px-8 pb-8 pt-6 border-t border-white/10" style={{ transform: "translateZ(20px)" }}>
-                <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-                  {/* Topics List */}
-                  <div className="space-y-4">
-                    <h4 className="text-accent text-sm md:text-base flex items-center gap-2 font-bold uppercase tracking-widest opacity-80">
-                      <ArrowRight size={14} className="text-accent" /> Objectives
+              <div className="px-6 md:px-10 pb-10 pt-4 border-t border-white/10" style={{ transform: "translateZ(20px)" }}>
+                <div className="grid lg:grid-cols-12 gap-10">
+                  
+                  {/* Left: Objectives with Progress Line */}
+                  <div className="lg:col-span-7 space-y-6">
+                    <h4 className="text-accent text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3">
+                      <Layers size={14} /> Knowledge Milestones
                     </h4>
-                    <ul className="space-y-3">
+                    <div className="relative ml-2 space-y-5">
+                      <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-accent/40 via-accent/10 to-transparent" />
                       {section.topics?.map((item, j) => (
-                        <li key={j} className="flex items-start gap-3 text-text-secondary/70 text-xs md:text-sm leading-relaxed group/item">
-                          <Check size={14} className="mt-0.5 text-accent/40 group-hover/item:text-accent transition-colors shrink-0" />
-                          <span className="group-hover:text-text transition-colors">{item}</span>
-                        </li>
+                        <motion.div 
+                          initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: j * 0.1 }}
+                          key={j} className="flex items-start gap-5 group/item"
+                        >
+                          <div className="relative z-10 mt-1.5 w-3.5 h-3.5 rounded-full bg-bg border-2 border-accent/40 group-hover/item:border-accent group-hover/item:scale-125 transition-all" />
+                          <span className="text-sm md:text-lg text-text-secondary/70 group-hover/item:text-white transition-colors">{item}</span>
+                        </motion.div>
                       ))}
-                    </ul>
-                  </div>
-
-                  {/* Tools Stack */}
-                  <div className="space-y-4">
-                    <h4 className="text-accent text-sm md:text-base flex items-center gap-2 font-bold uppercase tracking-widest opacity-80">
-                      <Terminal size={14} className="text-accent" /> Stack & Tools
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                        {section.tools?.map((tool, i) => (
-                            <span key={i} className="px-2.5 py-1.5 md:px-3 md:py-2 bg-black/40 border border-white/10 rounded-lg text-[9px] md:text-[10px] font-mono text-accent/80 uppercase tracking-wider hover:border-accent/40 transition-colors">
-                                {tool}
-                            </span>
-                        ))}
                     </div>
                   </div>
+
+                  {/* Right: Technical Stack Dashboard */}
+                  <div className="lg:col-span-5">
+                    <div className="bg-black/30 rounded-3xl p-6 border border-white/10 h-full relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-10"><Cpu size={40} /></div>
+                      <h4 className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                        <Terminal size={14} className="text-accent" /> Engineering Stack
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {section.tools?.map((tool, i) => (
+                          <div key={i} className="group/tool px-4 py-3 bg-white/5 border border-white/5 rounded-xl hover:border-accent/40 transition-all">
+                             <div className="text-[8px] font-mono text-accent/50 mb-1">0{i+1} // ARCH</div>
+                             <div className="text-xs md:text-sm font-bold text-white uppercase tracking-wider">{tool}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-8 p-4 rounded-xl bg-accent/5 border border-accent/10">
+                        <p className="text-[10px] leading-relaxed text-accent/70 italic">
+                          This module includes industry-grade documentation, source code templates, and architectural blueprints.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </motion.div>
@@ -266,16 +295,16 @@ export const CohortPage = ({ courseData }) => {
 
         {/* SYLLABUS SECTION */}
         {SYLLABUS.length > 0 && (
-          <section ref={syllabusRef} className="reveal-section mb-24 md:mb-48 max-w-4xl mx-auto scroll-mt-24">
+          <section ref={syllabusRef} className="reveal-section mb-24 md:mb-48 max-w-5xl mx-auto scroll-mt-24">
             <header className="text-center mb-16 md:mb-24">
                 <div className="inline-block px-4 py-1 border border-accent/20 bg-accent/5 rounded-full mb-6">
-                    <span className="text-accent text-[9px] md:text-[10px] tracking-[0.4em] uppercase font-black">Curriculum</span>
+                    <span className="text-accent text-[9px] md:text-[10px] tracking-[0.4em] uppercase font-black">Architecture</span>
                 </div>
-                <h2 className="text-4xl md:text-[80px] font-bold tracking-tighter text-white leading-none mb-6">What You'll Study</h2>
-                <p className="text-base md:text-xl text-text-secondary/50 font-light max-w-2xl mx-auto italic">"The most comprehensive roadmap designed for industry-level mastery."</p>
+                <h2 className="text-4xl md:text-[80px] font-bold tracking-tighter text-white leading-none mb-6">Learning Path</h2>
+                <p className="text-base md:text-xl text-text-secondary/50 font-light max-w-2xl mx-auto italic">"A strictly engineered curriculum designed for deep technical mastery."</p>
             </header>
 
-            <div className="perspective-1000">
+            <div className="px-2">
                 {SYLLABUS.map((section, index) => (
                     <SyllabusCard 
                         key={index} index={index} section={section}
@@ -358,7 +387,6 @@ export const CohortPage = ({ courseData }) => {
       </div>
 
       <style jsx global>{`
-        .perspective-1000 { perspective: 1000px; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); }
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem !important; }
