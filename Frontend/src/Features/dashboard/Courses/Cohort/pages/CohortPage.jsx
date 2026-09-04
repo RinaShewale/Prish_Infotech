@@ -152,7 +152,7 @@ export const CohortPage = ({ courseData }) => {
     if (!courseData) return;
     let ctx = gsap.context(() => {
       gsap.from(".hero-reveal", { y: 30, opacity: 0, stagger: 0.1, duration: 1.2, ease: "power4.out" });
-      gsap.from(".hero-img-container", { scale: 0.95, opacity: 0, duration: 1.5, ease: "expo.out", delay: 0.3 });
+      gsap.from(".hero-img-container", { scale: 0.9, opacity: 0, duration: 1.5, ease: "expo.out", delay: 0.3 });
       gsap.utils.toArray('.reveal-section').forEach(s => {
         gsap.from(s, { scrollTrigger: { trigger: s, start: "top 90%" }, y: 30, opacity: 0, duration: 1 });
       });
@@ -167,7 +167,6 @@ export const CohortPage = ({ courseData }) => {
   return (
     <div ref={containerRef} className="bg-bg text-text min-h-screen selection:bg-accent/30 overflow-x-hidden relative font-sans">
       
-      {/* Background stays subtle and consistent with theme */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <FluidBackground />
         <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: `linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
@@ -176,15 +175,15 @@ export const CohortPage = ({ courseData }) => {
 
       <main className="relative z-10 pt-24 md:pt-36 pb-20 px-6 max-w-7xl mx-auto">
 
-        {/* HERO SECTION - REFINED PROPORTIONS */}
-        <section className="grid lg:grid-cols-[1.3fr_0.7fr] gap-12 lg:gap-20 items-center mb-32 md:mb-48">
+        {/* UPDATED HERO SECTION - LARGER IMAGE & ANIMATION */}
+        <section className="grid lg:grid-cols-[1fr_1fr] gap-12 lg:gap-16 items-center mb-32 md:mb-48">
           <div className="text-center lg:text-left order-2 lg:order-1">
             <div className="hero-reveal inline-flex items-center gap-2 px-3 py-1 border border-accent/20 bg-accent/5 rounded-full mb-8">
               <span className="text-[10px] font-black tracking-[0.2em] uppercase text-accent">
                 {courseData.heroHighlight || "Engineering Cohort"}
               </span>
             </div>
-            <h1 className="hero-reveal text-5xl sm:text-7xl lg:text-[84px] font-bold leading-[0.9] tracking-tighter text-white mb-8">
+            <h1 className="hero-reveal text-5xl sm:text-7xl lg:text-[88px] font-bold leading-[0.85] tracking-tighter text-white mb-8">
               {mainTitle} <br />
               <span className="italic font-serif text-accent">{lastWord}</span>
             </h1>
@@ -205,15 +204,34 @@ export const CohortPage = ({ courseData }) => {
             </div>
           </div>
 
-          {/* SMALLER HERO IMAGE AREA */}
+          {/* IMPROVED IMAGE CONTAINER */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-             <div className="hero-img-container relative w-full max-w-[360px] aspect-[4/5] lg:aspect-square">
-                <div className="absolute inset-0 bg-accent/10 blur-[80px] rounded-full opacity-40 translate-y-10" />
-                <div className="relative h-full w-full rounded-[40px] overflow-hidden border border-white/10 shadow-2xl bg-black/40">
-                    <img src={courseData.thumbnail} className="w-full h-full object-cover grayscale-[0.1]" alt={courseData.title} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg/60 via-transparent to-transparent" />
+             <motion.div 
+                animate={{ y: [0, -20, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="hero-img-container relative w-full max-w-[480px] lg:max-w-[540px] aspect-square"
+             >
+                {/* Visual Glow Layer */}
+                <div className="absolute inset-0 bg-accent/20 blur-[100px] rounded-full opacity-30 translate-y-10 scale-110" />
+                
+                <div className="relative h-full w-full rounded-[48px] overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] bg-black/40 group">
+                    <img 
+                      src={courseData.thumbnail} 
+                      className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100" 
+                      alt={courseData.title} 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent opacity-60" />
+                    
+                    {/* Floating Tech Badges (Optional flair) */}
+                    <div className="absolute bottom-6 left-6 right-6 p-4 glass rounded-2xl border border-white/10 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <span className="text-[10px] font-mono text-accent uppercase tracking-widest">Industry Standard Curriculum</span>
+                        <div className="flex gap-2">
+                           <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                           <div className="w-2 h-2 rounded-full bg-accent/40" />
+                        </div>
+                    </div>
                 </div>
-             </div>
+             </motion.div>
           </div>
         </section>
 
@@ -243,17 +261,36 @@ export const CohortPage = ({ courseData }) => {
 
         <div className="reveal-section mb-32 md:mb-48"><ComparisonSection /></div>
 
-        {/* QUOTE SECTION */}
+        {/* UPDATED QUOTE SECTION - MORE PREMIUM UI */}
         <section className="reveal-section mb-32 md:mb-48 px-2">
-          <div className="relative py-20 md:py-32 bg-white/[0.02] border border-white/5 rounded-[60px] md:rounded-[100px] text-center overflow-hidden">
-            <h2 className="text-3xl md:text-6xl font-bold text-white mb-12 leading-[1.1] tracking-tighter">
-              {courseData.heroQuote || "Don't Just Use AI."} <br />
-              <span className="text-accent italic font-serif">Engineer It.</span>
-            </h2>
-            <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-4 px-12 py-6 bg-white text-bg rounded-full transition-all hover:scale-105 active:scale-95 font-black uppercase tracking-tighter text-sm md:text-lg shadow-xl">
-              SECURE YOUR SPOT <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
+          <motion.div 
+            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8 }}
+            className="relative py-24 md:py-40 bg-white/[0.03] border border-white/10 rounded-[60px] md:rounded-[100px] text-center overflow-hidden group"
+          >
+            {/* Spotlight effect behind text */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-accent/5 blur-[120px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            
+            <div className="relative z-10 px-6">
+              <h2 className="text-4xl md:text-8xl font-bold text-white mb-14 leading-[0.95] tracking-tighter">
+                {courseData.heroQuote || "Don't Just Use AI."} <br />
+                <span className="text-accent italic font-serif inline-block mt-4">Engineer It.</span>
+              </h2>
+              <button 
+                onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} 
+                className="group inline-flex items-center gap-4 px-14 py-7 bg-white text-bg rounded-2xl transition-all hover:bg-accent hover:text-bg active:scale-95 font-black uppercase tracking-tighter text-sm md:text-xl shadow-2xl"
+              >
+                SECURE YOUR SPOT 
+                <ArrowRight className="w-6 h-6 transition-transform group-hover:translate-x-2" />
+              </button>
+            </div>
+            
+            {/* Subtle bottom text for the quote block */}
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
+               <span className="text-[10px] tracking-[0.5em] text-white/20 font-black uppercase">Start Your Journey Today</span>
+            </div>
+          </motion.div>
         </section>
 
         <CertificationSection
