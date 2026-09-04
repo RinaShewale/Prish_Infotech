@@ -39,50 +39,30 @@ const LearningPage = () => {
     <div className="h-screen w-full bg-bg text-text font-sans overflow-hidden flex flex-col lg:flex-row p-2 md:p-4 gap-4">
       <FluidBackground />
 
-      {/* Navigation Column (Top on Mobile, Right on Desktop) */}
+      {/* Navigation Column */}
       <div className="w-full lg:w-64 shrink-0 order-1 lg:order-3">
         <NavigationSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       {/* Main Content Column (Stats & Modules) */}
-      {/* On mobile: Grows to fill space. On desktop: Flex-1 */}
+      {/* min-h-0 is crucial here for the internal scroll to work */}
       <div className="flex-1 flex flex-col gap-4 min-h-0 order-2 lg:order-1 overflow-hidden">
         <div className="shrink-0">
           <StatsHeader courseId={courseId} />
         </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar rounded-[2rem]">
+        
+        {/* ModuleList Wrapper: h-full + min-h-0 forces it to stay inside the flex box */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
           <ModuleList courseId={courseId} />
         </div>
       </div>
 
-      {/* Center Panel Column (Leaderboard/Cert/Bookmarks) */}
-      {/* On mobile: Fixed height to prevent squishing. On desktop: Fixed width, full height */}
+      {/* Center Panel Column */}
       <div className="w-full lg:w-[400px] shrink-0 order-3 lg:order-2 h-[350px] md:h-[450px] lg:h-full overflow-hidden">
-        <div className="h-full overflow-y-auto custom-scrollbar">
+        <div className="h-full overflow-y-auto scrollbar-hide">
             {renderCenterPanel()}
         </div>
       </div>
-
-      {/* Custom Scrollbar CSS (Add to your global CSS or a styled component) */}
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        @media (max-width: 1024px) {
-          .h-screen {
-            height: auto;
-            min-height: 100vh;
-            overflow-y: auto;
-          }
-        }
-      `}</style>
     </div>
   );
 };

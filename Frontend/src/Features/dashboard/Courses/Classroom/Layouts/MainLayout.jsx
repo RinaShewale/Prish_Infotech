@@ -4,7 +4,7 @@ import { Nav } from '../../../Home/components/Nav';
 
 const MainLayout = () => {
   return (
-    <div className="h-screen w-full bg-[#0A0A0B] text-white selection:bg-accent/30 flex flex-col overflow-hidden">
+    <div className="min-h-screen w-full bg-[#0A0A0B] text-white selection:bg-accent/30">
       <Nav />
       
       {/* Background Ambience */}
@@ -15,7 +15,7 @@ const MainLayout = () => {
       </div>
 
       {/* Content Area */}
-      <main className="relative z-10 pt-24 md:pt-28 pb-4 md:pb-6 px-4 md:px-6 max-w-[1600px] w-full mx-auto flex-1 min-h-0 flex flex-col overflow-hidden">
+      <main className="relative z-10 pt-32 pb-10 px-6 max-w-[1600px] mx-auto h-screen flex flex-col">
         <Outlet />
       </main>
     </div>

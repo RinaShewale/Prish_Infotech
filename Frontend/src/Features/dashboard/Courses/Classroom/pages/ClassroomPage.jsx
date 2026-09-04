@@ -45,11 +45,11 @@ const ClassroomPage = () => {
         }
       `}</style>
 
-      {/* h-full locks the page height within MainLayout */}
-      <div className="h-full w-full bg-[var(--color-bg)] text-text overflow-hidden font-sans relative flex-1 min-h-0">
+      {/* h-screen + overflow-hidden locks the page height */}
+      <div className="h-screen w-full bg-[var(--color-bg)] text-text overflow-hidden font-sans relative">
         <FluidBackground />
       
-        <div className="relative z-10 max-w-[1600px] mx-auto h-full flex flex-col px-4 sm:px-6 lg:px-10 min-h-0">
+        <div className="relative z-10 max-w-[1600px] mx-auto h-full flex flex-col px-4 sm:px-6 lg:px-10">
           {/* Header modified: items-center and flex-row used for mobile side-by-side alignment */}
           <header className="flex flex-row items-center justify-between py-6 lg:py-8 gap-4 shrink-0">
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-gradient">Classroom</h1>
