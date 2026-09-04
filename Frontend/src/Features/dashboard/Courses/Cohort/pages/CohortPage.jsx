@@ -21,7 +21,6 @@ import { useEnrollment } from "../../hooks/useEnrollment";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Helper to map icons based on module title keywords
 const getIcon = (title) => {
   const t = title?.toLowerCase() || "";
   if (t.includes('web') || t.includes('frontend')) return <Globe className="w-5 h-5" />;
@@ -50,30 +49,30 @@ const SyllabusCard = ({ section, isOpen, toggle, index }) => {
       style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => { x.set(0); y.set(0); }}
-      className="relative mb-5"
+      className="relative mb-4"
     >
       <div 
         onClick={toggle}
-        className={`glass rounded-2xl md:rounded-[32px] transition-all duration-500 border border-white/5 ${
-          isOpen ? 'bg-white/[0.04] border-accent/30' : 'hover:border-accent/20 bg-white/[0.02]'
+        className={`glass rounded-2xl md:rounded-[24px] transition-all duration-500 border border-white/5 ${
+          isOpen ? 'bg-white/[0.06] border-accent/40 shadow-[0_0_30px_rgba(var(--accent-rgb),0.1)]' : 'hover:border-white/20 bg-white/[0.02]'
         }`}
       >
-        <div className="p-6 md:p-8 flex items-center justify-between cursor-pointer">
-          <div className="flex items-center gap-6" style={{ transform: "translateZ(30px)" }}>
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isOpen ? 'bg-accent text-bg' : 'bg-white/5 text-accent border border-white/10'}`}>
+        <div className="p-5 md:p-7 flex items-center justify-between cursor-pointer">
+          <div className="flex items-center gap-5" style={{ transform: "translateZ(30px)" }}>
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500 ${isOpen ? 'bg-accent text-bg shadow-[0_0_20px_rgba(var(--accent-rgb),0.4)]' : 'bg-white/5 text-accent border border-white/10'}`}>
               {getIcon(section.title)}
             </div>
             <div>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-accent/60 font-bold mb-1 block">
-                0{index + 1} — {section.phase || 'Module'}
+              <span className="text-[9px] uppercase tracking-[0.3em] text-accent/60 font-bold mb-1 block">
+                Module 0{index + 1}
               </span>
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">
+              <h3 className="text-lg md:text-xl font-bold tracking-tight text-white uppercase">
                 {section.title}
               </h3>
             </div>
           </div>
           <motion.div animate={{ rotate: isOpen ? 180 : 0 }} className={isOpen ? "text-accent" : "text-white/20"}>
-            <ChevronDown size={24} strokeWidth={1.5} />
+            <ChevronDown size={20} />
           </motion.div>
         </div>
 
@@ -84,16 +83,16 @@ const SyllabusCard = ({ section, isOpen, toggle, index }) => {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.4, ease: "circOut" }}
-              className="overflow-hidden px-6 md:px-8 pb-8"
+              className="overflow-hidden px-5 md:px-7 pb-7"
             >
-              <div className="pt-8 grid md:grid-cols-2 gap-10 border-t border-white/10" style={{ transform: "translateZ(20px)" }}>
-                <div className="space-y-5">
-                  <h4 className="font-serif italic text-accent text-lg flex items-center gap-3">
-                    <ArrowRight size={14} className="not-italic" /> Curriculum Breakdown
+              <div className="pt-6 grid md:grid-cols-2 gap-8 border-t border-white/10" style={{ transform: "translateZ(20px)" }}>
+                <div className="space-y-4">
+                  <h4 className="font-serif italic text-accent text-base flex items-center gap-2">
+                    <ArrowRight size={14} className="not-italic" /> Curriculum
                   </h4>
-                  <ul className="space-y-3">
+                  <ul className="space-y-2.5">
                     {section.topics?.map((topic, j) => (
-                      <li key={j} className="flex items-start gap-3 text-text-secondary/70 text-sm leading-relaxed group/item">
+                      <li key={j} className="flex items-start gap-3 text-text-secondary/80 text-sm leading-relaxed group/item">
                         <Check size={14} className="mt-1 text-accent/50 group-hover/item:text-accent transition-colors shrink-0" />
                         <span className="group-hover:text-text transition-colors">{topic}</span>
                       </li>
@@ -102,11 +101,11 @@ const SyllabusCard = ({ section, isOpen, toggle, index }) => {
                 </div>
                 
                 {section.tools && (
-                  <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-6 h-fit">
-                    <h4 className="text-text-secondary/30 text-[9px] font-black uppercase tracking-widest mb-4">Core Modules & Tools</h4>
+                  <div className="bg-black/20 border border-white/5 rounded-xl p-5 h-fit">
+                    <h4 className="text-text-secondary/40 text-[9px] font-black uppercase tracking-widest mb-4">Tech Stack</h4>
                     <div className="flex flex-wrap gap-2">
                       {section.tools.map((tool, i) => (
-                        <span key={i} className="px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-[9px] font-mono text-accent uppercase tracking-wider">
+                        <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[9px] font-mono text-accent/90 uppercase tracking-wider">
                           {tool}
                         </span>
                       ))}
@@ -133,80 +132,53 @@ export const CohortPage = ({ courseData }) => {
   const { myCertificates, getMyCertificates } = useCertificate();
   const { enrollments } = useEnrollment();
 
-  useEffect(() => {
-    getMyCertificates();
-  }, []);
+  useEffect(() => { getMyCertificates(); }, []);
 
   const currentUserCertificate = useMemo(() => {
     if (!courseData?._id || !myCertificates) return null;
-    return myCertificates.find(cert =>
-      (cert.course?._id === courseData._id) || (cert.course === courseData._id)
-    );
+    return myCertificates.find(cert => (cert.course?._id === courseData._id) || (cert.course === courseData._id));
   }, [myCertificates, courseData]);
 
   const PRICE = Math.floor(courseData?.price || 0);
   const OLD_PRICE = Math.floor(courseData?.oldPrice || 0);
   const SYLLABUS = courseData?.syllabus || [];
   const CATEGORIES = courseData?.category || [];
-  const isLive = courseData?.type === "live";
 
   const titleWords = (courseData?.title || "").split(' ');
   const mainTitle = titleWords.slice(0, -1).join(' ');
   const lastWord = titleWords.slice(-1);
 
-  // PDF Download Logic
   const handleDownloadPDF = () => {
     try {
       const pdf = new jsPDF("p", "mm", "a4");
-      let yPosition = 20;
-      const margin = 15;
-      const maxWidth = pdf.internal.pageSize.getWidth() - 2 * margin;
-
-      pdf.setFontSize(24);
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(`${courseData.title} - Syllabus`, margin, yPosition);
-      yPosition += 15;
-
-      SYLLABUS.forEach((section, idx) => {
-        if (yPosition > 270) { pdf.addPage(); yPosition = 20; }
-        
-        pdf.setFontSize(14);
-        pdf.setFont(undefined, "bold");
-        pdf.text(`Module 0${idx + 1}: ${section.title}`, margin, yPosition);
-        yPosition += 8;
-
-        pdf.setFontSize(10);
-        pdf.setFont(undefined, "normal");
-        section.topics?.forEach(topic => {
-          const splitTopic = pdf.splitTextToSize(`• ${topic}`, maxWidth - 10);
-          pdf.text(splitTopic, margin + 5, yPosition);
-          yPosition += (splitTopic.length * 5);
-        });
-        yPosition += 5;
+      let yPos = 20;
+      pdf.setFontSize(22);
+      pdf.text(`${courseData.title} Syllabus`, 15, yPos);
+      yPos += 15;
+      SYLLABUS.forEach((s, i) => {
+        if (yPos > 270) { pdf.addPage(); yPos = 20; }
+        pdf.setFontSize(14); pdf.setFont(undefined, 'bold');
+        pdf.text(`Module ${i+1}: ${s.title}`, 15, yPos);
+        yPos += 8;
+        pdf.setFontSize(10); pdf.setFont(undefined, 'normal');
+        s.topics?.forEach(t => { pdf.text(`• ${t}`, 20, yPos); yPos += 6; });
+        yPos += 4;
       });
-
       pdf.save(`${courseData.title}_Syllabus.pdf`);
-    } catch (error) {
-      console.error("PDF Error:", error);
-    }
+    } catch (e) { console.error(e); }
   };
 
   useLayoutEffect(() => {
     if (!courseData) return;
     let ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-      tl.from(".hero-reveal", { y: 40, opacity: 0, stagger: 0.08, duration: 1.5 });
-      
-      gsap.utils.toArray('.reveal-section').forEach(section => {
-        gsap.from(section, {
-          scrollTrigger: { trigger: section, start: "top 85%" },
-          y: 40, opacity: 0, duration: 1.2, ease: "power3.out"
-        });
+      gsap.from(".hero-reveal", { y: 30, opacity: 0, stagger: 0.1, duration: 1.2, ease: "power4.out" });
+      gsap.from(".hero-img-reveal", { scale: 0.9, opacity: 0, duration: 1.5, ease: "expo.out", delay: 0.2 });
+      gsap.utils.toArray('.reveal-section').forEach(s => {
+        gsap.from(s, { scrollTrigger: { trigger: s, start: "top 90%" }, y: 30, opacity: 0, duration: 1 });
       });
-
-      gsap.fromTo(".sticky-cta", { y: 150, opacity: 0 }, {
-        scrollTrigger: { trigger: "body", start: "1000px top", toggleActions: "play none none reverse" },
-        y: 0, opacity: 1, duration: 0.8
+      gsap.fromTo(".sticky-cta", { y: 100 }, {
+        scrollTrigger: { trigger: "body", start: "800px top", toggleActions: "play none none reverse" },
+        y: 0, duration: 0.6
       });
     }, containerRef);
     return () => ctx.revert();
@@ -215,109 +187,100 @@ export const CohortPage = ({ courseData }) => {
   return (
     <div ref={containerRef} className="bg-bg text-text min-h-screen selection:bg-accent/30 overflow-x-hidden relative font-sans">
       
-      {/* BACKGROUND ELEMENTS */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <FluidBackground />
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(var(--accent-rgb), 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--accent-rgb), 0.5) 1px, transparent 1px)`, backgroundSize: '50px 50px' }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg" />
+        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/20 to-bg" />
       </div>
 
-      <main className="relative z-10 pt-28 md:pt-40 pb-24 px-4 sm:px-8 max-w-7xl mx-auto">
+      <main className="relative z-10 pt-24 md:pt-36 pb-20 px-6 max-w-7xl mx-auto">
 
-        {/* HERO SECTION */}
-        <section className="grid lg:grid-cols-2 gap-10 lg:gap-20 items-center mb-24 md:mb-48">
+        {/* HERO SECTION - REFINED LAYOUT */}
+        <section className="grid lg:grid-cols-[1.2fr_0.8fr] gap-12 lg:gap-16 items-center mb-32 md:mb-48">
           <div className="text-center lg:text-left order-2 lg:order-1">
-            <span className="hero-reveal inline-block px-4 py-1.5 border border-accent/20 bg-accent/5 rounded-full text-[10px] font-black tracking-[0.3em] uppercase text-accent mb-6">
-              {courseData.heroHighlight || "Engineering Cohort"}
-            </span>
-            <h1 className="hero-reveal text-4xl sm:text-6xl lg:text-[80px] xl:text-[90px] font-bold leading-[0.95] tracking-tighter text-white mb-8">
+            <div className="hero-reveal inline-flex items-center gap-2 px-3 py-1 border border-accent/20 bg-accent/5 rounded-full mb-8">
+              <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="text-[10px] font-black tracking-[0.2em] uppercase text-accent">
+                {courseData.heroHighlight || "Engineering Cohort"}
+              </span>
+            </div>
+            <h1 className="hero-reveal text-5xl sm:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tighter text-white mb-8">
               {mainTitle} <br />
               <span className="italic font-serif text-accent">{lastWord}</span>
             </h1>
-            <p className="hero-reveal text-base md:text-xl text-text-secondary/60 max-w-xl mb-8 mx-auto lg:mx-0 font-light leading-relaxed">
+            <p className="hero-reveal text-lg md:text-xl text-text-secondary/70 max-w-xl mb-10 mx-auto lg:mx-0 font-light leading-relaxed">
               {courseData.description}
             </p>
             <div className="hero-reveal flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-8">
-              <div className="flex flex-col items-center lg:items-start">
-                <div className="flex items-center gap-4">
-                  <span className="text-5xl md:text-7xl font-bold text-white tracking-tighter">₹{PRICE}</span>
-                  <span className="text-lg md:text-xl text-white/20 line-through decoration-accent/40">₹{OLD_PRICE}</span>
-                </div>
+              <div className="flex items-baseline gap-3">
+                <span className="text-5xl font-bold text-white tracking-tighter">₹{PRICE}</span>
+                <span className="text-lg text-white/20 line-through">₹{OLD_PRICE}</span>
               </div>
               <button
                 onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto px-10 py-5 bg-accent text-bg font-black rounded-2xl hover:scale-105 transition-all duration-500 uppercase tracking-widest text-xs flex items-center justify-center gap-3"
+                className="w-full sm:w-auto px-10 py-5 bg-accent text-bg font-black rounded-2xl hover:scale-105 transition-all shadow-[0_10px_30px_rgba(var(--accent-rgb),0.3)] uppercase tracking-widest text-[11px] flex items-center justify-center gap-3"
               >
-                Reserve Your Seat <ArrowRight className="w-4 h-4" />
+                Enroll Now <ArrowRight size={16} />
               </button>
             </div>
           </div>
-          <div ref={heroImageRef} className="order-1 lg:order-2 perspective-1000">
-             <div className="relative rounded-[32px] md:rounded-[40px] overflow-hidden border border-white/10 aspect-square bg-black/40 backdrop-blur-3xl shadow-2xl">
-                <img src={courseData.thumbnail} className="w-full h-full object-cover grayscale-[0.2]" alt={courseData.title} />
+
+          {/* SMALLER HERO IMAGE CONTAINER */}
+          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+             <div className="hero-img-reveal relative w-full max-w-[420px] aspect-[4/5] lg:aspect-square">
+                <div className="absolute inset-0 bg-accent/20 blur-[100px] rounded-full opacity-30" />
+                <div className="relative h-full w-full rounded-[32px] overflow-hidden border border-white/10 shadow-2xl">
+                    <img src={courseData.thumbnail} className="w-full h-full object-cover grayscale-[0.1]" alt={courseData.title} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
+                </div>
+                {/* Floating Elements for visual interest */}
+                <div className="absolute -bottom-6 -left-6 glass p-4 rounded-2xl border border-white/10 hidden md:block">
+                    <div className="flex gap-2 mb-2">
+                        {[1,2,3,4,5].map(i => <div key={i} className="w-2 h-2 rounded-full bg-accent" />)}
+                    </div>
+                    <p className="text-[10px] font-mono text-white/50 uppercase tracking-widest">Industry Standard</p>
+                </div>
              </div>
           </div>
         </section>
 
-        {/* NEW SYLLABUS SECTION */}
+        {/* SYLLABUS SECTION */}
         {SYLLABUS.length > 0 && (
-          <section ref={syllabusRef} className="reveal-section mb-24 md:mb-48">
-             <header className="text-center mb-16 md:mb-24">
-                <div className="inline-block px-4 py-1 border border-accent/20 bg-accent/5 mb-6">
-                    <span className="text-accent text-[10px] tracking-[0.4em] uppercase font-bold">Curriculum</span>
-                </div>
-                <h2 className="text-5xl md:text-[80px] font-bold tracking-tighter text-white leading-tight mb-4">
-                  What You'll Study<span className="text-accent">.</span>
+          <section ref={syllabusRef} className="reveal-section mb-32 md:mb-48">
+             <header className="text-center mb-16 md:mb-20">
+                <span className="text-accent text-[10px] tracking-[0.4em] uppercase font-black mb-4 block">Curriculum Roadmap</span>
+                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter text-white leading-tight mb-4">
+                  Master the Craft<span className="text-accent">.</span>
                 </h2>
-                <p className="text-lg text-text-secondary/50 max-w-2xl mx-auto">
-                  A comprehensive roadmap from fundamentals to industry-grade architecture.
-                </p>
             </header>
 
-            <div className="max-w-4xl mx-auto perspective-1000">
+            <div className="max-w-4xl mx-auto">
               {SYLLABUS.map((section, index) => (
-                <SyllabusCard 
-                  key={index}
-                  index={index}
-                  section={section}
-                  isOpen={activeIndex === index}
-                  toggle={() => setActiveIndex(activeIndex === index ? null : index)}
-                />
+                <SyllabusCard key={index} index={index} section={section} isOpen={activeIndex === index} toggle={() => setActiveIndex(activeIndex === index ? null : index)} />
               ))}
             </div>
 
-            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="mt-20 flex flex-col items-center gap-6">
-              <button 
-                onClick={handleDownloadPDF}
-                className="group relative glass px-10 py-4 rounded-full font-bold overflow-hidden transition-all hover:scale-105 border border-white/10 cursor-pointer"
-              >
-                <div className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10 transition-opacity" />
-                <span className="relative z-10 flex items-center gap-3 text-white uppercase text-xs tracking-widest font-black">
-                  <Download size={18} className="text-accent" />
-                  Download PDF Syllabus
-                </span>
+            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="mt-16 flex justify-center">
+              <button onClick={handleDownloadPDF} className="group flex items-center gap-3 px-8 py-4 rounded-full border border-white/10 hover:border-accent/40 transition-all text-white/60 hover:text-white uppercase text-[10px] tracking-[0.2em] font-black">
+                <Download size={16} className="text-accent" /> Download Syllabus PDF
               </button>
             </motion.div>
           </section>
         )}
 
-        <div className="reveal-section mb-24 md:mb-48">
-          <ComparisonSection />
-        </div>
+        <div className="reveal-section mb-32 md:mb-48"><ComparisonSection /></div>
 
         {/* QUOTE SECTION */}
-        <section className="reveal-section mb-24 md:mb-48 relative group px-2">
-          <div className="relative py-16 md:py-32 px-6 bg-white/[0.02] border border-white/10 rounded-[40px] md:rounded-[100px] text-center overflow-hidden">
-            <h2 className="text-3xl md:text-6xl lg:text-[80px] font-bold text-white mb-10 md:mb-16 leading-[1.1] tracking-tighter">
+        <section className="reveal-section mb-32 md:mb-48 px-2">
+          <div className="relative py-20 md:py-32 bg-white/[0.02] border border-white/5 rounded-[40px] md:rounded-[80px] text-center overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+            <h2 className="text-3xl md:text-6xl font-bold text-white mb-12 leading-[1.1] tracking-tighter">
               {courseData.heroQuote || "Don't Just Use AI."} <br />
               <span className="text-accent italic font-serif">Engineer It.</span>
             </h2>
-            <div className="flex justify-center">
-              <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="group relative flex items-center justify-center gap-4 px-8 md:px-16 py-6 md:py-10 bg-white text-bg rounded-full transition-all hover:scale-[1.03]">
-                <span className="text-xs md:text-2xl font-black uppercase tracking-tighter">ENROLL NOW</span>
-                <ArrowRight className="w-5 h-5 md:w-8 md:h-8" />
-              </button>
-            </div>
+            <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-4 px-12 py-6 bg-white text-bg rounded-full transition-all hover:scale-105 active:scale-95 font-black uppercase tracking-tighter text-sm md:text-lg">
+              GET STARTED NOW <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         </section>
 
@@ -327,39 +290,39 @@ export const CohortPage = ({ courseData }) => {
           data={{
             _id: courseData?._id,
             isEnrolled: courseData?.isEnrolled,
-            mainHeading: "Validate Your",
-            highlightedText: "Expertise",
-            description: "Earn a specialized certification upon successful completion.",
-            certType: courseData.title || "Mastery",
+            mainHeading: "Verified",
+            highlightedText: "Certification",
+            description: "Receive a globally recognized digital credential upon completing the cohort requirements.",
+            certType: courseData.title || "Specialist",
             skillsLearned: CATEGORIES.join(", "),
           }}
         />
 
-        <div className="reveal-section mt-24 md:mt-48"><FAQSection /></div>
+        <div className="reveal-section mt-32 md:mt-48"><FAQSection /></div>
 
-        <section ref={enrollmentRef} className="mb-24 md:mb-48 pt-10">
+        <section ref={enrollmentRef} className="pt-20">
           <PrishEnrollment courseData={courseData} title={courseData.title} price={PRICE} oldPrice={OLD_PRICE} />
         </section>
       </main>
 
       {/* STICKY CTA */}
-      <div className="sticky-cta fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-[500px]">
-        <div className="bg-bg/80 backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-2 flex items-center justify-between shadow-2xl">
-          <div className="pl-4 md:pl-6 text-left">
+      <div className="sticky-cta fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[440px]">
+        <div className="bg-bg/90 backdrop-blur-xl border border-white/10 rounded-3xl p-2.5 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          <div className="pl-5">
             <div className="flex items-center gap-2">
-              <span className="text-xl md:text-2xl font-bold text-white tracking-tighter leading-none">₹{PRICE}</span>
-              <span className="text-[10px] md:text-xs text-white/20 line-through">₹{OLD_PRICE}</span>
+              <span className="text-2xl font-bold text-white tracking-tighter">₹{PRICE}</span>
+              <span className="text-[10px] text-white/20 line-through font-mono">₹{OLD_PRICE}</span>
             </div>
           </div>
-          <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="bg-accent text-bg px-6 py-4 md:px-10 md:py-5 rounded-[18px] md:rounded-[26px] font-black text-[10px] md:text-[11px] uppercase tracking-widest">
-            Enroll Now
+          <button onClick={() => enrollmentRef.current?.scrollIntoView({ behavior: 'smooth' })} className="bg-accent text-bg px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-accent/20">
+            Secure Seat
           </button>
         </div>
       </div>
 
       <style jsx global>{`
-        .perspective-1000 { perspective: 1000px; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        :root { --accent-rgb: 0, 255, 153; /* Adjust to match your theme's accent color */ }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); }
       `}</style>
     </div>
   );
