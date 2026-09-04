@@ -49,10 +49,11 @@ const ModuleList = ({ courseId }) => {
     : [];
 
   return (
-    <div className="flex-1 h-full min-h-0 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
+    // Ensure the parent container has a fixed height or fills the available space
+    <div className="flex flex-col h-full w-full bg-bg2/40 border border-border/50 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-md">
 
-      {/* Tabs */}
-      <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 overflow-x-auto scrollbar-hide">
+      {/* Fixed Header / Tabs - Does not scroll */}
+      <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 bg-transparent z-10">
         <TabButton
           active={activeTab === 'modules'}
           onClick={() => setActiveTab('modules')}
@@ -67,7 +68,8 @@ const ModuleList = ({ courseId }) => {
         />
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto hide-scrollbar p-4 sm:p-6 lg:p-8">
+      {/* Scrollable Content Area */}
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide p-4 sm:p-6 lg:p-8">
         <AnimatePresence mode="wait">
           {activeTab === 'modules' ? (
             <motion.div
@@ -95,7 +97,7 @@ const ModuleList = ({ courseId }) => {
                   </div>
 
                   {/* Dynamic Module List */}
-                  <div className="space-y-1">
+                  <div className="space-y-1 pb-10"> {/* Added padding bottom for better scroll feel */}
                     {displayModules.map((module) => (
                       <ModuleItem
                         key={module.id}
@@ -125,8 +127,12 @@ const ModuleList = ({ courseId }) => {
       </div>
 
       <style jsx>{`
+        /* Standard name for hiding scrollbars across all browsers */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .scrollbar-hide { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
       `}</style>
     </div>
   );
@@ -186,9 +192,9 @@ const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
             className="overflow-hidden"
           >
             <div className="pl-2 sm:pl-4 pb-6 space-y-2">
-              {module.lessons.map((lesson) => (
+              {module.lessons.map((lesson, idx) => (
                 <div
-                  key={lesson.id}
+                  key={`${lesson.id}-${idx}`}
                   className="flex items-center justify-between group p-3 rounded-xl transition-all hover:bg-white/[0.03] border border-transparent hover:border-border/30 gap-4"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
