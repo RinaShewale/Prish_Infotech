@@ -65,10 +65,8 @@ const App = () => {
 
       previousLocationKey = state.location.key;
       revealFrame = window.requestAnimationFrame(() => {
-        revealFrame = window.requestAnimationFrame(() => {
-          resetScroll();
-          setIsNavigating(false);
-        });
+        resetScroll();
+        setIsNavigating(false);
       });
     });
 
