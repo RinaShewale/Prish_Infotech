@@ -1,7 +1,7 @@
 import React, { useRef, useLayoutEffect, useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
-  ArrowRight, CheckCircle2, Terminal, MousePointer2,
+  ArrowRight, CheckCircle2, Terminal, MousePointer2, Layers,
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,7 +21,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const CohortPage = ({ courseData }) => {
 
-  
   const containerRef = useRef(null);
   const syllabusRef = useRef(null);
   const enrollmentRef = useRef(null);
@@ -35,7 +34,6 @@ export const CohortPage = ({ courseData }) => {
   // ======================================================
   const { user } = useSelector((state) => state.auth);
   const { myCertificates, getMyCertificates } = useCertificate();
-
   const { enrollments, fetchEnrollments } = useEnrollment();
 
   useEffect(() => {
@@ -63,13 +61,12 @@ export const CohortPage = ({ courseData }) => {
   const lastWord = titleWords.slice(-1);
 
   // ======================================================
-  // 🎭 MINIMAL AESTHETIC GSAP ANIMATIONS
+  // 🎭 GSAP ANIMATIONS
   // ======================================================
   useLayoutEffect(() => {
     if (!courseData) return;
 
     let ctx = gsap.context(() => {
-      // 1. Hero Entrance Timeline
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
       tl.from(".hero-reveal", {
@@ -86,7 +83,6 @@ export const CohortPage = ({ courseData }) => {
           ease: "power2.out"
         }, "-=1.2");
 
-      // 2. Parallax Mouse Effect for Hero Image (Desktop Only)
       const handleMouseMove = (e) => {
         const { clientX, clientY } = e;
         const xPos = (clientX / window.innerWidth - 0.5) * 20;
@@ -106,7 +102,6 @@ export const CohortPage = ({ courseData }) => {
         window.addEventListener('mousemove', handleMouseMove);
       }
 
-      // 3. Scroll Reveal Logic
       gsap.utils.toArray('.reveal-section').forEach(section => {
         gsap.from(section, {
           scrollTrigger: {
@@ -121,7 +116,6 @@ export const CohortPage = ({ courseData }) => {
         });
       });
 
-      // 4. Sticky CTA
       gsap.fromTo(".sticky-cta",
         { y: 150, opacity: 0 },
         {
@@ -143,12 +137,11 @@ export const CohortPage = ({ courseData }) => {
     return () => ctx.revert();
   }, [courseData]);
 
-  // Content change transition for syllabus
   useLayoutEffect(() => {
     if (!contentRef.current) return;
     gsap.fromTo(contentRef.current,
-      { opacity: 0, x: 10, filter: 'blur(10px)' },
-      { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.6, ease: "expo.out" }
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
     );
   }, [activeModule]);
 
@@ -242,64 +235,100 @@ export const CohortPage = ({ courseData }) => {
           </div>
         </section>
 
-        {/* SYLLABUS SECTION */}
+        {/* REDESIGNED SYLLABUS SECTION */}
         {SYLLABUS.length > 0 && (
-          <section ref={syllabusRef} className="reveal-section mb-24 md:mb-48">
-            <div className="mb-10 md:mb-16 text-center lg:text-left px-2">
-              <h2 className="text-4xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-6">Curriculum<span className="text-accent">.</span></h2>
-              <p className="text-text-secondary/50 text-base md:text-lg">Structured roadmap designed for industry-level mastery.</p>
+          <section ref={syllabusRef} className="reveal-section mb-24 md:mb-48 scroll-mt-32">
+            <div className="mb-12 md:mb-20 text-center lg:text-left">
+              <h2 className="text-5xl md:text-8xl font-bold text-white tracking-tighter leading-tight mb-4">
+                The Roadmap<span className="text-accent">.</span>
+              </h2>
+              <p className="text-text-secondary/40 text-lg md:text-xl font-light">From core principles to production-ready architecture.</p>
             </div>
 
-            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column: Navigation Stepper */}
               <div className="w-full lg:col-span-4 lg:sticky lg:top-32 z-20">
-                <div className="relative">
-                  <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-bg to-transparent z-10 lg:hidden pointer-events-none" />
-                  <div ref={tabsRef} className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto pb-4 lg:pb-0 lg:max-h-[100vh] no-scrollbar snap-x snap-mandatory lg:pr-2 px-2 lg:px-0">
-                    {SYLLABUS.map((item, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleTabChange(idx)}
-                        className={`flex-shrink-0 w-[280px] lg:w-full p-5 md:p-6 rounded-2xl md:rounded-[28px] border transition-all duration-500 text-left snap-center group outline-none ${activeModule === idx ? "bg-accent border-accent text-bg shadow-[0_10px_30px_rgba(var(--accent-rgb),0.2)] scale-[1.02]" : "bg-white/[0.03] border-white/5 text-text-secondary hover:border-white/20 hover:bg-white/[0.05]"
-                          }`}
-                      >
-                        <div className="flex flex-col items-start gap-1 pointer-events-none">
-                          <span className={`text-[9px] font-black uppercase tracking-widest ${activeModule === idx ? "text-bg/60" : "text-accent/60"}`}>
-                            0{idx + 1} — {item.phase}
+                <div ref={tabsRef} className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 no-scrollbar snap-x snap-mandatory">
+                  {SYLLABUS.map((item, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleTabChange(idx)}
+                      className={`relative flex-shrink-0 w-[260px] lg:w-full text-left p-6 rounded-2xl transition-all duration-300 snap-center border ${
+                        activeModule === idx 
+                        ? "bg-accent/10 border-accent/30 shadow-[0_0_25px_rgba(var(--accent-rgb),0.1)]" 
+                        : "bg-white/[0.02] border-white/5 hover:border-white/10"
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className={`text-sm font-mono font-bold ${activeModule === idx ? "text-accent" : "text-white/20"}`}>
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <div className="flex flex-col">
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${activeModule === idx ? "text-accent" : "text-white/30"}`}>
+                            {item.phase || `Module ${idx + 1}`}
                           </span>
-                          <h3 className="font-bold uppercase text-sm md:text-lg tracking-tight leading-tight">{item.title}</h3>
+                          <h3 className={`font-bold text-base transition-colors ${activeModule === idx ? "text-white" : "text-white/60"}`}>
+                            {item.title}
+                          </h3>
                         </div>
-                      </button>
-                    ))}
-                  </div>
+                      </div>
+                      {activeModule === idx && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
 
+              {/* Right Column: Content Card */}
               <div className="w-full lg:col-span-8">
-                <div className="relative bg-white/[0.01] border border-white/10 rounded-[32px] md:rounded-[60px] p-6 md:p-12 lg:p-16 min-h-[400px] md:min-h-[500px] backdrop-blur-3xl overflow-hidden shadow-2xl">
-                  <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none hidden lg:block">
-                    <Terminal size={300} />
+                <div className="relative bg-[#0A0A0A] border border-white/10 rounded-[32px] md:rounded-[48px] p-8 md:p-14 overflow-hidden min-h-[500px] shadow-2xl">
+                  {/* Subtle Background Icon */}
+                  <div className="absolute -top-10 -right-10 opacity-[0.03] text-white pointer-events-none">
+                    <Layers size={300} />
                   </div>
-                  <div ref={contentRef} className="relative z-10 flex flex-col h-full will-change-transform">
-                    <span className="text-accent/60 font-black tracking-[0.2em] uppercase text-[10px] md:text-[12px] mb-4 block">{SYLLABUS[activeModule]?.phase}</span>
-                    <h3 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white mb-8 md:mb-12 tracking-tighter leading-[1.1]">{SYLLABUS[activeModule]?.title}</h3>
-                    <div className="grid md:grid-cols-2 gap-10 md:gap-12 mt-auto">
-                      <div>
-                        <h4 className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-6 border-l-2 border-accent/30 pl-3">Learning Objectives</h4>
-                        <ul className="space-y-4 md:space-y-5">
+
+                  <div ref={contentRef} className="relative z-10">
+                    <div className="flex items-center gap-3 mb-6">
+                      <span className="px-3 py-1 bg-accent/20 text-accent rounded-full text-[10px] font-black uppercase tracking-widest">
+                        {SYLLABUS[activeModule]?.phase}
+                      </span>
+                      <div className="h-[1px] flex-grow bg-gradient-to-r from-accent/30 to-transparent" />
+                    </div>
+
+                    <h3 className="text-4xl md:text-6xl font-bold text-white mb-10 tracking-tighter leading-tight">
+                      {SYLLABUS[activeModule]?.title}
+                    </h3>
+
+                    <div className="grid md:grid-cols-5 gap-12">
+                      <div className="md:col-span-3">
+                        <h4 className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em] mb-6 flex items-center gap-2">
+                          <CheckCircle2 className="w-3 h-3 text-accent" /> Objectives
+                        </h4>
+                        <ul className="space-y-4">
                           {SYLLABUS[activeModule]?.topics?.map((t, i) => (
-                            <li key={i} className="flex gap-3 md:gap-4 text-sm md:text-base lg:text-lg text-text-secondary/70 font-light items-start group/item">
-                              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-accent/40 shrink-0 mt-1 group-hover/item:text-accent transition-colors" />
-                              <span className="group-hover/item:text-text transition-colors">{t}</span>
+                            <li key={i} className="flex gap-4 text-text-secondary/70 group">
+                              <span className="text-accent/30 font-mono text-sm mt-1 group-hover:text-accent transition-colors">→</span>
+                              <span className="text-base md:text-lg group-hover:text-white transition-colors">{t}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
-                      <div className="bg-white/[0.03] border border-white/5 rounded-2xl md:rounded-[32px] p-6 md:p-8 h-fit">
-                        <h4 className="text-text-secondary/30 text-[9px] font-black uppercase tracking-widest mb-4">Core Modules</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {SYLLABUS[activeModule]?.tools?.map((tool, i) => (
-                            <span key={i} className="px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-[9px] font-mono text-accent uppercase tracking-wider hover:bg-accent hover:text-bg transition-colors duration-300 cursor-default">{tool}</span>
-                          ))}
+
+                      <div className="md:col-span-2">
+                        <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 md:p-8">
+                          <h4 className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-6 border-b border-white/10 pb-4">
+                            Stack & Tools
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {SYLLABUS[activeModule]?.tools?.map((tool, i) => (
+                              <span key={i} className="px-3 py-2 bg-black border border-white/10 rounded-xl text-[10px] font-mono text-accent uppercase tracking-wider">
+                                {tool}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -395,7 +424,6 @@ export const CohortPage = ({ courseData }) => {
         @media (max-width: 1024px) {
           .overflow-x-auto { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; }
         }
-        .lg\\:overflow-y-auto { scrollbar-gutter: stable; }
       `}</style>
     </div>
   );
