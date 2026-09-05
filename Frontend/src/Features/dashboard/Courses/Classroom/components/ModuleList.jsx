@@ -11,9 +11,7 @@ const ModuleList = ({ courseId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { lessons = [], loading, error } = useSelector(
-    (state) => state.lesson
-  );
+  const { lessons = [], loading, error } = useSelector((state) => state.lesson);
 
   useEffect(() => {
     if (courseId) {
@@ -49,9 +47,10 @@ const ModuleList = ({ courseId }) => {
     : [];
 
   return (
-    <div className="flex-1 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md">
-
-      {/* Tabs - Scrollable on mobile */}
+    /* Added min-h-0 here to allow flex child to shrink and trigger scroll */
+    <div className="flex-1 min-h-0 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md relative z-10">
+      
+      {/* Tabs */}
       <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 overflow-x-auto scrollbar-hide">
         <TabButton
           active={activeTab === 'modules'}
@@ -67,8 +66,8 @@ const ModuleList = ({ courseId }) => {
         />
       </div>
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8">
+      {/* Content Area - Added min-h-0 and overscroll-contain */}
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 overscroll-contain">
         <AnimatePresence mode="wait">
           {activeTab === 'modules' ? (
             <motion.div
@@ -84,7 +83,6 @@ const ModuleList = ({ courseId }) => {
                 <div className="text-red-500 text-xs text-center py-10">Error: {error}</div>
               ) : (
                 <>
-                  {/* Join Live Section - Responsive Stack */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-accent/5 rounded-2xl border border-accent/10 mb-6 gap-3">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
@@ -95,7 +93,6 @@ const ModuleList = ({ courseId }) => {
                     </button>
                   </div>
 
-                  {/* Dynamic Module List */}
                   <div className="space-y-1">
                     {displayModules.map((module) => (
                       <ModuleItem
@@ -187,9 +184,9 @@ const ModuleItem = ({ module, isExpanded, onToggle, courseId, navigate }) => {
             className="overflow-hidden"
           >
             <div className="pl-2 sm:pl-4 pb-6 space-y-2">
-              {module.lessons.map((lesson) => (
+              {module.lessons.map((lesson, idx) => (
                 <div
-                  key={lesson.id}
+                  key={`${lesson.id}-${idx}`}
                   className="flex items-center justify-between group p-3 rounded-xl transition-all hover:bg-white/[0.03] border border-transparent hover:border-border/30 gap-4"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
