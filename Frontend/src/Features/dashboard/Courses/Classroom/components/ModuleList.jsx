@@ -48,7 +48,7 @@ const ModuleList = ({ courseId }) => {
 
   return (
     /* CHANGED: flex-1 -> h-full so this doesn't depend on parent being display:flex */
-    <div className="h-full min-h-0 bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md relative z-10">
+   <div className="h-full min-h-0 max-h-full bg-bg2/40 border border-border/50 rounded-[2rem] flex flex-col overflow-hidden shadow-2xl backdrop-blur-md relative z-10">
       
       {/* Tabs */}
       <div className="flex items-center gap-4 sm:gap-8 px-4 sm:px-8 pt-4 border-b border-border/30 shrink-0 overflow-x-auto scrollbar-hide">
@@ -67,7 +67,10 @@ const ModuleList = ({ courseId }) => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 overscroll-contain">
+     <div
+  className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8"
+  style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+>
         <AnimatePresence mode="wait">
           {activeTab === 'modules' ? (
             <motion.div
